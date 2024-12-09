@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SignUpApi } from "../../Api/UserApis";
+import { signUpApi } from "../../Api/UserApis";
 
 interface SignUpProps {
-  closeSignUp: () => void;
-  openSignIn: () => void;
+  openModal: (type:'userSignIn'|'userSignUp'|'userOtpVerify') => void;
+  closeModal: () => void;
 }
 
 interface FormState {
@@ -17,7 +17,7 @@ interface FormState {
   passwordConfirm: string;
 }
 
-const SignUpModal: React.FC<SignUpProps> = ({ closeSignUp, openSignIn }) => {
+const SignUpModal: React.FC<SignUpProps> = ({ openModal,closeModal}) => {
   const [formData, setFormData] = useState<FormState>({
     userName: "",
     email: "",
@@ -25,6 +25,7 @@ const SignUpModal: React.FC<SignUpProps> = ({ closeSignUp, openSignIn }) => {
     password: "",
     passwordConfirm: "",
   });
+
 
   //form data input updation
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -90,16 +91,25 @@ const SignUpModal: React.FC<SignUpProps> = ({ closeSignUp, openSignIn }) => {
         }
       }
     }
+
     if (isValid) {
-      const response = await SignUpApi(formData);
-      console.log(response);
+      const response = await signUpApi(formData);
+     if(response.success===true){
+      sessionStorage.setItem("userEmail", response.email||"");
+      //open otp verify modal
+       openModal('userOtpVerify')
+
+     }else{
+      toast.error(response.message)
+     }
     }
+
   }
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-0 overflow-y-auto"
-      onClick={closeSignUp}
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60 overflow-y-auto"
+      onClick={()=>closeModal()}
     >
       <div
         className="bg-white pt-10 pb-8 px-10 rounded-lg shadow-lg w-full max-w-md max-h-full overflow-y-auto scrollbar-hide"
@@ -189,7 +199,7 @@ const SignUpModal: React.FC<SignUpProps> = ({ closeSignUp, openSignIn }) => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-brandBlue text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Sign Up
           </button>
@@ -200,7 +210,7 @@ const SignUpModal: React.FC<SignUpProps> = ({ closeSignUp, openSignIn }) => {
           Already Have An Account?{" "}
           <span
             className="text-blue-500 hover:underline cursor-pointer"
-            onClick={openSignIn}
+            onClick={()=>openModal('userSignIn')}
           >
             Sign In
           </span>

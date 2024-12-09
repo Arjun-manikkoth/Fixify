@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SignInApi } from "../../Api/UserApis";
+import { signInApi } from "../../Api/UserApis";
+import { useEffect } from "react";
 
-interface SignIn {
-  closeSignIn: () => void;
-  openSignUp: () => void;
+interface SignInProps {
+  openModal: (type:'userSignIn'|'userSignUp'|'userOtpVerify') => void;
+  closeModal: () => void;
+  message:string|null
 }
+
 
 interface FormState {
   email: string;
   password: string;
 }
 
-const LoginModal: React.FC<SignIn> = (props) => {
+const SignInModal: React.FC<SignInProps> = (props) => {
   const [formData, setFormData] = useState<FormState>({
     email: "",
     password: "",
@@ -48,15 +51,22 @@ const LoginModal: React.FC<SignIn> = (props) => {
     }
 
     if (isValid) {
-      const response = await SignInApi(formData);
+      const response = await signInApi(formData);
       console.log(response);
     }
   };
+  
+    useEffect(() => {
+      if (props.message) {
+        toast.info(props.message); 
+      }
+    }, [props.message]); // Trigger this effect when message changes
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
       onClick={() => {
-        props.closeSignIn();
+        props.closeModal();
       }}
     >
       <div
@@ -103,7 +113,7 @@ const LoginModal: React.FC<SignIn> = (props) => {
           Don't have an Account?{" "}
           <span
             className="text-blue-500 hover:underline"
-            onClick={() => props.openSignUp()}
+            onClick={() => props.openModal('userSignUp')}
           >
             Sign Up
           </span>
@@ -114,4 +124,4 @@ const LoginModal: React.FC<SignIn> = (props) => {
   );
 };
 
-export default LoginModal;
+export default SignInModal;

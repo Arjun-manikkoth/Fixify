@@ -1,36 +1,24 @@
 import React, { FC, useState } from "react";
 import { FaMapMarkerAlt, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
-import UserSignInModal from "../UserComponents/LoginModal";
+import UserSignInModal from "../UserComponents/SignInModal";
 import UserSignUpModal from "../UserComponents/SignUpModal";
+import UserOtpVerificationModal from "../UserComponents/OtpVerificationModal";
 
 const Header: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showUserSignIn, setShowUserSignIn] = useState(false);
-  const [showUserSignUp, setShowUserSignUp] = useState(false);
+  const [modalType,setModalType]=useState<'userSignIn'|'userSignUp'|'userOtpVerify'|null>(null)
+  const [signInMessage,setSignInMessage]= useState<string|null>(null)
+
+  const openModal =(type:'userSignIn'|'userSignUp'|'userOtpVerify')=>{
+      setModalType(type)
+  }
+  const closeModal =()=>{
+      setModalType(null)
+  }
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const closeUserSignIn = () => {
-    console.log("closed user sign in state changed to false");
-    setShowUserSignIn(false);
-  };
-  const closeUserSignUp = () => {
-    console.log(
-      "closed user sign up state changed to false and closed user sign in "
-    );
-    setShowUserSignIn(false);
-    setShowUserSignUp(false);
-  };
-  const openUserSignUp = () => {
-    console.log("open user sign up state changed to true");
-    setShowUserSignUp(true);
-  };
-  const openUserSignIn = () => {
-    console.log("closed user sign up state changed to false");
-    console.log("open user sign in state changed to true");
-    setShowUserSignUp(false);
-    setShowUserSignIn(true);
-  };
+
   return (
     <>
       <div className="bg-gray-100 p-2 border-b border-gray-200 px-12">
@@ -105,9 +93,7 @@ const Header: FC = () => {
             <button
               className="bg-brandBlue text-white font-regular text-lg px-6 py-[1.09rem] hover:bg-blue-600 flex items-center justify-center"
               onClick={() => {
-                if (!showUserSignIn) {
-                  setShowUserSignIn(true);
-                }
+                openModal('userSignIn')
               }}
             >
               Book Now
@@ -186,18 +172,21 @@ const Header: FC = () => {
           </div>
         )}
       </div>
-      {showUserSignIn && (
+      {modalType==='userSignIn' && (
         <UserSignInModal
-          closeSignIn={closeUserSignIn}
-          openSignUp={openUserSignUp}
+          closeModal={closeModal}
+          openModal={openModal}
+          message={signInMessage}
         />
       )}
-      {showUserSignUp && (
+      {modalType==='userOtpVerify'&& <UserOtpVerificationModal openModal={openModal} otpOnSucess={setSignInMessage}/>}
+      {modalType==='userSignUp' && (
         <UserSignUpModal
-          closeSignUp={closeUserSignUp}
-          openSignIn={openUserSignIn}
+        closeModal={closeModal}
+        openModal={openModal}
         />
       )}
+   
     </>
   );
 };

@@ -5,4 +5,6 @@ const instance = axios.create({
   baseURL: `${baseUrl}users`,
 });
 
+
+
 export default instance;

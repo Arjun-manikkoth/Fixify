@@ -6,7 +6,7 @@ import userRoute from "./Routes/UserRoute";
 import morgan from "morgan";
 
 const app: Express = express();
-//Db connection
+//Db connectiongit
 connectDB();
 
 // CORS configuration options
