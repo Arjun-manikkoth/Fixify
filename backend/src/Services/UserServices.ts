@@ -5,13 +5,18 @@ import { messages } from "../Constants/Messages";
 import { generateOtp,hashOtp,compareOtps} from "../Utils/GenerateOtp";
 import { sentOtpVerificationMail } from "../Utils/SendOtpMail";
 import { ObjectId } from "mongoose";
-import { hashPassword } from "../Utils/HashPassword";
+import { hashPassword ,comparePasswords} from "../Utils/HashPassword";
 
 export interface ISignUpResponse{
 success:boolean,
 message:string,
 email:string|null
 }
+export interface ISignInResponse{
+  success:boolean,
+  message:string,
+  email:string|null
+  }
 
 export interface IOtpResponse{
 success:boolean,
@@ -28,7 +33,7 @@ class UserService implements IUserService{
 async createUser(userData:SignUp):Promise<ISignUpResponse|null>{
   try{
 
-    const exists = await this.userRepository.emailExists(userData.email)
+    const exists = await this.userRepository.findUserByEmail(userData.email)
 
     if(!exists){
       
@@ -123,6 +128,8 @@ async otpReSend(email:string,id:ObjectId):Promise<boolean>{
     return false;
   }
   }
+
+  //resend otp
   async otpResend(email:string):Promise<boolean>{
     try{
 
@@ -151,6 +158,8 @@ async otpReSend(email:string,id:ObjectId):Promise<boolean>{
       return false;
     }
     }
+
+    //verifiying otp
 async otpCheck(otp: string,email:string): Promise<IOtpResponse> {
   {
     try{
@@ -198,6 +207,47 @@ async otpCheck(otp: string,email:string): Promise<IOtpResponse> {
     }
   }
 }
+
+async authenticateUser(userData:SignUp):Promise<ISignInResponse|null>{
+  try{
+
+    const exists = await this.userRepository.findUserByEmail(userData.email)
+
+    if(exists){
+    
+      const passwordStatus = await comparePasswords(userData.password,exists.password)
+
+      if(passwordStatus){
+        
+       return {
+        success:true,
+        message:"Signed in Sucessfully",
+        email:exists.email
+       }
+
+      }else{
+          return {
+            success:false,
+            message:"Invalid Credentials",
+            email:null
+          }
+      }
+    }else{
+      return {
+        success:false,
+        message:"Account doesnot exist",
+        email:null
+      }
+    }
+ 
+  }
+  catch(error:any){
+    console.log(error.message)
+ return null;
+ ;
+  }
+}
+
 
 }
 

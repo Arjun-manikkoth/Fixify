@@ -28,8 +28,25 @@ class UserController{
  async signIn(req:Request,res:Response):Promise<void>{
   try{
 
-   const user = await this.UserService.createUser(req.body)
-  
+   const response = await this.UserService.authenticateUser(req.body)
+
+   if (response?.success) {
+    res.status(200).json({ success: true, message: response.message });
+  } else {
+    // Error handling based on  error messages
+    switch (response?.message) {
+      case "Account doesnot exist":
+        res.status(400).json({ success: false, message: response.message });
+        break;
+      case "Invalid Credentials":
+        res.status(410).json({ success: false, message: response.message });
+        break;
+      default:
+        res.status(500).json({ success: false, message: "Internal server error" });
+        break;
+    }
+  }
+
   }
   catch(error:any){
       console.log(error.message)

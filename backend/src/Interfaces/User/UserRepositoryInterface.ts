@@ -4,7 +4,6 @@ import {SignUp,IUserWithOtp} from "./SignUpInterface";
 
 interface IUserRepository {
  insertUser(userData:SignUp):Promise<IUser|null>
- emailExists(email:string):Promise<IUser|null>
  storeOtp(otp:string,id:ObjectId):Promise<Boolean>
  findUserByEmail(email:string):Promise<IUser|null>
  findOtpWithId(userId:ObjectId):Promise<IUserWithOtp|null>

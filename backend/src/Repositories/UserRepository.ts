@@ -8,15 +8,6 @@ import { ObjectId } from "mongoose";
 
 class UserRepository implements IUserRepository{
 
-    async emailExists(email:string):Promise<IUser|null>{
-        try{
-           return User.findOne({email:email})
-        }
-        catch(error:any){
-       console.log(error.message)
-       return null;
-        }
-    }
 
  async insertUser(userData:SignUp):Promise<IUser|null>{
         try{

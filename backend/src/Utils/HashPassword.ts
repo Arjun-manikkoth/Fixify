@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 
-export const hashPassword = async (password: string): Promise<string> => {
+ const hashPassword = async (password: string): Promise<string> => {
     try {
       
       const saltRounds = 10;
@@ -11,3 +11,17 @@ export const hashPassword = async (password: string): Promise<string> => {
       throw new Error('Hashing failed');
     }
   };
+  const comparePasswords = async (password: string,hashPassword:string): Promise<boolean> => {
+    try {
+      
+      
+      const passwordStatus = await bcrypt.compare(password, hashPassword);
+      return passwordStatus;
+
+    } catch (error: any) {
+      console.log('Error validating password:', error.message);
+      throw new Error('validation failed');
+    }
+  };
+
+  export {hashPassword,comparePasswords}

@@ -3,6 +3,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { signInApi } from "../../Api/UserApis";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 interface SignInProps {
   openModal: (type:'userSignIn'|'userSignUp'|'userOtpVerify') => void;
@@ -21,6 +23,8 @@ const SignInModal: React.FC<SignInProps> = (props) => {
     email: "",
     password: "",
   });
+ 
+  const navigate = useNavigate()
 
   //form data input updation
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -52,7 +56,11 @@ const SignInModal: React.FC<SignInProps> = (props) => {
 
     if (isValid) {
       const response = await signInApi(formData);
-      console.log(response);
+      if(response.success===true){
+         navigate('/users/home')
+      }else{
+        toast.error(response.message)
+      }
     }
   };
   

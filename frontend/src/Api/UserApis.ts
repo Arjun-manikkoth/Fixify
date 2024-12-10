@@ -12,9 +12,13 @@ interface ISignUpResponse{
 const signInApi = async (formData: SignIn) => {
   try {
     const response = await axiosUser.post(userRoutes.signIn, formData);
-    return response;
+    return {success:true,message:"Sucessfully signed Into Account",email:response.data.data}
   } catch (error: any) {
     console.log(error.message);
+    return {
+      success:false,
+      message:error.response.data.message
+    }
   }
 };
 

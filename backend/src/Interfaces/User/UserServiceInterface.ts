@@ -10,5 +10,6 @@ interface IUserService{
   otpSend(email:string,id:ObjectId):Promise<boolean>
   otpCheck(otp:string,email:string):Promise<IOtpResponse>
   otpResend(email:string):Promise<boolean>
+  authenticateUser(userData:SignUp):Promise<ISignUpResponse|null>
 }
 export default IUserService;
