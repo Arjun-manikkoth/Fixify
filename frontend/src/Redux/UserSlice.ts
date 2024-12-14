@@ -5,7 +5,6 @@ interface UserState {
   name: string;
   email: string;
   phone: string;
-  token: string;
 }
 
 const initialState: UserState = {
@@ -13,7 +12,6 @@ const initialState: UserState = {
   name: "",
   email: "",
   phone: "",
-  token: "",
 };
 
 const userSlice = createSlice({
@@ -26,16 +24,13 @@ const userSlice = createSlice({
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.phone = action.payload.phone;
-      state.token = action.payload.token;
-
     },
     clearUser: (state) => {
       state.id = null;
       state.name = "";
       state.email = "";
       state.phone = "";
-      state.token = "";
-    },
+},
   },
 });
 

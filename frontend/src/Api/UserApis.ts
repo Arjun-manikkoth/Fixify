@@ -6,13 +6,22 @@ import userRoutes from "../Endpoints/UserEndpoints";
 interface ISignUpResponse{
   success:boolean,
   message:string,
-  email?:string|null
+  email?:string|null,
+  id?:string|null,
+  name?:string,
+  phone?:string
 }
 
 const signInApi = async (formData: SignIn) => {
   try {
     const response = await axiosUser.post(userRoutes.signIn, formData);
-    return {success:true,message:"Sucessfully signed Into Account",email:response.data.data}
+    return {success:true,
+      message:"Sucessfully signed Into Account",
+      email:response.data.email,
+      name:response.data.name,
+      id:response.data.id,
+      phone:response.data.phone
+    }
   } catch (error: any) {
     console.log(error.message);
     return {
@@ -71,6 +80,55 @@ const otpResendApi= async(email:string)=>{
       success:false,
       message:error.response.data.message    }
   }
+
 }
 
-export { signInApi, signUpApi ,otpVerifyApi,otpResendApi};
+const logoutUser= async()=>{
+
+  try{
+
+  const response =await axiosUser.post(userRoutes.logout)
+
+      return {
+        success:true,
+        message:response.data.message
+       }
+
+  }
+  catch(error:any){
+    console.log(error.message)
+    return{
+      success:false,
+      message:error.response.data.message    }
+  }
+  
+}
+
+
+const refreshTokenApi= async()=>{
+  try{
+
+  const response =await axiosUser.post(userRoutes.refresh_token)
+
+  }
+  catch(error:any){
+    
+    console.log(error.message)
+  
+  }
+}
+
+
+const testApi= async()=>{
+  try{
+
+  const response =await axiosUser.post('/test')
+
+  }
+  catch(error:any){
+    
+    console.log(error.message)
+  
+  }
+}
+export { signInApi, signUpApi ,otpVerifyApi,otpResendApi,logoutUser,refreshTokenApi,testApi};

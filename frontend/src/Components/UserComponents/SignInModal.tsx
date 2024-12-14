@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { signInApi } from "../../Api/UserApis";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch} from "react-redux";
+import { setUser } from "../../Redux/UserSlice";
 
 
 interface SignInProps {
@@ -23,6 +25,7 @@ const SignInModal: React.FC<SignInProps> = (props) => {
     email: "",
     password: "",
   });
+  const dispatch =useDispatch()
  
   const navigate = useNavigate()
 
@@ -56,10 +59,27 @@ const SignInModal: React.FC<SignInProps> = (props) => {
 
     if (isValid) {
       const response = await signInApi(formData);
+
       if(response.success===true){
+           dispatch(setUser({
+            email:response.email,
+            id:response.id,
+            name:response.name,
+            phone:response.phone
+              
+           }))
+       
          navigate('/users/home')
+
       }else{
-        toast.error(response.message)
+        
+        if(response.message==="Didn't complete otp verification"){
+          
+          props.openModal('userOtpVerify')
+
+        }else{
+          toast.error(response.message)
+        }
       }
     }
   };

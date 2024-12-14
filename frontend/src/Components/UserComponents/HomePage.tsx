@@ -1,11 +1,22 @@
 import React from "react";
+import { useDispatch } from "react-redux";
+import { clearUser } from "../../Redux/UserSlice";
+import { logoutUser,testApi } from "../../Api/UserApis";
 
 const HomePage: React.FC = () => {
 
-    const handleLogout = () => {
-       
-        console.log("User logged out");
+    const dispatch = useDispatch()
+
+    const handleLogout =async() => {
+     const response = await logoutUser()
+     if(response.success){
+      dispatch(clearUser())
+      console.log("User logged out");
+     }
       };
+     const handleapicall =async()=>{
+           await testApi()
+     }
 
   return (
     <div>
@@ -36,6 +47,7 @@ const HomePage: React.FC = () => {
         <h1 className="text-2xl font-semibold text-gray-700">Welcome to Fixify</h1>
         <p className="text-gray-600">This is the home page after login.</p>
         <button  onClick={handleLogout}>Click here to logout</button>
+        <p onClick={handleapicall}>Click here to make an api call </p>
       </main>
     </div>
   );

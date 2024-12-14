@@ -1,19 +1,29 @@
 import React, { FC, useState } from "react";
-import { FaMapMarkerAlt, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
+import { FaMapMarkerAlt, FaEnvelope, FaBars, FaTimes,FaUser  } from "react-icons/fa";
 import UserSignInModal from "../UserComponents/SignInModal";
 import UserSignUpModal from "../UserComponents/SignUpModal";
 import UserOtpVerificationModal from "../UserComponents/OtpVerificationModal";
+import { useSelector} from "react-redux";
+import { RootState } from "../../Redux/Store";
+import { useNavigate } from "react-router-dom";
 
 const Header: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [modalType,setModalType]=useState<'userSignIn'|'userSignUp'|'userOtpVerify'|null>(null)
   const [signInMessage,setSignInMessage]= useState<string|null>(null)
 
+  const user = useSelector((state:RootState)=>state.user)
+
+  const navigate =useNavigate()
+
   const openModal =(type:'userSignIn'|'userSignUp'|'userOtpVerify')=>{
       setModalType(type)
   }
   const closeModal =()=>{
       setModalType(null)
+  }
+  const handleUserProfileNavigation=()=>{
+     navigate('/users/home')
   }
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -90,7 +100,15 @@ const Header: FC = () => {
               Join Us
             </a>
 
-            <button
+            {user.id ?(
+              <button
+              className="flex items-center gap-3 px-4 py-2 rounded-md  text-gray-900 "
+              onClick={handleUserProfileNavigation}
+            >
+              <FaUser className="w-5 h-5 text-brandBlue" />
+              <span className="text-lg font-medium text-gray-700 ">Hi, {user.name}</span>
+            </button>):(
+              <button 
               className="bg-brandBlue text-white font-regular text-lg px-6 py-[1.09rem] hover:bg-blue-600 flex items-center justify-center"
               onClick={() => {
                 openModal('userSignIn')
@@ -114,6 +132,8 @@ const Header: FC = () => {
                 />
               </svg>
             </button>
+            )}
+          
           </div>
 
           <div className="md:hidden flex items-center">

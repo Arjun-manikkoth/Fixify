@@ -11,6 +11,7 @@ import bcrypt from 'bcrypt'
       throw new Error('Hashing failed');
     }
   };
+  
   const comparePasswords = async (password: string,hashPassword:string): Promise<boolean> => {
     try {
       
