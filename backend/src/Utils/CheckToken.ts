@@ -11,12 +11,10 @@ interface IVerifyTokenResponse{
 const verifyToken = async (token:string):Promise<IVerifyTokenResponse>=>{
 
     try{
-      console.log("call reached at verify refresh token utility")
+
      // Await the token verification and decode it
      const decoded =  jwt.verify(token, process.env.JWT_SECRET || "secret") as JwtPayload;
-     
-     // If the token is valid, decoded will hold the payload
-     console.log("Decoded token:", decoded);
+
   
      return {
       id: decoded.id,

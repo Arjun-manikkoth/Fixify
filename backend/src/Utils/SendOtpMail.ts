@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 export const sentOtpVerificationMail = async (email: string, otp: string): Promise<boolean> => {
   try {
 
-
+//smtp server set up
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -24,10 +24,13 @@ export const sentOtpVerificationMail = async (email: string, otp: string): Promi
 
     
     await transporter.sendMail(mailOptions);
-    console.log("Mail sent successfully");
+
     return true;
+
   } catch (error: any) {
+
     console.log(error.message);
     return false;
+    
   }
 };

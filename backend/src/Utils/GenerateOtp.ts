@@ -11,7 +11,9 @@ const generateOtp =() :string=> {
 };
 async function hashOtp(otp:string):Promise<string>{
     try{
-      return await bcrypt.hash(otp,10)
+
+      return await bcrypt.hash(otp,10) //returns the hashed otp
+
     }
     catch(error:any){
         console.log(error.message)
@@ -20,7 +22,9 @@ async function hashOtp(otp:string):Promise<string>{
 }
 async function compareOtps(otp:string,otpDb:string):Promise<boolean>{
     try{
-      return await bcrypt.compare(otp,otpDb)
+
+      return await bcrypt.compare(otp,otpDb)  
+
     }
     catch(error:any){
         console.log(error.message)

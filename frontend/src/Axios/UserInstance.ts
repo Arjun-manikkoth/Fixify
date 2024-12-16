@@ -14,21 +14,26 @@ const instance = axios.create({
 instance.interceptors.response.use((response)=>{
 
   return response;
+  
 }, async(error)=>{
-  console.log(error.response.status,error.response.data.message)
-  if(error.response && error.response.status===401 && error.response.data.message==="Refresh Token expired"){
-   
-   //if refresh token is expired makes api call and clear cookies then logouts
-  await logoutUser()
-  store.dispatch((clearUser()))
+  
 
-  }else if( error.response.status === 401 && (error.response.data.message ==="Refresh Token invalid"||error.response.data.message=== "Refresh Token missing"||error.response.data.message==="Unauthorized! Access Token is invalid"||error.response.data.message==="Access Token is missing")){
+  if(error.response && error.response.status===401 && error.response.data.message==="Refresh Token expired"){
+   //if refresh token is expired makes api call and clear cookies then logouts
+
+  await logoutUser()
+  store.dispatch((clearUser())) //clears user data from the store
+
+  }
+  else if( error.response.status === 401 && (error.response.data.message ==="Refresh Token invalid"||error.response.data.message=== "Refresh Token missing"||error.response.data.message==="Unauthorized! Access Token is invalid")){
  //if access or refresh tokens are missing or invalid clear cookies and logouts
+
    await logoutUser()
-   store.dispatch((clearUser()))
+   store.dispatch((clearUser())) //clears user data from the store
    
-  }else if(error.response.status===401 && error.response.data.message==="Unauthorized! Access Token is expired"){
-    //if access token is expired make an api call to get new access token
+  }else if(error.response.status===401 && (error.response.data.message==="Unauthorized! Access Token is expired"|| error.response.data.message==="Access Token is missing")){
+   //if access token is expired make an api call to get new access token
+
    await refreshTokenApi()
 
   }

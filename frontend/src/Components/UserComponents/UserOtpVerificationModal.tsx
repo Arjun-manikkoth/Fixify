@@ -9,7 +9,7 @@ interface OtpVerifyProps {
   otpOnSucess: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const OtpVerificationModal: React.FC<OtpVerifyProps> = ({ openModal, otpOnSucess }) => {
+const UserOtpVerificationModal: React.FC<OtpVerifyProps> = ({ openModal, otpOnSucess }) => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [timer, setTimer] = useState<number>(120); // Timer starts at 120 seconds
   const [resendEnabled, setResendEnabled] = useState<boolean>(false);
@@ -72,7 +72,7 @@ const OtpVerificationModal: React.FC<OtpVerifyProps> = ({ openModal, otpOnSucess
 
   const handleResendOtp = async() => {
 
-    const email = sessionStorage.getItem("userEmail")||''
+    const email = localStorage.getItem("userEmail")||''
     const response= await otpResendApi(email)
 
     if(response.success===true){
@@ -138,4 +138,4 @@ const OtpVerificationModal: React.FC<OtpVerifyProps> = ({ openModal, otpOnSucess
   );
 };
 
-export default OtpVerificationModal;
+export default UserOtpVerificationModal;
