@@ -42,6 +42,7 @@ const userSchema = new mongoose_1.Schema({
     image_url: String,
     address_id: mongoose_1.default.Types.ObjectId,
     chosen_address_id: mongoose_1.default.Types.ObjectId,
+    google_id: String,
     is_blocked: {
         type: Boolean,
         default: false,

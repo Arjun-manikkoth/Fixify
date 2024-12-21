@@ -1,5 +1,5 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
-import {SignUp} from "../Interfaces/User/SignUpInterface";
+import {IUpdateProfile, SignUp} from "../Interfaces/User/SignUpInterface";
 import {ISignIn} from "../Interfaces/User/SignUpInterface";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import {messages} from "../Constants/Messages";
@@ -9,6 +9,9 @@ import {ObjectId} from "mongoose";
 import {hashPassword, comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
 import {verifyToken} from "../Utils/CheckToken";
+import {oAuth2Client} from "../Utils/GoogleConfig";
+import axios from "axios";
+import {IUser} from "../Models/UserModels/UserModel";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -24,6 +27,7 @@ export interface ISignInResponse {
      email: string | null;
      _id: ObjectId | null;
      name: string;
+     url: string;
      mobileNo: string;
      accessToken: string | null;
      refreshToken: string | null;
@@ -61,7 +65,10 @@ class UserService implements IUserService {
                     const hashedPassword = await hashPassword(userData.password);
                     userData.password = hashedPassword;
 
-                    const status = await this.userRepository.insertUser(userData); //inserts userdata to the database
+                    const status = await this.userRepository.insertUser({
+                         ...userData,
+                         google_id: null,
+                    }); //inserts userdata to the database
 
                     if (status) {
                          const otpStatus = await this.otpSend(status.email, status._id); //generate and sends otp via email
@@ -241,6 +248,7 @@ class UserService implements IUserService {
                                    email: exists.email,
                                    _id: exists._id,
                                    name: exists.name,
+                                   url: exists.url,
                                    mobileNo: exists.mobile_no,
                                    accessToken: tokens.accessToken,
                                    refreshToken: tokens.refreshToken,
@@ -257,6 +265,7 @@ class UserService implements IUserService {
                                    email: exists.email,
                                    _id: exists._id,
                                    name: exists.name,
+                                   url: exists.url,
                                    mobileNo: exists.mobile_no,
                                    accessToken: null,
                                    refreshToken: null,
@@ -270,6 +279,7 @@ class UserService implements IUserService {
                               email: exists.email,
                               _id: exists._id,
                               name: exists.name,
+                              url: exists.url,
                               mobileNo: exists.mobile_no,
                               accessToken: null,
                               refreshToken: null,
@@ -283,6 +293,7 @@ class UserService implements IUserService {
                          email: null,
                          name: "",
                          mobileNo: "",
+                         url: "",
                          _id: null,
                          accessToken: null,
                          refreshToken: null,
@@ -326,6 +337,98 @@ class UserService implements IUserService {
                     accessToken: null,
                     message: "Token error",
                };
+          }
+     }
+     async googleAuth(code: string): Promise<ISignInResponse> {
+          try {
+               const googleRes = await oAuth2Client.getToken(code);
+
+               oAuth2Client.setCredentials(googleRes.tokens);
+
+               const userRes = await axios.get(
+                    `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
+               );
+
+               const {email, name, picture, id} = userRes.data;
+
+               console.log(picture);
+               const user = await this.userRepository.findUserByEmail(email);
+
+               if (!user) {
+                    const saveUser = await this.userRepository.insertUser({
+                         userName: name,
+                         email: email,
+                         password: "",
+                         passwordConfirm: "",
+                         mobileNo: "",
+                         url: picture,
+                         google_id: id,
+                    });
+                    if (saveUser) {
+                         const tokens = generateTokens(email, saveUser._id.toString(), "user");
+                         return {
+                              success: true,
+                              message: "Signed in sucessfully",
+                              email: saveUser.email,
+                              _id: saveUser._id,
+                              name: saveUser.name,
+                              mobileNo: "",
+                              url: saveUser.url,
+                              accessToken: tokens.accessToken,
+                              refreshToken: tokens.refreshToken,
+                         };
+                    }
+                    return {
+                         success: false,
+                         message: "Google Sign In failed",
+                         email: null,
+                         _id: null,
+                         name: "",
+                         mobileNo: "",
+                         url: "",
+                         accessToken: null,
+                         refreshToken: null,
+                    };
+               } else {
+                    const tokens = generateTokens(email, user._id.toString(), "user");
+                    return {
+                         success: true,
+                         message: "Signed in sucessfully",
+                         email: user.email,
+                         _id: user._id,
+                         name: user.name,
+                         url: user.url,
+                         mobileNo: "",
+                         accessToken: tokens.accessToken,
+                         refreshToken: tokens.refreshToken,
+                    };
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Sign In Failed",
+                    email: null,
+                    _id: null,
+                    name: "",
+                    url: "",
+                    mobileNo: "",
+                    accessToken: null,
+                    refreshToken: null,
+               };
+          }
+     }
+     async editProfile(data: IUpdateProfile): Promise<Partial<IUser | null>> {
+          try {
+               const status = await this.userRepository.updateUserWithId(data);
+               if (!status) {
+                    return null;
+               } else {
+                    return status;
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
           }
      }
 }

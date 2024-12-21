@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {FcGoogle} from "react-icons/fc";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {signUpApi} from "../../Api/ProviderApis";
 import {getServices} from "../../Api/ProviderApis";
+import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
 
 interface SignUpProps {
      openModal: (type: "providerSignIn" | "providerOtpVerify") => void;
@@ -150,15 +150,7 @@ const ProviderSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => 
 
                     {/* Google Sign-In Button */}
                     <div className="flex justify-center mb-6">
-                         <button
-                              type="button"
-                              className="flex items-center w-full py-3 px-4 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                         >
-                              <FcGoogle className="h-6 w-6 mr-5 ml-2" />
-                              <span className="text-gray-600 text-base font-medium">
-                                   Sign in with Google Account
-                              </span>
-                         </button>
+                         <GoogleAuthWrapper />
                     </div>
 
                     {/* Divider */}

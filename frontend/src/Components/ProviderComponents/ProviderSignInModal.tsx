@@ -6,6 +6,7 @@ import {useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {setProvider} from "../../Redux/ProviderSlice";
+import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
 
 interface SignInProps {
      openModal: (type: "providerSignUp" | "providerOtpVerify") => void;
@@ -103,6 +104,17 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                     <h2 className="text-4xl font-semibold mb-11 text-center text-gray-900">
                          Service Provider
                     </h2>
+                    {/* Google Sign-In Button */}
+                    <div className="flex justify-center mb-6">
+                         <GoogleAuthWrapper />
+                    </div>
+
+                    {/* Divider */}
+                    <div className="flex items-center justify-center mb-6">
+                         <div className="border-t border-gray-300 w-full"></div>
+                         <span className="text-gray-500 text-sm px-2">or</span>
+                         <div className="border-t border-gray-300 w-full"></div>
+                    </div>
                     <form className="space-y-6" onSubmit={validateSignIn}>
                          <div>
                               <input

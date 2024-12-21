@@ -8,6 +8,8 @@ export interface SignUp {
      mobileNo: string;
      password: string;
      passwordConfirm: string;
+     url: string;
+     google_id: ObjectId | null;
 }
 export interface IUserWithOtp {
      user: IUser;
@@ -17,4 +19,10 @@ export interface IUserWithOtp {
 export interface ISignIn {
      email: string;
      password: string;
+}
+export interface IUpdateProfile {
+     url: string;
+     userName: string;
+     mobileNo: string;
+     id: string;
 }

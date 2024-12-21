@@ -2,7 +2,7 @@ import express, {Router, Request, Response} from "express";
 import AdminService from "../Services/AdminServices";
 import AdminController from "../Controllers/AdminController";
 import AdminRepository from "../Repositories/AdminRepository";
-import verifyToken from "../Middlewares/JwtVerify";
+import verifyTokenAndRole from "../Middlewares/JwtVerify";
 
 const adminRepository = new AdminRepository(); // Initialize repository instance
 const adminService = new AdminService(adminRepository); // Dependency injection of repository into service
@@ -21,6 +21,6 @@ adminRoute.post("/sign_out", adminController.signOut.bind(adminController));
 adminRoute.post("/refresh_token", adminController.refreshToken.bind(adminController));
 
 // // Route for testing token
-adminRoute.post("/test", verifyToken, adminController.test.bind(adminController));
+adminRoute.get("/test", verifyTokenAndRole(["admin"]), adminController.test.bind(adminController));
 
 export default adminRoute;

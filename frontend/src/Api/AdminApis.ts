@@ -47,7 +47,7 @@ const refreshTokenApi = async () => {
 
 const testApi = async () => {
      try {
-          const response = await axiosAdmin.post("/test");
+          const response = await axiosAdmin.get("/test");
      } catch (error: any) {
           console.log(error.message);
      }

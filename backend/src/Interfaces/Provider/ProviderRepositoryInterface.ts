@@ -1,6 +1,6 @@
 import {ObjectId} from "mongoose";
 import {IProvider} from "../../Models/ProviderModels/ProviderModel";
-import {SignUp, IProviderWithOtp} from "./SignUpInterface";
+import {SignUp, IProviderWithOtp} from "./SignIn";
 import {IServices} from "../../Models/ProviderModels/ServiceModel";
 
 interface IProviderRepository {

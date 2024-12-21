@@ -107,7 +107,7 @@ const refreshTokenApi = async () => {
 
 const testApi = async () => {
      try {
-          const response = await axiosProvider.post("/test");
+          const response = await axiosProvider.get("/test");
      } catch (error: any) {
           console.log(error.message);
      }
@@ -133,6 +133,27 @@ const getServices = async () => {
      }
 };
 
+const googleAuthApi = async (code: string) => {
+     try {
+          const response = await axiosProvider.get(`${providerRoutes.o_auth}?code=${code}`);
+
+          return {
+               success: true,
+               message: "Sucessfully signed Into Account",
+               email: response.data.email,
+               name: response.data.name,
+               id: response.data.id,
+               service_id: response.data.service_id,
+               phone: response.data.phone,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+          };
+     }
+};
 export {
      signInApi,
      signUpApi,
@@ -142,4 +163,5 @@ export {
      refreshTokenApi,
      getServices,
      testApi,
+     googleAuthApi,
 };

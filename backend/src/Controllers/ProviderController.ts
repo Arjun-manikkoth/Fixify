@@ -231,13 +231,66 @@ class ProviderController {
      //testing function for authenticated route
      async test(req: Request, res: Response): Promise<void> {
           try {
-               console.log("reached at test controller");
                res.status(200).json({
                     success: true,
                     message: "inside the test controller function",
                });
           } catch (error: any) {
                console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+     async googleAuth(req: Request, res: Response) {
+          try {
+               const {code} = req.query;
+
+               const response = await this.ProviderService.googleAuth(code as string);
+
+               if (response?.success && response?.accessToken && response?.refreshToken) {
+                    //sends user data ,access and refresh token in cookie after a sucessfull signin
+
+                    res.status(200)
+                         .cookie("accessToken", response.accessToken, {
+                              httpOnly: true,
+                              secure: false,
+                              // sameSite: 'none',
+                              maxAge: process.env.MAX_AGE_ACCESS_COOKIE
+                                   ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
+                                   : 15 * 60 * 1000, // 15 minutes
+                         })
+                         .cookie("refreshToken", response.refreshToken, {
+                              httpOnly: true,
+                              secure: false,
+                              //  sameSite: 'none',
+                              maxAge: process.env.MAX_AGE_REFRESH_COOKIE
+                                   ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
+                                   : 7 * 24 * 60 * 60 * 1000, // 7 days
+                         })
+                         .json({
+                              success: true,
+                              message: response.message,
+                              email: response.email,
+                              id: response._id,
+                              name: response.name,
+                              phone: response.mobileNo,
+                         });
+               } else {
+                    // Error handling based on  error messages
+                    switch (response?.message) {
+                         case "Google Sign In failed":
+                              res.status(400).json({success: false, message: response.message});
+                              break;
+                         default:
+                              res.status(500).json({
+                                   success: false,
+                                   message: "Internal server error",
+                              });
+                              break;
+                    }
+               }
+          } catch (error: any) {
+               console.log(error.message);
 
                res.status(500).json({success: false, message: "Internal server error"});
           }

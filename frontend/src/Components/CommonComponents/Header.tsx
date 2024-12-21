@@ -10,6 +10,8 @@ import {useNavigate} from "react-router-dom";
 import ProviderSignInModal from "../ProviderComponents/ProviderSignInModal";
 import ProviderSignUpModal from "../ProviderComponents/ProviderSignUpModal";
 
+export const ModalContext = React.createContext("");
+
 const Header: FC = () => {
      const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -20,9 +22,9 @@ const Header: FC = () => {
           | "providerSignIn"
           | "providerSignUp"
           | "providerOtpVerify"
-          | null
-     >(null);
-
+          | ""
+     >("");
+     console.log("header rendering");
      const [signInMessage, setSignInMessage] = useState<string | null>(null);
 
      const user = useSelector((state: RootState) => state.user);
@@ -42,10 +44,10 @@ const Header: FC = () => {
           setModalType(type);
      };
      const closeModal = () => {
-          setModalType(null);
+          setModalType("");
      };
      const handleProfileNavigation = () => {
-          if (user.id) navigate("/users/home");
+          if (user.id) navigate("/users/profile");
           else navigate("/providers/home");
      };
 
@@ -212,50 +214,53 @@ const Header: FC = () => {
                          </div>
                     )}
                </div>
+               <ModalContext.Provider value={modalType}>
+                    {/* user sign in modal */}
+                    {modalType === "userSignIn" && (
+                         <UserSignInModal
+                              closeModal={closeModal}
+                              openModal={openModal}
+                              message={signInMessage}
+                         />
+                    )}
 
-               {/* user sign in modal */}
-               {modalType === "userSignIn" && (
-                    <UserSignInModal
-                         closeModal={closeModal}
-                         openModal={openModal}
-                         message={signInMessage}
-                    />
-               )}
+                    {/* user otp verification modal */}
+                    {modalType === "userOtpVerify" && (
+                         <UserOtpVerificationModal
+                              openModal={openModal}
+                              otpOnSucess={setSignInMessage}
+                         />
+                    )}
 
-               {/* user otp verification modal */}
-               {modalType === "userOtpVerify" && (
-                    <UserOtpVerificationModal
-                         openModal={openModal}
-                         otpOnSucess={setSignInMessage}
-                    />
-               )}
+                    {/* user sign up modal */}
+                    {modalType === "userSignUp" && (
+                         <ModalContext.Provider value="userSignUp">
+                              <UserSignUpModal closeModal={closeModal} openModal={openModal} />
+                         </ModalContext.Provider>
+                    )}
 
-               {/* user sign up modal */}
-               {modalType === "userSignUp" && (
-                    <UserSignUpModal closeModal={closeModal} openModal={openModal} />
-               )}
+                    {/* provider sign in modal */}
+                    {modalType === "providerSignIn" && (
+                         <ProviderSignInModal
+                              closeModal={closeModal}
+                              openModal={openModal}
+                              message={signInMessage}
+                         />
+                    )}
 
-               {/* provider sign in modal */}
-               {modalType === "providerSignIn" && (
-                    <ProviderSignInModal
-                         closeModal={closeModal}
-                         openModal={openModal}
-                         message={signInMessage}
-                    />
-               )}
+                    {/* user sign up modal */}
+                    {modalType === "providerSignUp" && (
+                         <ProviderSignUpModal closeModal={closeModal} openModal={openModal} />
+                    )}
 
-               {/* user sign up modal */}
-               {modalType === "providerSignUp" && (
-                    <ProviderSignUpModal closeModal={closeModal} openModal={openModal} />
-               )}
-
-               {/* user otp verification modal */}
-               {modalType === "providerOtpVerify" && (
-                    <ProviderOtpVerificationModal
-                         openModal={openModal}
-                         otpOnSucess={setSignInMessage}
-                    />
-               )}
+                    {/* user otp verification modal */}
+                    {modalType === "providerOtpVerify" && (
+                         <ProviderOtpVerificationModal
+                              openModal={openModal}
+                              otpOnSucess={setSignInMessage}
+                         />
+                    )}
+               </ModalContext.Provider>
           </>
      );
 };

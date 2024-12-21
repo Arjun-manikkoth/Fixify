@@ -1,4 +1,4 @@
-import {SignUp, IProviderWithOtp} from "../Interfaces/Provider/SignUpInterface";
+import {SignUp, IProviderWithOtp} from "../Interfaces/Provider/SignIn";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
 import {IProvider} from "../Models/ProviderModels/ProviderModel";
 import Service from "../Models/ProviderModels/ServiceModel";
@@ -18,7 +18,6 @@ class ProviderRepository implements IProviderRepository {
           }
      }
      async insertProvider(data: SignUp): Promise<IProvider | null> {
-          console.log("reached at the repository insertProvider ");
           try {
                const provider = new Provider({
                     name: data.userName,
@@ -26,6 +25,8 @@ class ProviderRepository implements IProviderRepository {
                     service_id: data.service_id,
                     password: data.password,
                     mobile_no: data.mobileNo,
+                    is_verified: true,
+                    google_id: data.google_id,
                });
 
                return await provider.save();

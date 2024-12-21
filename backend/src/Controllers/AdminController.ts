@@ -10,7 +10,7 @@ class AdminController {
                const response = await this.AdminService.authenticateAdmin(req.body); //this function checks and verify the credentials
 
                if (response?.success && response?.accessToken && response?.refreshToken) {
-                    //sends user data ,access and refresh token in cookie after a sucessfull signin
+                    //sends admin data ,access and refresh token in cookie after a sucessfull signin
 
                     res.status(200)
                          .cookie("accessToken", response.accessToken, {

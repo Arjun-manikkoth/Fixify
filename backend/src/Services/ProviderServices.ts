@@ -1,6 +1,6 @@
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
-import {SignUp} from "../Interfaces/Provider/SignUpInterface";
-import {ISignIn} from "../Interfaces/Provider/SignUpInterface";
+import {SignUp} from "../Interfaces/Provider/SignIn";
+import {ISignIn} from "../Interfaces/Provider/SignIn";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
 import {messages} from "../Constants/Messages";
 import {generateOtp, hashOtp, compareOtps} from "../Utils/GenerateOtp";
@@ -10,6 +10,8 @@ import {hashPassword, comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
 import {verifyToken} from "../Utils/CheckToken";
 import {IServices} from "../Models/ProviderModels/ServiceModel";
+import {oAuth2Client} from "../Utils/GoogleConfig";
+import axios from "axios";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -71,7 +73,15 @@ class ProviderService implements IProviderService {
                     const hashedPassword = await hashPassword(data.password);
                     data.password = hashedPassword;
 
-                    const status = await this.providerRepository.insertProvider(data); //inserts provider data to the database
+                    const status = await this.providerRepository.insertProvider({
+                         userName: data.userName,
+                         email: data.email,
+                         mobileNo: data.mobileNo,
+                         password: data.password,
+                         passwordConfirm: data.passwordConfirm,
+                         service_id: data.service_id,
+                         google_id: null,
+                    }); //inserts provider data to the database
 
                     if (status) {
                          const otpStatus = await this.otpSend(status.email, status._id); //generate and sends otp via email
@@ -341,6 +351,85 @@ class ProviderService implements IProviderService {
                return {
                     accessToken: null,
                     message: "Token error",
+               };
+          }
+     }
+     async googleAuth(code: string): Promise<ISignInResponse> {
+          try {
+               const googleRes = await oAuth2Client.getToken(code);
+
+               oAuth2Client.setCredentials(googleRes.tokens);
+
+               const userRes = await axios.get(
+                    `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
+               );
+
+               const {email, name, picture, id} = userRes.data;
+
+               const provider = await this.providerRepository.findProviderByEmail(email);
+
+               if (!provider) {
+                    const saveProvider = await this.providerRepository.insertProvider({
+                         userName: name,
+                         email: email,
+                         password: "",
+                         service_id: null,
+                         passwordConfirm: "",
+                         mobileNo: "",
+                         google_id: id,
+                    });
+
+                    if (saveProvider) {
+                         const tokens = generateTokens(email, saveProvider._id.toString(), "user");
+                         return {
+                              success: true,
+                              message: "Signed in sucessfully",
+                              email: saveProvider.email,
+                              _id: saveProvider._id,
+                              name: saveProvider.name,
+                              service_id: saveProvider.service_id,
+                              mobileNo: "",
+                              accessToken: tokens.accessToken,
+                              refreshToken: tokens.refreshToken,
+                         };
+                    }
+                    return {
+                         success: false,
+                         message: "Google Sign In failed",
+                         email: null,
+                         _id: null,
+                         service_id: null,
+                         name: "",
+                         mobileNo: "",
+                         accessToken: null,
+                         refreshToken: null,
+                    };
+               } else {
+                    const tokens = generateTokens(email, provider._id.toString(), "user");
+                    return {
+                         success: true,
+                         message: "Signed in sucessfully",
+                         email: provider.email,
+                         _id: provider._id,
+                         name: provider.name,
+                         service_id: provider.service_id,
+                         mobileNo: "",
+                         accessToken: tokens.accessToken,
+                         refreshToken: tokens.refreshToken,
+                    };
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Sign In Failed",
+                    email: null,
+                    _id: null,
+                    name: "",
+                    service_id: null,
+                    mobileNo: "",
+                    accessToken: null,
+                    refreshToken: null,
                };
           }
      }

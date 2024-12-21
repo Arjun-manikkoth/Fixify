@@ -6,12 +6,13 @@ interface IUser extends Document {
      email: string;
      password: string;
      mobile_no: string;
-     image_url: string;
+     url: string;
      address_id: ObjectId;
      chosen_address_id: ObjectId;
      is_verified: Boolean;
      is_blocked: Boolean;
      is_deleted: Boolean;
+     google_id: string | null;
 }
 
 const userSchema: Schema = new Schema(
@@ -20,9 +21,10 @@ const userSchema: Schema = new Schema(
           email: String,
           password: String,
           mobile_no: String,
-          image_url: String,
+          url: String,
           address_id: mongoose.Types.ObjectId,
           chosen_address_id: mongoose.Types.ObjectId,
+          google_id: String || null,
           is_blocked: {
                type: Boolean,
                default: false,

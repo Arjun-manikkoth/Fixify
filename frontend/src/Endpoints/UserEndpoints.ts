@@ -5,5 +5,7 @@ const userRoutes = {
      otpResend: "/otp_resend",
      logout: "/sign_out",
      refresh_token: "/refresh_token",
+     o_auth: `/o_auth`,
+     update_profile: "update_profile",
 };
 export default userRoutes;

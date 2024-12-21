@@ -29,7 +29,7 @@ class AdminService implements IAdminService {
      //authenticates admin by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
      async authenticateAdmin(data: ISignIn): Promise<ISignInResponse | null> {
           try {
-               const exists = await this.adminRepository.findAdminByEmail(data.email); //gets user data with given email
+               const exists = await this.adminRepository.findAdminByEmail(data.email); //gets admin data with given email
 
                if (exists) {
                     // if the admin exists
@@ -39,7 +39,11 @@ class AdminService implements IAdminService {
                     if (passwordStatus) {
                          //executes if the passwords are matching
 
-                         const tokens = generateTokens(exists._id.toString(), exists.email, "user"); //generates access and refresh tokens
+                         const tokens = generateTokens(
+                              exists._id.toString(),
+                              exists.email,
+                              "admin"
+                         ); //generates access and refresh tokens
 
                          return {
                               success: true,

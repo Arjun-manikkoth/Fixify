@@ -1,13 +1,10 @@
 import React from "react";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {clearAdmin} from "../../Redux/AdminSlice";
 import {logoutAdmin, testApi} from "../../Api/AdminApis";
-import {RootState} from "../../Redux/Store";
 
 const AdminHomePage: React.FC = () => {
      const dispatch = useDispatch();
-
-     const admin = useSelector((state: RootState) => state.admin);
 
      const handleLogout = async () => {
           const response = await logoutAdmin();

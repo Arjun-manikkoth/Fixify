@@ -5,7 +5,8 @@ import {IOtp} from "../../Models/CommonModels/OtpModel";
 export interface SignUp {
      userName: string;
      email: string;
-     service_id: string;
+     service_id: ObjectId | null;
+     google_id: string | null;
      mobileNo: string;
      password: string;
      passwordConfirm: string;

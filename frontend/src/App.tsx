@@ -1,13 +1,13 @@
 import React, {FC} from "react";
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import LandingPage from "./Pages/Common/LandingPage";
-import UserHomePage from "./Pages/User/UserHomePage";
-import ProviderHomePage from "./Pages/Provider/HomePage";
+import ProviderHomePage from "./Pages/Provider/ProviderHomePage";
+import UserProfilePage from "./Pages/User/UserHomePage";
+import AdminHomePage from "./Pages/Admin/AdminHomePage";
 import UserProtected from "./Components/UserComponents/UserProtected";
 import ProviderProtected from "./Components/ProviderComponents/ProviderProtected";
 import AdminProtected from "./Components/AdminComponents/AdminProtected";
 import AdminSignIn from "./Components/AdminComponents/AdminSignIn";
-import AdminHomePage from "./Pages/Admin/AdminHome";
 
 const App: FC = () => {
      return (
@@ -20,7 +20,7 @@ const App: FC = () => {
                          {/*user protected component wrapper*/}
                          <Route Component={UserProtected}>
                               {/*user home*/}
-                              <Route path="/users/home" Component={UserHomePage} />
+                              <Route path="/users/profile" Component={UserProfilePage} />
                          </Route>
 
                          {/*provider protected component wrapper*/}

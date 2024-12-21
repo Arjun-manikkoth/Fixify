@@ -1,5 +1,5 @@
-import {SignUp} from "./SignUpInterface";
-import {ISignIn} from "./SignUpInterface";
+import {SignUp} from "./SignIn";
+import {ISignIn} from "./SignIn";
 import {ISignUpResponse} from "../../Services/ProviderServices";
 import {IOtpResponse} from "../../Services/ProviderServices";
 import {ObjectId} from "mongoose";
@@ -14,5 +14,6 @@ interface IProviderService {
      authenticateProvider(providerData: ISignIn): Promise<ISignInResponse | null>;
      refreshTokenCheck(token: string): Promise<IRefreshTokenResponse>;
      getServices(): Promise<IServices[] | null>;
+     googleAuth(code: string): Promise<ISignInResponse>;
 }
 export default IProviderService;

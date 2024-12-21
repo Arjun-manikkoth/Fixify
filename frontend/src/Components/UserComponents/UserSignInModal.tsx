@@ -6,6 +6,7 @@ import {useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {setUser} from "../../Redux/UserSlice";
+import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
 
 //interface for sign in props
 interface SignInProps {
@@ -69,18 +70,19 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
 
                if (response.success === true) {
                     //for a successfull response storing the authenticated users data in redux store by calling dispatch function
-
+                    localStorage.setItem("userEmail", response.email);
                     dispatch(
                          setUser({
                               email: response.email,
                               id: response.id,
                               name: response.name,
                               phone: response.phone,
+                              url: "",
                          })
                     );
 
                     // navigates to user home after success full login
-                    navigate("/users/home");
+                    navigate("/users/profile");
                } else {
                     //for unverified users proceed to complete otp verification process
 
@@ -93,7 +95,6 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
                }
           }
      };
-
      useEffect(() => {
           //displays the sign in message after otp verification
           if (props.message) {
@@ -115,6 +116,17 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
                     <h2 className="text-4xl font-semibold mb-11 text-center text-gray-900">
                          Customer
                     </h2>
+
+                    {/* Google Sign-In Button */}
+                    <div className="flex justify-center mb-6">
+                         <GoogleAuthWrapper />
+                    </div>
+                    {/* Divider */}
+                    <div className="flex items-center justify-center mb-6 ">
+                         <div className="border-t border-gray-300 w-full"></div>
+                         <span className="text-gray-500 text-sm px-2">or</span>
+                         <div className="border-t border-gray-300 w-full"></div>
+                    </div>
                     <form className="space-y-6" onSubmit={validateSignIn}>
                          <div>
                               <input
@@ -148,6 +160,7 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
                               Sign In
                          </button>
                     </form>
+
                     <p className="mt-4 text-center text-sm text-gray-600">
                          Don't have an Account?{" "}
                          <span
