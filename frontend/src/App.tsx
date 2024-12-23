@@ -9,6 +9,7 @@ import ProviderProtected from "./Components/ProviderComponents/ProviderProtected
 import AdminProtected from "./Components/AdminComponents/AdminProtected";
 import AdminSignIn from "./Components/AdminComponents/AdminSignIn";
 import AdminUsersPage from "./Pages/Admin/AdminUsersPage";
+import AdminProvidersPage from "./Pages/Admin/AdminProvidersPage";
 
 const App: FC = () => {
      return (
@@ -35,6 +36,7 @@ const App: FC = () => {
                          <Route Component={AdminProtected}>
                               <Route path="/admins/dashboard" Component={AdminHomePage} />
                               <Route path="/admins/users" Component={AdminUsersPage} />
+                              <Route path="/admins/providers" Component={AdminProvidersPage} />
                          </Route>
                     </Routes>
                </Router>

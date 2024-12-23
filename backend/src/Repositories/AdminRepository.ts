@@ -4,6 +4,8 @@ import Admin from "../Models/AdminModels/AdminModel";
 import {IUser} from "../Models/UserModels/UserModel";
 import User from "../Models/UserModels/UserModel";
 import {IPaginatedUsers} from "../Interfaces/Admin/SignInInterface";
+import {IPaginatedProviders} from "../Interfaces/Admin/SignInInterface";
+import Provider from "../Models/ProviderModels/ProviderModel";
 
 class AdminRepository implements IAdminRepository {
      //find admin by email
@@ -92,5 +94,82 @@ class AdminRepository implements IAdminRepository {
                return false;
           }
      }
+     //get all users based on queries
+     async getAllProviders(
+          search: string,
+          page: string,
+          filter: string
+     ): Promise<IPaginatedProviders | null> {
+          try {
+               let limit = 8; // Number of records per page
+               let pageNo: number = Number(page); // Current page number
+
+               // Initialize the filter query object
+               let filterQuery: any = {};
+
+               // Add conditions based on the `filter`
+               if (filter === "Verified") {
+                    filterQuery.is_verified = true;
+               } else if (filter === "Approved") {
+                    filterQuery.is_approved = true;
+               }
+
+               // Add search functionality
+               if (search) {
+                    filterQuery.$or = [
+                         {name: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {email: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {mobile_no: {$regex: ".*" + search + ".*", $options: "i"}},
+                    ];
+               }
+
+               // Fetch data with pagination
+               const providerData = await Provider.find(filterQuery)
+                    .skip((pageNo - 1) * limit)
+                    .limit(limit);
+
+               //total count
+               const totalRecords = await Provider.countDocuments(filterQuery);
+
+               return {
+                    providers: providerData,
+                    currentPage: pageNo,
+                    totalPages: Math.ceil(totalRecords / limit),
+                    totalRecords,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     //blocks user by changing status in db
+     async changeProviderBlockStatus(id: string): Promise<boolean> {
+          try {
+               const blockStatus = await Provider.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: true}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     // unblocks user by changing status in db
+     async changeProviderUnBlockStatus(id: string): Promise<boolean> {
+          try {
+               const blockStatus = await Provider.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: false}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
 }
+
 export default AdminRepository;

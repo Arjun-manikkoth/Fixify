@@ -1,5 +1,5 @@
 import IAdminService from "../Interfaces/Admin/AdminServiceInterface";
-import {IPaginatedUsers, ISignIn} from "../Interfaces/Admin/SignInInterface";
+import {IPaginatedProviders, IPaginatedUsers, ISignIn} from "../Interfaces/Admin/SignInInterface";
 import IAdminRepository from "../Interfaces/Admin/AdminRepositoryInterface";
 import {ObjectId} from "mongoose";
 import {comparePasswords} from "../Utils/HashPassword";
@@ -148,6 +148,45 @@ class AdminService implements IAdminService {
      async userUnBlock(id: string): Promise<Boolean> {
           try {
                const status = await this.adminRepository.changeUserUnBlockStatus(id);
+               return status ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+
+     //gets user list
+     async getProvidersList(
+          search: string,
+          page: string,
+          filter: string
+     ): Promise<IPaginatedProviders | null> {
+          try {
+               const data = await this.adminRepository.getAllProviders(search, page, filter);
+               if (data?.providers) {
+                    return data;
+               }
+               return null;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     //change user block status to block
+     async providerBlock(id: string): Promise<Boolean> {
+          try {
+               const status = await this.adminRepository.changeProviderBlockStatus(id);
+               return status ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     //change user block status to unblock
+     async providerUnBlock(id: string): Promise<Boolean> {
+          try {
+               const status = await this.adminRepository.changeProviderUnBlockStatus(id);
                return status ? true : false;
           } catch (error: any) {
                console.log(error.message);

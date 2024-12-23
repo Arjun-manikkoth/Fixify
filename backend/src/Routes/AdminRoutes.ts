@@ -40,4 +40,18 @@ adminRoute.get("/unblock_user", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.unBlockUser(req, res);
 });
 
+// // Route for fetching provider datas
+adminRoute.get("/providers", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.getProviders(req, res);
+});
+
+// // Route for blocking provider
+adminRoute.get("/block_provider", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.blockProvider(req, res);
+});
+// // Route for unblocking provider
+adminRoute.get("/unblock_provider", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.unBlockProvider(req, res);
+});
+
 export default adminRoute;

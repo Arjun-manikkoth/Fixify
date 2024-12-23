@@ -60,7 +60,7 @@ const AdminSidebar: React.FC = () => {
                          </li>
                          <li
                               className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
-                              onClick={() => handleNavigation("/admins/professionals")}
+                              onClick={() => handleNavigation("/admins/providers")}
                          >
                               <FiTool className="text-xl text-black" />
                               <span className="text-black text-lg font-semibold">

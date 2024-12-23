@@ -7,7 +7,6 @@ class AdminController {
      // login and sends the corresponding status code
      async signIn(req: Request, res: Response): Promise<void> {
           try {
-               console.log("admin signin controller");
                const response = await this.AdminService.authenticateAdmin(req.body); //this function checks and verify the credentials
 
                if (response?.success && response?.accessToken && response?.refreshToken) {
@@ -69,7 +68,6 @@ class AdminController {
      // sign out function which clears the cookie
      async signOut(req: Request, res: Response): Promise<void> {
           try {
-               console.log("admin signout controller");
                res.clearCookie("accessToken", {
                     httpOnly: true,
                     secure: false,
@@ -93,8 +91,6 @@ class AdminController {
      // function which validates the refresh token and sends an access token if required
      async refreshToken(req: Request, res: Response): Promise<void> {
           try {
-               console.log("admin refresh token route for access token - controller");
-               console.log("call reached at controller refresh token");
                const token = req.cookies.refreshToken;
 
                if (!token) {
@@ -131,7 +127,6 @@ class AdminController {
 
      //list users in the admin side based on the selections
      async getUsers(req: Request, res: Response): Promise<void> {
-          console.log("admin get users controller");
           try {
                const status = await this.AdminService.getUsersList(
                     req.query.search as string,
@@ -161,17 +156,16 @@ class AdminController {
      //block user
      async blockUser(req: Request, res: Response): Promise<void> {
           try {
-               console.log("admin block user controler");
                const status = await this.AdminService.userBlock(req.query.id as string);
                if (status) {
                     res.status(200).json({
                          success: true,
-                         message: "Users blocked successully",
+                         message: "User blocked successully",
                     });
                } else {
                     res.status(200).json({
                          success: false,
-                         message: "Users blocking failed",
+                         message: "User blocking failed",
                     });
                }
           } catch (error: any) {
@@ -184,18 +178,88 @@ class AdminController {
      //block user
      async unBlockUser(req: Request, res: Response): Promise<void> {
           try {
-               console.log("admin unblock user controler");
-
                const status = await this.AdminService.userUnBlock(req.query.id as string);
                if (status) {
                     res.status(200).json({
                          success: true,
-                         message: "Users Unblocked successully",
+                         message: "User Unblocked successully",
                     });
                } else {
                     res.status(200).json({
                          success: false,
-                         message: "Users Unblocking failed",
+                         message: "User Unblocking failed",
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //list providers in the admin side based on the selections
+     async getProviders(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.AdminService.getProvidersList(
+                    req.query.search as string,
+                    req.query.page as string,
+                    req.query.filter as string
+               );
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Providers data fetched successully",
+                         data: status,
+                    });
+               } else {
+                    res.status(200).json({
+                         success: false,
+                         message: "Providers data fetching failed",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //block provider
+     async blockProvider(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.AdminService.providerBlock(req.query.id as string);
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Provider blocked successfully",
+                    });
+               } else {
+                    res.status(200).json({
+                         success: false,
+                         message: "Provider blocking failed",
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //block provider
+     async unBlockProvider(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.AdminService.providerUnBlock(req.query.id as string);
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Provider Unblocked successully",
+                    });
+               } else {
+                    res.status(200).json({
+                         success: false,
+                         message: "Provider Unblocking failed",
                     });
                }
           } catch (error: any) {

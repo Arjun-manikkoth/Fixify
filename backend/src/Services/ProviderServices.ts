@@ -450,6 +450,21 @@ class ProviderService implements IProviderService {
                          refreshToken: null,
                     };
                } else {
+                    if (provider.is_blocked) {
+                         return {
+                              success: false,
+                              message: "Account blocked by admin",
+                              email: "",
+                              _id: null,
+                              name: "",
+                              url: "",
+                              service_id: null,
+                              mobileNo: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
+
                     const tokens = generateTokens(provider._id.toString(), email, "provider");
                     return {
                          success: true,

@@ -219,21 +219,6 @@ class UserController {
           }
      }
 
-     //testing function for authenticated route
-     async test(req: Request, res: Response): Promise<void> {
-          try {
-               console.log("reached at test controller");
-               res.status(200).json({
-                    success: true,
-                    message: "inside the test controller function",
-               });
-          } catch (error: any) {
-               console.error(error.message);
-
-               res.status(500).json({success: false, message: "Internal server error"});
-          }
-     }
-
      //google authentication
      async googleAuth(req: Request, res: Response) {
           try {
@@ -294,6 +279,7 @@ class UserController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
+     //update user profile data
      async updateProfile(req: Request, res: Response) {
           try {
                console.log(req.body);

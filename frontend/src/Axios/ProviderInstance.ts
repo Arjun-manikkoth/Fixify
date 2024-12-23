@@ -42,6 +42,12 @@ instance.interceptors.response.use(
                //if access token is expired make an api call to get new access token
 
                await refreshTokenApi();
+          } else if (
+               error.response.status === 401 &&
+               error.response.data.message === "Blocked by admin"
+          ) {
+               await logoutProvider();
+               store.dispatch(clearProvider());
           }
 
           return Promise.reject(error);

@@ -33,11 +33,6 @@ const verifyTokenAndRole = (allowedRoles: string[]) => {
                          userRepository
                               .getUserDataWithId(decoded.id)
                               .then((data) => {
-                                   console.log(
-                                        "this is the user block status at middleware" +
-                                             data?.is_blocked,
-                                        data
-                                   );
                                    if (data?.is_blocked) {
                                         res.status(401).json({
                                              message: "Blocked by admin",

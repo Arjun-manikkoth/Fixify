@@ -66,6 +66,27 @@ const getUsers = async (page: number, filter: string, search: string | number) =
      }
 };
 
+//providers listing api
+const getProviders = async (page: number, filter: string, search: string | number) => {
+     try {
+          const response = await axiosAdmin.get(
+               `${adminRoutes.providers}?page=${page}&search=${search}&filter=${filter}`
+          );
+
+          return {
+               success: true,
+               message: "Fetched provider data successfully",
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch provider data",
+               data: null,
+          };
+     }
+};
 //user blocking api
 const blockUser = async (id: string) => {
      try {
@@ -96,4 +117,45 @@ const unBlockUser = async (id: string) => {
           };
      }
 };
-export {signInApi, logoutAdmin, refreshTokenApi, getUsers, blockUser, unBlockUser};
+
+//provider blocking api
+const blockProvider = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.providerBlock}?id=${id}`);
+
+          return {success: true, message: "Provider blocked successfully", data: response.data};
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to block provider",
+               data: null,
+          };
+     }
+};
+//provider unblocking api
+const unBlockProvider = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.providerUnBlock}?id=${id}`);
+
+          return {success: true, message: "Provider Unblocked successfully", data: response.data};
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to Unblock provider",
+               data: null,
+          };
+     }
+};
+export {
+     signInApi,
+     logoutAdmin,
+     refreshTokenApi,
+     getUsers,
+     blockUser,
+     unBlockUser,
+     getProviders,
+     blockProvider,
+     unBlockProvider,
+};

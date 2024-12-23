@@ -95,7 +95,12 @@ class ProviderController {
                          case "Didn't complete otp verification":
                               res.status(403).json({success: false, message: response.message});
                               break;
-
+                         case "Please Sign in With Google":
+                              res.status(401).json({success: false, message: response.message});
+                              break;
+                         case "Account blocked by admin":
+                              res.status(403).json({success: false, message: response.message});
+                              break;
                          default:
                               res.status(500).json({
                                    success: false,
@@ -269,6 +274,11 @@ class ProviderController {
                          case "Google Sign In failed":
                               res.status(400).json({success: false, message: response.message});
                               break;
+
+                         case "Account blocked by admin":
+                              res.status(401).json({success: false, message: response.message});
+                              break;
+
                          default:
                               res.status(500).json({
                                    success: false,

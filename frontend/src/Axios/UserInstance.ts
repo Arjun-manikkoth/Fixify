@@ -40,7 +40,7 @@ instance.interceptors.response.use(
                     error.response.data.message === "Access Token is missing")
           ) {
                //if access token is expired make an api call to get new access token
-               console.log("this error code is being triggered at refresh token api");
+
                await refreshTokenApi();
           } else if (
                error.response.status === 401 &&
