@@ -10,6 +10,7 @@ interface IProviderRepository {
      findOtpWithId(id: ObjectId): Promise<IProviderWithOtp | null>;
      verifyProvider(id: ObjectId): Promise<Boolean>;
      getAllServices(): Promise<IServices[]>;
+     getProviderDataWithId(id: string): Promise<Partial<IProvider> | null>;
 }
 
 export default IProviderRepository;

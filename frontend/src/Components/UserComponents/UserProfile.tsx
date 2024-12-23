@@ -3,19 +3,30 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../Redux/Store";
 import {toast, ToastContainer} from "react-toastify";
 import {useRef} from "react";
-import {cloudinaryApi, updateProfile} from "../../Api/UserApis";
+import {cloudinaryApi, getUserData, updateProfile} from "../../Api/UserApis";
 import {useDispatch} from "react-redux";
 import {setUser} from "../../Redux/UserSlice";
+import {profileData} from "../../Interfaces/UserInterfaces/SignInInterface";
+import {User} from "../../Interfaces/UserInterfaces/SignInInterface";
 
 const UserProfile: React.FC = () => {
-     interface profileData {
-          userName: string;
-          mobileNo: string;
-          image: File | null;
-     }
-
      const ref = useRef<HTMLInputElement | null>(null);
+
      const dispatch = useDispatch();
+
+     const [profileData, setProfileData] = useState<User>({
+          _id: "",
+          name: "",
+          email: "",
+          mobile_no: "",
+          url: "",
+          address_id: "",
+          chosen_address_id: "",
+          is_verified: null,
+          is_blocked: null,
+          is_deleted: null,
+          google_id: null,
+     });
 
      const user = useSelector((state: RootState) => state.user);
 
@@ -26,6 +37,18 @@ const UserProfile: React.FC = () => {
      });
 
      const [preview, setPreview] = useState<string>("");
+
+     useEffect(() => {
+          if (user.id) {
+               getUserData(user.id)
+                    .then((data) => {
+                         setProfileData(data.data);
+                    })
+                    .catch((error) => {
+                         console.log(error.message);
+                    });
+          }
+     }, []);
 
      const validateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
           try {
@@ -161,7 +184,7 @@ const UserProfile: React.FC = () => {
                                              />
                                         ) : (
                                              <img
-                                                  src="https://via.placeholder.com/88" // Placeholder image URL
+                                                  src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
                                                   alt="Default Profile"
                                                   className="w-52 h-52 rounded-full mb-8 cursor-pointer"
                                                   onClick={handleImageUpload}
@@ -281,16 +304,30 @@ const UserProfile: React.FC = () => {
 
                          {/* Passwords & Security */}
                          <div className="bg-white shadow p-11 rounded-xl">
-                              <h2 className="text-lg font-semibold text-black mb-4">
-                                   Passwords And Security
-                              </h2>
-                              <p className="text-black mb-6">
-                                   For optimal security, consider updating your password
-                                   periodically.
-                              </p>
-                              <button className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600">
-                                   Change Now
-                              </button>
+                              {!profileData?.google_id ? (
+                                   <>
+                                        <h2 className="text-lg font-semibold text-black mb-4">
+                                             Passwords And Security
+                                        </h2>
+                                        <p className="text-black mb-6">
+                                             For optimal security, consider updating your password
+                                             periodically.
+                                        </p>
+                                        <button className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600">
+                                             Change Now
+                                        </button>
+                                   </>
+                              ) : (
+                                   <>
+                                        <h2 className="text-lg font-semibold text-black mb-4">
+                                             Signed In With Google Account
+                                        </h2>
+                                        <p className="text-black mb-6 leading-relaxed">
+                                             You can Seamlessly sign in everytime with your gmail
+                                             account.
+                                        </p>
+                                   </>
+                              )}
                          </div>
                     </div>
                </div>

@@ -70,14 +70,14 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
 
                if (response.success === true) {
                     //for a successfull response storing the authenticated users data in redux store by calling dispatch function
-                    localStorage.setItem("userEmail", response.email);
+                    console.log(response);
                     dispatch(
                          setUser({
                               email: response.email,
                               id: response.id,
                               name: response.name,
                               phone: response.phone,
-                              url: "",
+                              url: response.url,
                          })
                     );
 

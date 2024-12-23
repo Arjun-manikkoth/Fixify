@@ -1,6 +1,6 @@
 import axios from "axios";
 import {baseUrl} from "../Constants/Constants";
-import {refreshTokenApi} from "../Api/ProviderApis";
+import {refreshTokenApi} from "../Api/AdminApis";
 import {logoutAdmin} from "../Api/AdminApis";
 import {clearAdmin} from "../Redux/AdminSlice";
 import {store} from "../Redux/Store";

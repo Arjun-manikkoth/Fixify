@@ -2,7 +2,6 @@ import express, {Router, Request, Response} from "express";
 import UserServices from "../Services/UserServices";
 import UserController from "../Controllers/UserController";
 import UserRepository from "../Repositories/UserRepository";
-import userAuth from "../Middlewares/JwtVerify";
 import verifyTokenAndRole from "../Middlewares/JwtVerify";
 
 const userRepository = new UserRepository(); // Initialize repository instance
@@ -43,7 +42,7 @@ userRoute.post("/refresh_token", (req, res) => {
 });
 
 // Route for update profile
-userRoute.post("/update_profile", (req, res) => {
+userRoute.post("/update_profile", verifyTokenAndRole(["user"]), (req, res) => {
      userController.updateProfile(req, res);
 });
 
@@ -55,6 +54,11 @@ userRoute.get("/test", verifyTokenAndRole(["user"]), (req, res) => {
 // Route for oauth
 userRoute.get("/o_auth", (req, res) => {
      userController.googleAuth(req, res);
+});
+
+// Route for fetching user data with id
+userRoute.get("/", verifyTokenAndRole(["user"]), (req, res) => {
+     userController.getUser(req, res);
 });
 
 export default userRoute;

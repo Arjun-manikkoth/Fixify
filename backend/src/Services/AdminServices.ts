@@ -1,5 +1,5 @@
 import IAdminService from "../Interfaces/Admin/AdminServiceInterface";
-import {ISignIn} from "../Interfaces/Admin/SignInInterface";
+import {IPaginatedUsers, ISignIn} from "../Interfaces/Admin/SignInInterface";
 import IAdminRepository from "../Interfaces/Admin/AdminRepositoryInterface";
 import {ObjectId} from "mongoose";
 import {comparePasswords} from "../Utils/HashPassword";
@@ -113,6 +113,45 @@ class AdminService implements IAdminService {
                     accessToken: null,
                     message: "Token error",
                };
+          }
+     }
+
+     //gets user list
+     async getUsersList(
+          search: string,
+          page: string,
+          filter: string
+     ): Promise<IPaginatedUsers | null> {
+          try {
+               const data = await this.adminRepository.getAllUsers(search, page, filter);
+               if (data?.users) {
+                    return data;
+               }
+               return null;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     //change user block status to block
+     async userBlock(id: string): Promise<Boolean> {
+          try {
+               const status = await this.adminRepository.changeUserBlockStatus(id);
+               return status ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     //change user block status to unblock
+     async userUnBlock(id: string): Promise<Boolean> {
+          try {
+               const status = await this.adminRepository.changeUserUnBlockStatus(id);
+               return status ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
           }
      }
 }

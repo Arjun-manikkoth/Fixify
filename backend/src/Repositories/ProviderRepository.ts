@@ -97,5 +97,16 @@ class ProviderRepository implements IProviderRepository {
                return false;
           }
      }
+     //get provider data with id
+     async getProviderDataWithId(id: string): Promise<Partial<IProvider> | null> {
+          try {
+               const data = await Provider.findOne({_id: id});
+
+               return data;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
 }
 export default ProviderRepository;

@@ -2,6 +2,7 @@ import axiosAdmin from "../Axios/AdminInstance";
 import {SignIn} from "../Interfaces/AdminInterfaces/SignInInterface";
 import adminRoutes from "../Endpoints/AdminEndPoints";
 
+//sign in api
 const signInApi = async (formData: SignIn) => {
      try {
           const response = await axiosAdmin.post(adminRoutes.signIn, formData);
@@ -20,6 +21,7 @@ const signInApi = async (formData: SignIn) => {
      }
 };
 
+//admin logout api
 const logoutAdmin = async () => {
      try {
           const response = await axiosAdmin.post(adminRoutes.logout);
@@ -37,6 +39,7 @@ const logoutAdmin = async () => {
      }
 };
 
+//refresh token api
 const refreshTokenApi = async () => {
      try {
           const response = await axiosAdmin.post(adminRoutes.refresh_token);
@@ -45,11 +48,52 @@ const refreshTokenApi = async () => {
      }
 };
 
-const testApi = async () => {
+//users listing api
+const getUsers = async (page: number, filter: string, search: string | number) => {
      try {
-          const response = await axiosAdmin.get("/test");
+          const response = await axiosAdmin.get(
+               `${adminRoutes.users}?page=${page}&search=${search}&filter=${filter}`
+          );
+
+          return {success: true, message: "Fetched users data successfully", data: response.data};
      } catch (error: any) {
           console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch users data",
+               data: null,
+          };
      }
 };
-export {signInApi, logoutAdmin, refreshTokenApi, testApi};
+
+//user blocking api
+const blockUser = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.userBlock}?id=${id}`);
+
+          return {success: true, message: "User blocked successfully", data: response.data};
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to block user",
+               data: null,
+          };
+     }
+};
+//user unblocking api
+const unBlockUser = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.userUnBlock}?id=${id}`);
+
+          return {success: true, message: "User Unblocked successfully", data: response.data};
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to Unblock user",
+               data: null,
+          };
+     }
+};
+export {signInApi, logoutAdmin, refreshTokenApi, getUsers, blockUser, unBlockUser};

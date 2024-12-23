@@ -15,5 +15,6 @@ interface IUserService {
      refreshTokenCheck(token: string): Promise<IRefreshTokenResponse>;
      googleAuth(code: string): Promise<ISignInResponse>;
      editProfile(data: IUpdateProfile): Promise<Partial<IUser> | null>;
+     getUserData(id: string): Promise<Partial<IUser> | null>;
 }
 export default IUserService;

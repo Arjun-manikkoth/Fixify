@@ -64,6 +64,7 @@ class UserController {
                               url: response.url,
                          });
                } else {
+                    console.log(response?.message);
                     // Error handling based on  error messages
                     switch (response?.message) {
                          case "Account doesnot exist":
@@ -75,6 +76,14 @@ class UserController {
                               break;
 
                          case "Didn't complete otp verification":
+                              res.status(403).json({success: false, message: response.message});
+                              break;
+
+                         case "Please Sign in With Google":
+                              res.status(403).json({success: false, message: response.message});
+                              break;
+
+                         case "Account blocked by admin":
                               res.status(403).json({success: false, message: response.message});
                               break;
 
@@ -267,6 +276,10 @@ class UserController {
                          case "Google Sign In failed":
                               res.status(400).json({success: false, message: response.message});
                               break;
+
+                         case "Account blocked by admin":
+                              res.status(403).json({success: false, message: response.message});
+                              break;
                          default:
                               res.status(500).json({
                                    success: false,
@@ -292,10 +305,39 @@ class UserController {
                          data: status,
                     });
                } else {
-                    return null;
+                    res.status(500).json({
+                         success: false,
+                         message: "Profile updated failed",
+                         data: null,
+                    });
                }
           } catch (error: any) {
                console.log(error.message);
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //fetches and send the user data
+     async getUser(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.UserService.getUserData(req.query.id as string);
+
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Profile data fetched successfully",
+                         data: status,
+                    });
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Profile fetching failed",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }

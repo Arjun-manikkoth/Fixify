@@ -380,7 +380,7 @@ class ProviderService implements IProviderService {
                     });
 
                     if (saveProvider) {
-                         const tokens = generateTokens(email, saveProvider._id.toString(), "user");
+                         const tokens = generateTokens(saveProvider._id.toString(), email, "user");
                          return {
                               success: true,
                               message: "Signed in sucessfully",
@@ -405,7 +405,7 @@ class ProviderService implements IProviderService {
                          refreshToken: null,
                     };
                } else {
-                    const tokens = generateTokens(email, provider._id.toString(), "user");
+                    const tokens = generateTokens(provider._id.toString(), email, "user");
                     return {
                          success: true,
                          message: "Signed in sucessfully",

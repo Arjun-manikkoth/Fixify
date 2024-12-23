@@ -3,10 +3,12 @@ import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import {IUser} from "../Models/UserModels/UserModel";
 import User from "../Models/UserModels/UserModel";
 import Otp from "../Models/CommonModels/OtpModel";
-import {ObjectId} from "mongoose";
 import {IUpdateProfile} from "../Interfaces/User/SignUpInterface";
+import mongoose from "mongoose";
+import {ObjectId} from "mongoose";
 
 class UserRepository implements IUserRepository {
+     //insert a new user to db
      async insertUser(userData: SignUp): Promise<IUser | null> {
           try {
                const user = new User({
@@ -26,6 +28,7 @@ class UserRepository implements IUserRepository {
           }
      }
 
+     //store user otp to db
      async storeOtp(otp: string, id: ObjectId): Promise<Boolean> {
           try {
                const otpNew = new Otp({
@@ -41,6 +44,7 @@ class UserRepository implements IUserRepository {
           }
      }
 
+     //find user with email id
      async findUserByEmail(email: string): Promise<IUser | null> {
           try {
                return await User.findOne({email: email});
@@ -49,6 +53,7 @@ class UserRepository implements IUserRepository {
                return null;
           }
      }
+     //find otp from otp collection and aggreagate with users collection
      async findOtpWithId(userId: ObjectId): Promise<IUserWithOtp | null> {
           try {
                const data = await User.aggregate([
@@ -74,6 +79,7 @@ class UserRepository implements IUserRepository {
                return null;
           }
      }
+     //change user verification status
      async verifyUser(id: ObjectId): Promise<Boolean> {
           try {
                const verified = await User.findByIdAndUpdate(
@@ -87,6 +93,8 @@ class UserRepository implements IUserRepository {
                return false;
           }
      }
+
+     //update user profile
      async updateUserWithId(data: IUpdateProfile): Promise<Partial<IUser | null>> {
           try {
                console.log("reached repo ");
@@ -119,6 +127,23 @@ class UserRepository implements IUserRepository {
 
                return status;
           } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     //get user data with id
+     async getUserDataWithId(id: string): Promise<Partial<IUser> | null> {
+          try {
+               console.log("this is the argument id obtained at the user repo", id);
+               const _id = new mongoose.Types.ObjectId(id);
+               console.log("this is parameter id" + typeof _id, _id);
+               const data = await User.findOne({_id: _id});
+               console.log("this is data id", typeof data?._id, data?._id);
+               console.log("user data from the repo with id" + data);
+               return data;
+          } catch (error: any) {
+               console.log("error from the user repo");
                console.log(error.message);
                return null;
           }

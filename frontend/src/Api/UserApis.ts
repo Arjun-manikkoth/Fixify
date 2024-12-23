@@ -178,6 +178,24 @@ const updateProfile = async (formData: {
           };
      }
 };
+const getUserData = async (id: string) => {
+     try {
+          const response = await axiosUser.get(`${userRoutes.get_details}?id=${id}`);
+
+          return {
+               success: true,
+               message: "User Details fetched successfully",
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch user details",
+               data: null,
+          };
+     }
+};
 export {
      signInApi,
      signUpApi,
@@ -189,4 +207,5 @@ export {
      testApi,
      cloudinaryApi,
      updateProfile,
+     getUserData,
 };

@@ -9,6 +9,7 @@ interface IUserRepository {
      findOtpWithId(userId: ObjectId): Promise<IUserWithOtp | null>;
      verifyUser(id: ObjectId): Promise<Boolean>;
      updateUserWithId(data: IUpdateProfile): Promise<Partial<IUser> | null>;
+     getUserDataWithId(id: string): Promise<Partial<IUser> | null>;
 }
 
 export default IUserRepository;

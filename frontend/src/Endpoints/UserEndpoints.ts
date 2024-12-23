@@ -7,5 +7,6 @@ const userRoutes = {
      refresh_token: "/refresh_token",
      o_auth: `/o_auth`,
      update_profile: "update_profile",
+     get_details: "/",
 };
 export default userRoutes;

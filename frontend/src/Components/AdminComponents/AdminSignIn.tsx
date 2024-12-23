@@ -18,7 +18,7 @@ const AdminSignIn = () => {
      const admin = useSelector((state: RootState) => state.admin);
 
      if (admin.id) {
-          return <Navigate to={"/admins/home"} />;
+          return <Navigate to={"/admins/dashboard"} />;
      }
 
      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +66,7 @@ const AdminSignIn = () => {
                          })
                     );
                     // navigates to admins home after success full login
-                    navigate("/admins/home");
+                    navigate("/admins/dashboard");
                } else {
                     toast.error(response.message);
                }

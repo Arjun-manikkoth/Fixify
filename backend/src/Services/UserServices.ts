@@ -68,6 +68,7 @@ class UserService implements IUserService {
                     const status = await this.userRepository.insertUser({
                          ...userData,
                          google_id: null,
+                         url: "",
                     }); //inserts userdata to the database
 
                     if (status) {
@@ -222,7 +223,34 @@ class UserService implements IUserService {
                const exists = await this.userRepository.findUserByEmail(userData.email); //gets user data with given email
 
                if (exists) {
+                    //checks whether the user is blocked by admin
+                    if (exists.is_blocked) {
+                         return {
+                              success: false,
+                              message: "Account blocked by admin",
+                              email: "",
+                              _id: null,
+                              name: "",
+                              url: "",
+                              mobileNo: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
                     // if the user exists
+                    if (exists.google_id) {
+                         return {
+                              success: false,
+                              message: "Please Sign in With Google",
+                              email: "",
+                              _id: null,
+                              name: "",
+                              url: "",
+                              mobileNo: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
 
                     const passwordStatus = await comparePasswords(
                          userData.password,
@@ -277,10 +305,10 @@ class UserService implements IUserService {
                               success: false,
                               message: "Invalid Credentials",
                               email: exists.email,
-                              _id: exists._id,
-                              name: exists.name,
-                              url: exists.url,
-                              mobileNo: exists.mobile_no,
+                              _id: null,
+                              name: "",
+                              url: "",
+                              mobileNo: "",
                               accessToken: null,
                               refreshToken: null,
                          };
@@ -365,7 +393,7 @@ class UserService implements IUserService {
                          google_id: id,
                     });
                     if (saveUser) {
-                         const tokens = generateTokens(email, saveUser._id.toString(), "user");
+                         const tokens = generateTokens(saveUser._id.toString(), email, "user");
                          return {
                               success: true,
                               message: "Signed in sucessfully",
@@ -390,7 +418,20 @@ class UserService implements IUserService {
                          refreshToken: null,
                     };
                } else {
-                    const tokens = generateTokens(email, user._id.toString(), "user");
+                    if (user.is_blocked) {
+                         return {
+                              success: false,
+                              message: "Account blocked by admin",
+                              email: null,
+                              _id: null,
+                              name: "",
+                              mobileNo: "",
+                              url: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
+                    const tokens = generateTokens(user._id.toString(), email, "user");
                     return {
                          success: true,
                          message: "Signed in sucessfully",
@@ -398,7 +439,7 @@ class UserService implements IUserService {
                          _id: user._id,
                          name: user.name,
                          url: user.url,
-                         mobileNo: "",
+                         mobileNo: user.mobile_no,
                          accessToken: tokens.accessToken,
                          refreshToken: tokens.refreshToken,
                     };
@@ -418,9 +459,23 @@ class UserService implements IUserService {
                };
           }
      }
+     //user edit profile to db
      async editProfile(data: IUpdateProfile): Promise<Partial<IUser | null>> {
           try {
                const status = await this.userRepository.updateUserWithId(data);
+               if (!status) {
+                    return null;
+               } else {
+                    return status;
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     async getUserData(id: string): Promise<Partial<IUser | null>> {
+          try {
+               const status = await this.userRepository.getUserDataWithId(id);
                if (!status) {
                     return null;
                } else {

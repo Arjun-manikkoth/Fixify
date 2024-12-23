@@ -12,15 +12,32 @@ const adminController = new AdminController(adminService); // Dependency injecti
 const adminRoute: Router = express.Router();
 
 // // Route for provider login (sign-in)
-adminRoute.post("/sign_in", adminController.signIn.bind(adminController));
+adminRoute.post("/sign_in", (req, res) => {
+     adminController.signIn(req, res);
+});
 
 // // Route for provider logout
-adminRoute.post("/sign_out", adminController.signOut.bind(adminController));
+adminRoute.post("/sign_out", (req, res) => {
+     adminController.signOut(req, res);
+});
 
 // // Route for refresh token
-adminRoute.post("/refresh_token", adminController.refreshToken.bind(adminController));
+adminRoute.post("/refresh_token", (req, res) => {
+     adminController.refreshToken(req, res);
+});
 
-// // Route for testing token
-adminRoute.get("/test", verifyTokenAndRole(["admin"]), adminController.test.bind(adminController));
+// // Route for fetching user datas
+adminRoute.get("/users", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.getUsers(req, res);
+});
+
+// // Route for blocking user
+adminRoute.get("/block_user", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.blockUser(req, res);
+});
+// // Route for unblocking user
+adminRoute.get("/unblock_user", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.unBlockUser(req, res);
+});
 
 export default adminRoute;
