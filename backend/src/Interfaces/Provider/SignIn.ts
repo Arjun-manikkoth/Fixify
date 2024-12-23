@@ -9,6 +9,7 @@ export interface SignUp {
      google_id: string | null;
      mobileNo: string;
      password: string;
+     url: string;
      passwordConfirm: string;
 }
 
@@ -20,4 +21,11 @@ export interface IProviderWithOtp {
 export interface ISignIn {
      email: string;
      password: string;
+}
+
+export interface IUpdateProfile {
+     url: string;
+     userName: string;
+     mobileNo: string;
+     id: string;
 }

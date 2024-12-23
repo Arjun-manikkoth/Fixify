@@ -135,15 +135,12 @@ class UserRepository implements IUserRepository {
      //get user data with id
      async getUserDataWithId(id: string): Promise<Partial<IUser> | null> {
           try {
-               console.log("this is the argument id obtained at the user repo", id);
                const _id = new mongoose.Types.ObjectId(id);
-               console.log("this is parameter id" + typeof _id, _id);
+
                const data = await User.findOne({_id: _id});
-               console.log("this is data id", typeof data?._id, data?._id);
-               console.log("user data from the repo with id" + data);
+
                return data;
           } catch (error: any) {
-               console.log("error from the user repo");
                console.log(error.message);
                return null;
           }

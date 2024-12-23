@@ -2,6 +2,7 @@ import axiosProvider from "../Axios/ProviderInstance";
 import {SignIn} from "../Interfaces/ProviderInterfaces/SignInInterface";
 import {SignUp} from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
+import axios from "axios";
 
 interface ISignUpResponse {
      success: boolean;
@@ -23,6 +24,7 @@ const signInApi = async (formData: SignIn) => {
                name: response.data.name,
                service_id: response.data.service_id,
                id: response.data.id,
+               url: response.data.url,
                phone: response.data.phone,
           };
      } catch (error: any) {
@@ -105,14 +107,6 @@ const refreshTokenApi = async () => {
      }
 };
 
-const testApi = async () => {
-     try {
-          const response = await axiosProvider.get("/test");
-     } catch (error: any) {
-          console.log(error.message);
-     }
-};
-
 //get all services
 const getServices = async () => {
      try {
@@ -143,6 +137,7 @@ const googleAuthApi = async (code: string) => {
                email: response.data.email,
                name: response.data.name,
                id: response.data.id,
+               url: response.data.url,
                service_id: response.data.service_id,
                phone: response.data.phone,
           };
@@ -154,6 +149,48 @@ const googleAuthApi = async (code: string) => {
           };
      }
 };
+
+const updateProfile = async (formData: {
+     id: string;
+     url: string;
+     userName: string;
+     mobileNo: string;
+}) => {
+     try {
+          const response = await axiosProvider.post(providerRoutes.update_profile, formData);
+          return {
+               success: true,
+               message: "Profile updated Sucessfully",
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Profile updation failed",
+               data: null,
+          };
+     }
+};
+//api to provider user data with id
+const getProviderData = async (id: string) => {
+     try {
+          const response = await axiosProvider.get(`${providerRoutes.get_details}?id=${id}`);
+
+          return {
+               success: true,
+               message: "User Details fetched successfully",
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch provider details",
+               data: null,
+          };
+     }
+};
 export {
      signInApi,
      signUpApi,
@@ -162,6 +199,7 @@ export {
      logoutProvider,
      refreshTokenApi,
      getServices,
-     testApi,
      googleAuthApi,
+     updateProfile,
+     getProviderData,
 };

@@ -69,11 +69,12 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                               id: response.id,
                               service_id: response.service_id,
                               name: response.name,
+                              url: response.url,
                               phone: response.phone,
                          })
                     );
 
-                    navigate("/providers/home");
+                    navigate("/providers/profile");
                } else {
                     if (response.message === "Didn't complete otp verification") {
                          props.openModal("providerOtpVerify");

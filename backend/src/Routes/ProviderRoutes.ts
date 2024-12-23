@@ -41,14 +41,14 @@ providerRoute.post("/refresh_token", (req, res) => {
      providerController.refreshToken(req, res);
 });
 
-// // Route for testing token
-providerRoute.get("/test", verifyTokenAndRole(["provider"]), (req, res) => {
-     providerController.test(req, res);
-});
-
 //route to get all services
 providerRoute.get("/services", (req, res) => {
      providerController.getAllServices(req, res);
+});
+
+// Route for update profile
+providerRoute.post("/update_profile", verifyTokenAndRole(["provider"]), (req, res) => {
+     providerController.updateProfile(req, res);
 });
 
 // Route for oauth

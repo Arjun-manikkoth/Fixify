@@ -237,7 +237,7 @@ class UserService implements IUserService {
                               refreshToken: null,
                          };
                     }
-                    // if the user exists
+                    // if the user signed in via google
                     if (exists.google_id) {
                          return {
                               success: false,
@@ -379,7 +379,6 @@ class UserService implements IUserService {
 
                const {email, name, picture, id} = userRes.data;
 
-               console.log(picture);
                const user = await this.userRepository.findUserByEmail(email);
 
                if (!user) {

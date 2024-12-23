@@ -2,11 +2,11 @@ import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
 import {Request, Response} from "express";
 
 class ProviderController {
-     constructor(private ProviderService: IProviderService) {}
+     constructor(private providerService: IProviderService) {}
 
      async getAllServices(req: Request, res: Response): Promise<void> {
           try {
-               const services = await this.ProviderService.getServices();
+               const services = await this.providerService.getServices();
 
                res.status(200).json({
                     success: true,
@@ -22,8 +22,7 @@ class ProviderController {
 
      async signUp(req: Request, res: Response): Promise<void> {
           try {
-               console.log("reached at the controller sign up");
-               const provider = await this.ProviderService.createProvider(req.body); //this function is called to check and save data to the db
+               const provider = await this.providerService.createProvider(req.body); //this function is called to check and save data to the db
 
                if (provider?.success === true) {
                     //sends for successfull sign up
@@ -50,7 +49,7 @@ class ProviderController {
      // login and sends the corresponding status code
      async signIn(req: Request, res: Response): Promise<void> {
           try {
-               const response = await this.ProviderService.authenticateProvider(req.body); //this function checks and verify the credentials
+               const response = await this.providerService.authenticateProvider(req.body); //this function checks and verify the credentials
 
                if (response?.success && response?.accessToken && response?.refreshToken) {
                     //sends user data ,access and refresh token in cookie after a sucessfull signin
@@ -77,6 +76,7 @@ class ProviderController {
                               message: response.message,
                               email: response.email,
                               id: response._id,
+                              url: response.url,
                               service_id: response.service_id,
                               name: response.name,
                               phone: response.mobileNo,
@@ -113,7 +113,7 @@ class ProviderController {
 
      async otpVerify(req: Request, res: Response): Promise<void> {
           try {
-               const otpStatus = await this.ProviderService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
+               const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
                // Check the OTP verification status
                if (otpStatus.success) {
@@ -148,7 +148,7 @@ class ProviderController {
 
      async otpResend(req: Request, res: Response): Promise<void> {
           try {
-               const status = await this.ProviderService.otpResend(req.body.email); // resends otps via mail
+               const status = await this.providerService.otpResend(req.body.email); // resends otps via mail
 
                if (status) {
                     //sends for sucessfully mail
@@ -203,7 +203,7 @@ class ProviderController {
                }
 
                //checks  the validity of refresh token and returns access token
-               const response = await this.ProviderService.refreshTokenCheck(token);
+               const response = await this.providerService.refreshTokenCheck(token);
 
                if (response.accessToken) {
                     //sends the token via cookie for successfull refresh token
@@ -228,24 +228,11 @@ class ProviderController {
           }
      }
 
-     //testing function for authenticated route
-     async test(req: Request, res: Response): Promise<void> {
-          try {
-               res.status(200).json({
-                    success: true,
-                    message: "inside the test controller function",
-               });
-          } catch (error: any) {
-               console.error(error.message);
-
-               res.status(500).json({success: false, message: "Internal server error"});
-          }
-     }
      async googleAuth(req: Request, res: Response) {
           try {
                const {code} = req.query;
 
-               const response = await this.ProviderService.googleAuth(code as string);
+               const response = await this.providerService.googleAuth(code as string);
 
                if (response?.success && response?.accessToken && response?.refreshToken) {
                     //sends user data ,access and refresh token in cookie after a sucessfull signin
@@ -272,6 +259,7 @@ class ProviderController {
                               message: response.message,
                               email: response.email,
                               id: response._id,
+                              url: response.url,
                               name: response.name,
                               phone: response.mobileNo,
                          });
@@ -292,6 +280,29 @@ class ProviderController {
           } catch (error: any) {
                console.log(error.message);
 
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+     //update user profile data
+     async updateProfile(req: Request, res: Response) {
+          try {
+               console.log(req.body);
+               const status = await this.providerService.editProfile(req.body);
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Profile updated successfully",
+                         data: status,
+                    });
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Profile updated failed",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.log(error.message);
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }

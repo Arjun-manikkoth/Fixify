@@ -6,6 +6,7 @@ interface ProviderState {
      name: string;
      email: string;
      phone: string;
+     url: string;
 }
 
 const initialState: ProviderState = {
@@ -14,6 +15,7 @@ const initialState: ProviderState = {
      name: "",
      email: "",
      phone: "",
+     url: "",
 };
 
 const providerSlice = createSlice({
@@ -26,6 +28,7 @@ const providerSlice = createSlice({
                state.name = action.payload.name;
                state.email = action.payload.email;
                state.phone = action.payload.phone;
+               state.url = action.payload.url;
           },
           clearProvider: (state) => {
                state.id = null;
@@ -33,6 +36,7 @@ const providerSlice = createSlice({
                state.name = "";
                state.email = "";
                state.phone = "";
+               state.url = "";
           },
      },
 });

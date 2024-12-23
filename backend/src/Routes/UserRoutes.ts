@@ -46,11 +46,6 @@ userRoute.post("/update_profile", verifyTokenAndRole(["user"]), (req, res) => {
      userController.updateProfile(req, res);
 });
 
-// Route for testing token
-userRoute.get("/test", verifyTokenAndRole(["user"]), (req, res) => {
-     userController.test(req, res);
-});
-
 // Route for oauth
 userRoute.get("/o_auth", (req, res) => {
      userController.googleAuth(req, res);

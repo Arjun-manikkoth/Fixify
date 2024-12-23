@@ -12,7 +12,7 @@ interface ISignUpResponse {
      name?: string;
      phone?: string;
 }
-
+//api sends sign in data to the server
 const signInApi = async (formData: SignIn) => {
      try {
           const response = await axiosUser.post(userRoutes.signIn, formData);
@@ -33,7 +33,7 @@ const signInApi = async (formData: SignIn) => {
           };
      }
 };
-
+//api sends signup data to the server
 const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
      try {
           const response = await axiosUser.post(userRoutes.signUp, formData);
@@ -44,7 +44,7 @@ const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
           return {success: false, message: error.response.data.message || "something went wrong"};
      }
 };
-
+//api to send otp to server for verification
 const otpVerifyApi = async (otp: string, email: string) => {
      try {
           const response = await axiosUser.post(userRoutes.otpVerify, {otp: otp, email: email});
@@ -60,6 +60,8 @@ const otpVerifyApi = async (otp: string, email: string) => {
           };
      }
 };
+
+//api to resend otp
 const otpResendApi = async (email: string) => {
      try {
           const response = await axiosUser.post(userRoutes.otpResend, {email: email});
@@ -77,6 +79,7 @@ const otpResendApi = async (email: string) => {
      }
 };
 
+//api logouts user clears access and refresh tokens
 const logoutUser = async () => {
      try {
           const response = await axiosUser.post(userRoutes.logout);
@@ -94,6 +97,7 @@ const logoutUser = async () => {
      }
 };
 
+//api for refreshing access token
 const refreshTokenApi = async () => {
      try {
           const response = await axiosUser.post(userRoutes.refresh_token);
@@ -102,14 +106,7 @@ const refreshTokenApi = async () => {
      }
 };
 
-const testApi = async () => {
-     try {
-          const response = await axiosUser.get("/test");
-     } catch (error: any) {
-          console.log(error.message);
-     }
-};
-
+//api to google signin and signup
 const googleAuthApi = async (code: string) => {
      try {
           const response = await axiosUser.get(`${userRoutes.o_auth}?code=${code}`);
@@ -132,6 +129,7 @@ const googleAuthApi = async (code: string) => {
      }
 };
 
+//api to store images in cloudinary
 const cloudinaryApi = async (file: File) => {
      try {
           const formData = new FormData();
@@ -156,6 +154,7 @@ const cloudinaryApi = async (file: File) => {
      }
 };
 
+//api to update the profile data
 const updateProfile = async (formData: {
      id: string;
      url: string;
@@ -178,6 +177,7 @@ const updateProfile = async (formData: {
           };
      }
 };
+//api to get user data with id
 const getUserData = async (id: string) => {
      try {
           const response = await axiosUser.get(`${userRoutes.get_details}?id=${id}`);
@@ -204,7 +204,6 @@ export {
      logoutUser,
      refreshTokenApi,
      googleAuthApi,
-     testApi,
      cloudinaryApi,
      updateProfile,
      getUserData,

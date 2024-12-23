@@ -12,6 +12,8 @@ import {verifyToken} from "../Utils/CheckToken";
 import {IServices} from "../Models/ProviderModels/ServiceModel";
 import {oAuth2Client} from "../Utils/GoogleConfig";
 import axios from "axios";
+import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
+import {IProvider} from "../Models/ProviderModels/ProviderModel";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -28,6 +30,7 @@ export interface ISignInResponse {
      _id: ObjectId | null;
      service_id: ObjectId | null;
      name: string;
+     url: string;
      mobileNo: string;
      accessToken: string | null;
      refreshToken: string | null;
@@ -66,7 +69,6 @@ class ProviderService implements IProviderService {
 
      async createProvider(data: SignUp): Promise<ISignUpResponse | null> {
           try {
-               console.log("reached at the create provider at services");
                const exists = await this.providerRepository.findProviderByEmail(data.email); //checking the registration status of the provider
 
                if (!exists) {
@@ -78,6 +80,7 @@ class ProviderService implements IProviderService {
                          email: data.email,
                          mobileNo: data.mobileNo,
                          password: data.password,
+                         url: "",
                          passwordConfirm: data.passwordConfirm,
                          service_id: data.service_id,
                          google_id: null,
@@ -234,13 +237,44 @@ class ProviderService implements IProviderService {
           }
      }
 
-     //authenticates uesr by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
+     //authenticates provider by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
      async authenticateProvider(data: ISignIn): Promise<ISignInResponse | null> {
           try {
                const exists = await this.providerRepository.findProviderByEmail(data.email); //gets provider data with given email
 
                if (exists) {
-                    // if the provider exists
+                    //if provider exists
+
+                    if (exists.is_blocked) {
+                         //if the provider is blocked by admin
+                         return {
+                              success: false,
+                              message: "Account blocked by admin",
+                              service_id: null,
+                              email: "",
+                              _id: null,
+                              name: "",
+                              url: "",
+                              mobileNo: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
+                    // if the providers signed up via google
+                    if (exists.google_id) {
+                         return {
+                              success: false,
+                              message: "Please Sign in With Google",
+                              email: "",
+                              _id: null,
+                              service_id: null,
+                              name: "",
+                              url: "",
+                              mobileNo: "",
+                              accessToken: null,
+                              refreshToken: null,
+                         };
+                    }
 
                     const passwordStatus = await comparePasswords(data.password, exists.password); // utility function compares passwords
 
@@ -263,6 +297,7 @@ class ProviderService implements IProviderService {
                                    email: exists.email,
                                    _id: exists._id,
                                    name: exists.name,
+                                   url: exists.url,
                                    service_id: exists.service_id,
                                    mobileNo: exists.mobile_no,
                                    accessToken: tokens.accessToken,
@@ -280,6 +315,7 @@ class ProviderService implements IProviderService {
                                    email: exists.email,
                                    _id: exists._id,
                                    name: exists.name,
+                                   url: exists.url,
                                    service_id: exists.service_id,
                                    mobileNo: exists.mobile_no,
                                    accessToken: null,
@@ -295,6 +331,7 @@ class ProviderService implements IProviderService {
                               _id: null,
                               name: "",
                               service_id: null,
+                              url: "",
                               mobileNo: "",
                               accessToken: null,
                               refreshToken: null,
@@ -309,6 +346,7 @@ class ProviderService implements IProviderService {
                          name: "",
                          mobileNo: "",
                          _id: null,
+                         url: "",
                          service_id: null,
                          accessToken: null,
                          refreshToken: null,
@@ -375,18 +413,24 @@ class ProviderService implements IProviderService {
                          password: "",
                          service_id: null,
                          passwordConfirm: "",
+                         url: picture,
                          mobileNo: "",
                          google_id: id,
                     });
 
                     if (saveProvider) {
-                         const tokens = generateTokens(saveProvider._id.toString(), email, "user");
+                         const tokens = generateTokens(
+                              saveProvider._id.toString(),
+                              email,
+                              "provider"
+                         );
                          return {
                               success: true,
                               message: "Signed in sucessfully",
                               email: saveProvider.email,
                               _id: saveProvider._id,
                               name: saveProvider.name,
+                              url: saveProvider.url,
                               service_id: saveProvider.service_id,
                               mobileNo: "",
                               accessToken: tokens.accessToken,
@@ -400,20 +444,22 @@ class ProviderService implements IProviderService {
                          _id: null,
                          service_id: null,
                          name: "",
+                         url: "",
                          mobileNo: "",
                          accessToken: null,
                          refreshToken: null,
                     };
                } else {
-                    const tokens = generateTokens(provider._id.toString(), email, "user");
+                    const tokens = generateTokens(provider._id.toString(), email, "provider");
                     return {
                          success: true,
                          message: "Signed in sucessfully",
                          email: provider.email,
                          _id: provider._id,
                          name: provider.name,
+                         url: provider.url,
                          service_id: provider.service_id,
-                         mobileNo: "",
+                         mobileNo: provider.mobile_no,
                          accessToken: tokens.accessToken,
                          refreshToken: tokens.refreshToken,
                     };
@@ -427,10 +473,25 @@ class ProviderService implements IProviderService {
                     _id: null,
                     name: "",
                     service_id: null,
+                    url: "",
                     mobileNo: "",
                     accessToken: null,
                     refreshToken: null,
                };
+          }
+     }
+     //provider edit profile to db
+     async editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
+          try {
+               const status = await this.providerRepository.updateUserWithId(data);
+               if (!status) {
+                    return null;
+               } else {
+                    return status;
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
           }
      }
 }

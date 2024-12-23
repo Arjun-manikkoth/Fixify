@@ -7,6 +7,7 @@ export interface IProvider extends Document {
      email: string;
      password: string;
      mobile_no: string;
+     url: string;
      google_id: string | null;
      is_blocked: boolean;
      is_deleted: boolean;
@@ -22,6 +23,7 @@ const providerSchema: Schema = new Schema(
           password: {type: String},
           mobile_no: {type: String},
           google_id: String || null,
+          url: String,
           is_blocked: {
                type: Boolean,
                default: false,

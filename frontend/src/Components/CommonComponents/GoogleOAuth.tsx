@@ -50,15 +50,16 @@ const GoogleOAuth: React.FC = () => {
                          if (result?.success === true) {
                               dispatch(
                                    setProvider({
-                                        id: result.email,
+                                        id: result.id,
                                         service_id: null,
                                         name: result.name,
                                         email: result.email,
                                         phone: result.phone,
+                                        url: result.url,
                                    })
                               );
 
-                              navigate("/providers/home");
+                              navigate("/providers/profile");
                          } else {
                               toast.error(result.message);
                          }

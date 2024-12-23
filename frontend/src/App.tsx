@@ -27,7 +27,7 @@ const App: FC = () => {
                          {/*provider protected component wrapper*/}
                          <Route Component={ProviderProtected}>
                               {/*provider home*/}
-                              <Route path="/providers/home" Component={ProviderHomePage} />
+                              <Route path="/providers/profile" Component={ProviderHomePage} />
                          </Route>
 
                          {/*admin sign in page*/}

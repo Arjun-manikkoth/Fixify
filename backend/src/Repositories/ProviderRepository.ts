@@ -6,6 +6,8 @@ import Provider from "../Models/ProviderModels/ProviderModel";
 import Otp from "../Models/CommonModels/OtpModel";
 import {ObjectId} from "mongoose";
 import {IServices} from "../Models/ProviderModels/ServiceModel";
+import mongoose from "mongoose";
+import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
 
 class ProviderRepository implements IProviderRepository {
      // get all services
@@ -26,6 +28,7 @@ class ProviderRepository implements IProviderRepository {
                     password: data.password,
                     mobile_no: data.mobileNo,
                     is_verified: true,
+                    url: data.url,
                     google_id: data.google_id,
                });
 
@@ -100,9 +103,47 @@ class ProviderRepository implements IProviderRepository {
      //get provider data with id
      async getProviderDataWithId(id: string): Promise<Partial<IProvider> | null> {
           try {
-               const data = await Provider.findOne({_id: id});
+               console.log("reached at getproviderdatawithId", id);
+               const _id = new mongoose.Types.ObjectId(id);
+               const data = await Provider.findOne({_id: _id});
 
                return data;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     //update user profile
+     async updateUserWithId(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
+          try {
+               interface Profile {
+                    name?: string;
+                    email?: string;
+                    url?: string;
+                    mobile_no?: string;
+               }
+
+               let profileData: Profile = {};
+
+               if (data.userName) {
+                    profileData.name = data.userName;
+               }
+
+               if (data.url) {
+                    profileData.url = data.url;
+               }
+
+               if (data.mobileNo) {
+                    profileData.mobile_no = data.mobileNo;
+               }
+
+               const status = await Provider.findByIdAndUpdate(
+                    data.id,
+                    {$set: profileData},
+                    {new: true}
+               );
+
+               return status;
           } catch (error: any) {
                console.log(error.message);
                return null;
