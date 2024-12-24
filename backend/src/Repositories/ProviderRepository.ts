@@ -1,4 +1,4 @@
-import {SignUp, IProviderWithOtp} from "../Interfaces/Provider/SignIn";
+import {SignUp, IProviderWithOtp, IProviderWithService} from "../Interfaces/Provider/SignIn";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
 import {IProvider} from "../Models/ProviderModels/ProviderModel";
 import Service from "../Models/ProviderModels/ServiceModel";
@@ -8,12 +8,14 @@ import {ObjectId} from "mongoose";
 import {IServices} from "../Models/ProviderModels/ServiceModel";
 import mongoose from "mongoose";
 import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
+import {IProviderRegistration} from "../Interfaces/Provider/SignIn";
+import Approval from "../Models/ProviderModels/ApprovalModel";
 
 class ProviderRepository implements IProviderRepository {
      // get all services
      async getAllServices(): Promise<IServices[]> {
           try {
-               return await Service.find({});
+               return await Service.find({is_active: true});
           } catch (error: any) {
                console.log(error.message);
                throw new Error("Failed to fetch services"); // Propagate error
@@ -87,6 +89,7 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
+     //change provider status to verified
      async verifyProvider(id: ObjectId): Promise<Boolean> {
           try {
                const verified = await Provider.findByIdAndUpdate(
@@ -103,7 +106,6 @@ class ProviderRepository implements IProviderRepository {
      //get provider data with id
      async getProviderDataWithId(id: string): Promise<Partial<IProvider> | null> {
           try {
-               console.log("reached at getproviderdatawithId", id);
                const _id = new mongoose.Types.ObjectId(id);
                const data = await Provider.findOne({_id: _id});
 
@@ -113,8 +115,8 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-     //update user profile
-     async updateUserWithId(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
+     //update provider profile
+     async updateProviderWithId(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
           try {
                interface Profile {
                     name?: string;
@@ -147,6 +149,99 @@ class ProviderRepository implements IProviderRepository {
           } catch (error: any) {
                console.log(error.message);
                return null;
+          }
+     }
+     //fetch provider profile
+     async fetchProviderProfileData(id: string): Promise<Partial<IProviderWithService | null>> {
+          try {
+               const _id = new mongoose.Types.ObjectId(id); // Ensure the ID is in the correct ObjectId format
+
+               const data = await Provider.aggregate([
+                    {$match: {_id}}, // Match the provider by ID
+                    {
+                         $lookup: {
+                              from: "services", // Collection name in MongoDB
+                              localField: "service_id", // Field in providerModel
+                              foreignField: "_id", // Field in Services
+                              as: "service_details", // Alias for the joined data
+                         },
+                    },
+                    {$unwind: {path: "$service_details", preserveNullAndEmptyArrays: true}},
+                    {
+                         $project: {
+                              name: 1,
+                              email: 1,
+                              mobile_no: 1,
+                              url: 1,
+                              google_id: 1,
+                              is_blocked: 1,
+                              is_approved: 1,
+                              is_verified: 1,
+                              "service_details.name": 1,
+                              "service_details.description": 1,
+                              "service_details.is_active": 1,
+                         },
+                    },
+               ]);
+
+               if (!data.length) {
+                    return null; // Return null if no matching provider is found
+               }
+
+               return {
+                    provider: {
+                         _id: data[0]._id,
+                         name: data[0].name,
+                         email: data[0].email,
+                         mobile_no: data[0].mobile_no,
+                         url: data[0].url,
+                         google_id: data[0].google_id,
+                         is_blocked: data[0].is_blocked,
+                         is_approved: data[0].is_approved,
+                         is_verified: data[0].is_verified,
+                    },
+                    service: data[0].service_details || null,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     async providerRegistration(data: IProviderRegistration): Promise<boolean> {
+          try {
+               const _id = new mongoose.Types.ObjectId(data._id);
+               const _idService = new mongoose.Types.ObjectId(data.expertise);
+
+               const approval = new Approval({
+                    provider_id: _id,
+                    provider_experience: data.description,
+                    provider_work_images: data.workImages,
+                    service_id: _idService,
+                    aadhar_picture: data.aadharImage,
+                    status: "Pending",
+               });
+               const result = await approval.save();
+               if (result) {
+                    return true;
+               } else {
+                    return false;
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     async approvalExists(id: string): Promise<boolean> {
+          try {
+               const _id = new mongoose.Types.ObjectId(id);
+
+               const exists = await Approval.findOne({provider_id: _id, status: {$ne: "Rejected"}});
+
+               return exists ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
           }
      }
 }

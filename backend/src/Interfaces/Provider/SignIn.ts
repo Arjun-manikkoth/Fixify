@@ -1,6 +1,7 @@
 import {ObjectId} from "mongoose";
 import {IProvider} from "../../Models/ProviderModels/ProviderModel";
 import {IOtp} from "../../Models/CommonModels/OtpModel";
+import {IServices} from "../../Models/ProviderModels/ServiceModel";
 
 export interface SignUp {
      userName: string;
@@ -28,4 +29,16 @@ export interface IUpdateProfile {
      userName: string;
      mobileNo: string;
      id: string;
+}
+
+export interface IProviderWithService {
+     provider: Partial<IProvider>;
+     service: Partial<IServices> | null;
+}
+export interface IProviderRegistration {
+     _id: string;
+     description: string;
+     aadharImage: string;
+     expertise: string;
+     workImages: string[];
 }

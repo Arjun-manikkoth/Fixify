@@ -232,7 +232,7 @@ class ProviderController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
-
+     //google sign in and sign up route
      async googleAuth(req: Request, res: Response) {
           try {
                const {code} = req.query;
@@ -293,7 +293,7 @@ class ProviderController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
-     //update user profile data
+     //update provider profile data
      async updateProfile(req: Request, res: Response) {
           try {
                console.log(req.body);
@@ -310,6 +310,50 @@ class ProviderController {
                          message: "Profile updated failed",
                          data: null,
                     });
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+     //fetch provider profile data
+     async fetchProfile(req: Request, res: Response) {
+          try {
+               const status = await this.providerService.getProfileData(req.query.id as string);
+
+               res.status(200).json({
+                    success: true,
+                    message: "Data fetched successfully",
+                    data: status,
+               });
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+     //register provider data
+     async registerProfile(req: Request, res: Response) {
+          try {
+               const response = await this.providerService.registerProvider(req.body);
+               if (response.success === true) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Provider registration successfully",
+                         data: "",
+                    });
+               } else {
+                    switch (response?.message) {
+                         case "Already requested for approval":
+                              res.status(400).json({success: false, message: response.message});
+                              break;
+
+                         default:
+                              res.status(500).json({
+                                   success: false,
+                                   message: "Cannot register at this moment",
+                              });
+                              break;
+                    }
                }
           } catch (error: any) {
                console.log(error.message);

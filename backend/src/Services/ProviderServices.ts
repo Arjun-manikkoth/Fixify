@@ -1,5 +1,5 @@
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
-import {SignUp} from "../Interfaces/Provider/SignIn";
+import {IProviderWithService, SignUp} from "../Interfaces/Provider/SignIn";
 import {ISignIn} from "../Interfaces/Provider/SignIn";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
 import {messages} from "../Constants/Messages";
@@ -13,6 +13,7 @@ import {IServices} from "../Models/ProviderModels/ServiceModel";
 import {oAuth2Client} from "../Utils/GoogleConfig";
 import axios from "axios";
 import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
+import {IProviderRegistration} from "../Interfaces/Provider/SignIn";
 import {IProvider} from "../Models/ProviderModels/ProviderModel";
 
 //interface for signup response
@@ -498,7 +499,7 @@ class ProviderService implements IProviderService {
      //provider edit profile to db
      async editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
           try {
-               const status = await this.providerRepository.updateUserWithId(data);
+               const status = await this.providerRepository.updateProviderWithId(data);
                if (!status) {
                     return null;
                } else {
@@ -507,6 +508,61 @@ class ProviderService implements IProviderService {
           } catch (error: any) {
                console.log(error.message);
                return null;
+          }
+     }
+
+     //provider get look up profile data with services and address in future
+     async getProfileData(id: string): Promise<Partial<IProviderWithService> | null> {
+          try {
+               const status = await this.providerRepository.fetchProviderProfileData(id);
+               return status;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     async registerProvider(data: IProviderRegistration): Promise<IOtpResponse> {
+          try {
+               const exists = await this.providerRepository.approvalExists(data._id);
+
+               if (!exists) {
+                    let expertise = data.expertise;
+
+                    if (!data.expertise) {
+                         const providerData = await this.providerRepository.getProviderDataWithId(
+                              data._id
+                         );
+                         if (providerData?.service_id) {
+                              expertise = providerData.service_id.toString();
+                         }
+                    }
+                    const status = await this.providerRepository.providerRegistration({
+                         ...data,
+                         expertise,
+                    });
+                    if (status) {
+                         return {
+                              success: true,
+                              message: "Sucessfully registered request",
+                         };
+                    } else {
+                         return {
+                              success: false,
+                              message: "Cannot register at this moment",
+                         };
+                    }
+               } else {
+                    return {
+                         success: false,
+                         message: "Already requested for approval",
+                    };
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Failed to register",
+               };
           }
      }
 }

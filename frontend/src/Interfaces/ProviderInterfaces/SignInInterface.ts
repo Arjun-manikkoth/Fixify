@@ -25,3 +25,27 @@ export interface Provider {
      is_approved: boolean | null;
      google_id: string | null;
 }
+export interface IServices {
+     _id: string;
+     name: string;
+     is_active: boolean | null;
+     description: string;
+}
+export interface IProviderProfile {
+     provider: {
+          _id: string;
+          name: string;
+          email: string;
+          mobile_no: string;
+          url: string;
+          google_id: string | null;
+          is_blocked: boolean;
+          is_approved: boolean;
+          is_verified: boolean;
+     };
+     service: {
+          name: string;
+          is_active: boolean;
+          description: string;
+     } | null; // Service can be null
+}

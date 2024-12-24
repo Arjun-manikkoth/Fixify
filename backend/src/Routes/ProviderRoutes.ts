@@ -56,4 +56,14 @@ providerRoute.get("/o_auth", (req, res) => {
      providerController.googleAuth(req, res);
 });
 
+//get provider profile data
+providerRoute.get("/profile", (req, res) => {
+     providerController.fetchProfile(req, res);
+});
+
+//get provider profile data
+providerRoute.post("/register", (req, res) => {
+     providerController.registerProfile(req, res);
+});
+
 export default providerRoute;

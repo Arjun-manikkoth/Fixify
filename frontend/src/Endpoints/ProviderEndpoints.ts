@@ -8,6 +8,7 @@ const providerRoutes = {
      get_services: "/services",
      o_auth: "/o_auth",
      update_profile: "update_profile",
-     get_details: "/",
+     get_profile_details: "/profile",
+     register: "/register",
 };
 export default providerRoutes;

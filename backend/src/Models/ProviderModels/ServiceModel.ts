@@ -8,7 +8,7 @@ export interface IServices extends Document {
      description: string;
 }
 
-const ServicesSchema: Schema = new Schema(
+const serviceSchema: Schema = new Schema(
      {
           name: {type: String},
           is_active: {
@@ -20,6 +20,6 @@ const ServicesSchema: Schema = new Schema(
      {timestamps: true}
 );
 
-const Services = mongoose.model<IServices>("Services", ServicesSchema);
+const serviceModel = mongoose.model<IServices>("services", serviceSchema);
 
-export default Services;
+export default serviceModel;

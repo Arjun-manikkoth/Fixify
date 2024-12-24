@@ -35,7 +35,7 @@ const ProviderSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => 
           password: "",
           passwordConfirm: "",
      });
-     console.log(formData);
+
      const [services, setServices] = useState<ServiceData[]>([]);
 
      useEffect(() => {

@@ -1,4 +1,4 @@
-import {SignUp} from "./SignIn";
+import {IProviderRegistration, IProviderWithService, SignUp} from "./SignIn";
 import {ISignIn} from "./SignIn";
 import {ISignUpResponse} from "../../Services/ProviderServices";
 import {IOtpResponse} from "../../Services/ProviderServices";
@@ -18,5 +18,7 @@ interface IProviderService {
      getServices(): Promise<IServices[] | null>;
      googleAuth(code: string): Promise<ISignInResponse>;
      editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>>;
+     getProfileData(id: string): Promise<Partial<IProviderWithService> | null>;
+     registerProvider(data: IProviderRegistration): Promise<IOtpResponse>;
 }
 export default IProviderService;
