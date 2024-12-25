@@ -10,6 +10,7 @@ import AdminProtected from "./Components/AdminComponents/AdminProtected";
 import AdminSignIn from "./Components/AdminComponents/AdminSignIn";
 import AdminUsersPage from "./Pages/Admin/AdminUsersPage";
 import AdminProvidersPage from "./Pages/Admin/AdminProvidersPage";
+import AdminApprovalsPage from "./Pages/Admin/AdminApprovalsPage";
 
 const App: FC = () => {
      return (
@@ -37,6 +38,7 @@ const App: FC = () => {
                               <Route path="/admins/dashboard" Component={AdminHomePage} />
                               <Route path="/admins/users" Component={AdminUsersPage} />
                               <Route path="/admins/providers" Component={AdminProvidersPage} />
+                              <Route path="/admins/approvals" Component={AdminApprovalsPage} />
                          </Route>
                     </Routes>
                </Router>

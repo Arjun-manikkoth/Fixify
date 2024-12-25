@@ -148,6 +148,26 @@ const unBlockProvider = async (id: string) => {
           };
      }
 };
+
+//approvals listing api
+const getProvidersForApproval = async (page: number) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.approvals}?page=${page}`);
+
+          return {
+               success: true,
+               message: "Fetched approvals data successfully",
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch approval data",
+               data: null,
+          };
+     }
+};
 export {
      signInApi,
      logoutAdmin,
@@ -158,4 +178,5 @@ export {
      getProviders,
      blockProvider,
      unBlockProvider,
+     getProvidersForApproval,
 };

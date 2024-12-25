@@ -4,7 +4,7 @@ export interface IApprovals extends Document {
      _id: ObjectId;
      provider_id: ObjectId | null;
      provider_experience: String | null;
-     service_id: String | null;
+     service_id: ObjectId | null;
      proivder_work_images: String[] | null;
      aadhar_picture: String | null;
      status: String | null;

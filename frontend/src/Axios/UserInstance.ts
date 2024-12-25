@@ -15,6 +15,9 @@ instance.interceptors.response.use(
           return response;
      },
      async (error) => {
+          const originalRequest = error.config;
+          console.log(originalRequest);
+
           if (
                error.response &&
                error.response.status === 401 &&
@@ -37,11 +40,21 @@ instance.interceptors.response.use(
           } else if (
                error.response.status === 401 &&
                (error.response.data.message === "Unauthorized! Access Token is expired" ||
-                    error.response.data.message === "Access Token is missing")
+                    error.response.data.message === "Access Token is missing") &&
+               !originalRequest._retry
           ) {
                //if access token is expired make an api call to get new access token
 
-               await refreshTokenApi();
+               originalRequest._retry = true;
+               try {
+                    await refreshTokenApi();
+
+                    return instance(originalRequest);
+               } catch (refreshError) {
+                    await logoutUser();
+
+                    return Promise.reject(refreshError);
+               }
           } else if (
                error.response.status === 401 &&
                error.response.data.message === "Blocked by admin"

@@ -3,9 +3,10 @@ import {IAdmin} from "../Models/AdminModels/AdminModel";
 import Admin from "../Models/AdminModels/AdminModel";
 import {IUser} from "../Models/UserModels/UserModel";
 import User from "../Models/UserModels/UserModel";
-import {IPaginatedUsers} from "../Interfaces/Admin/SignInInterface";
+import {IPaginatedApprovals, IPaginatedUsers} from "../Interfaces/Admin/SignInInterface";
 import {IPaginatedProviders} from "../Interfaces/Admin/SignInInterface";
 import Provider from "../Models/ProviderModels/ProviderModel";
+import Approval from "../Models/ProviderModels/ApprovalModel";
 
 class AdminRepository implements IAdminRepository {
      //find admin by email
@@ -168,6 +169,85 @@ class AdminRepository implements IAdminRepository {
           } catch (error: any) {
                console.log(error.message);
                return false;
+          }
+     }
+
+     //get all approvals based on queries
+     async getAllApprovals(page: string): Promise<IPaginatedApprovals | null> {
+          try {
+               const limit = 8;
+               const pageNo: number = Number(page);
+
+               // Aggregation with lookup
+               const approvalData = await Approval.aggregate([
+                    {
+                         $match: {
+                              status: {$ne: "Rejected"},
+                         },
+                    },
+                    {
+                         $lookup: {
+                              from: "providers", // Collection  providers
+                              localField: "provider_id",
+                              foreignField: "_id",
+                              as: "providerDetails",
+                         },
+                    },
+                    {
+                         $lookup: {
+                              from: "services", // Collection services
+                              localField: "service_id",
+                              foreignField: "_id",
+                              as: "serviceDetails",
+                         },
+                    },
+                    {
+                         $unwind: {
+                              path: "$providerDetails",
+                              preserveNullAndEmptyArrays: true,
+                         },
+                    },
+                    {
+                         $unwind: {
+                              path: "$serviceDetails",
+                              preserveNullAndEmptyArrays: true,
+                         },
+                    },
+                    {
+                         $project: {
+                              _id: 1,
+                              provider_id: 1,
+                              service_id: 1,
+                              provider_experience: 1,
+                              provider_work_images: 1,
+                              aadhar_picture: 1,
+                              status: 1,
+                              "providerDetails.name": 1,
+                              "providerDetails.email": 1,
+                              "providerDetails.mobile_no": 1,
+                              "serviceDetails.name": 1,
+                              "serviceDetails.description": 1,
+                         },
+                    },
+                    {
+                         $skip: (pageNo - 1) * limit,
+                    },
+                    {
+                         $limit: limit,
+                    },
+               ]);
+
+               const totalRecords = await Approval.countDocuments({status: {$ne: "Rejected"}});
+
+               return {
+                    approvals: approvalData,
+                    currentPage: pageNo,
+                    totalPages: Math.ceil(totalRecords / limit),
+                    totalRecords,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
           }
      }
 }

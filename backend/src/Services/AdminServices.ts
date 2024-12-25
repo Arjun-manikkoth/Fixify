@@ -1,5 +1,10 @@
 import IAdminService from "../Interfaces/Admin/AdminServiceInterface";
-import {IPaginatedProviders, IPaginatedUsers, ISignIn} from "../Interfaces/Admin/SignInInterface";
+import {
+     IPaginatedApprovals,
+     IPaginatedProviders,
+     IPaginatedUsers,
+     ISignIn,
+} from "../Interfaces/Admin/SignInInterface";
 import IAdminRepository from "../Interfaces/Admin/AdminRepositoryInterface";
 import {ObjectId} from "mongoose";
 import {comparePasswords} from "../Utils/HashPassword";
@@ -125,6 +130,21 @@ class AdminService implements IAdminService {
           try {
                const data = await this.adminRepository.getAllUsers(search, page, filter);
                if (data?.users) {
+                    return data;
+               }
+               return null;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     //gets user list
+     async getApprovalsList(page: string): Promise<IPaginatedApprovals | null> {
+          try {
+               const data = await this.adminRepository.getAllApprovals(page);
+
+               if (data?.approvals) {
                     return data;
                }
                return null;

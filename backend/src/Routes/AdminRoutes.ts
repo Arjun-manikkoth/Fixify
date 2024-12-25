@@ -45,6 +45,11 @@ adminRoute.get("/providers", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.getProviders(req, res);
 });
 
+// // Route for fetching approval datas
+adminRoute.get("/approvals", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.getApprovals(req, res);
+});
+
 // // Route for blocking provider
 adminRoute.get("/block_provider", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.blockProvider(req, res);

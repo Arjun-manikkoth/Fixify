@@ -225,6 +225,31 @@ class AdminController {
           }
      }
 
+     //list approval request in the admin side based on the page no
+     async getApprovals(req: Request, res: Response): Promise<void> {
+          try {
+               console.log("approval call reached at the controller");
+               const status = await this.AdminService.getApprovalsList(req.query.page as string);
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Approvals data fetched successully",
+                         data: status,
+                    });
+               } else {
+                    res.status(400).json({
+                         success: false,
+                         message: "Approvals data fetching failed",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
      //block provider
      async blockProvider(req: Request, res: Response): Promise<void> {
           try {

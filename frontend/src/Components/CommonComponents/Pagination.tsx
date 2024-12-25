@@ -5,6 +5,7 @@ interface PaginationProps {
      totalPages: number;
      changePage: (type: "Increment" | "Decrement") => void;
 }
+
 const Pagination: React.FC<PaginationProps> = (props) => {
      return (
           <div className="flex justify-center items-center space-x-4 py-4">
