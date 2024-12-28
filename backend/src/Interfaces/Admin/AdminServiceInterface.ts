@@ -1,6 +1,6 @@
 import {ObjectId} from "mongoose";
 import {ISignInResponse, IRefreshTokenResponse} from "../../Services/AdminServices";
-import {IPaginatedUsers, ISignIn} from "./SignInInterface";
+import {IApprovalDetails, IPaginatedUsers, ISignIn} from "./SignInInterface";
 import {IPaginatedProviders} from "./SignInInterface";
 import {IPaginatedApprovals} from "./SignInInterface";
 
@@ -18,5 +18,7 @@ interface IAdminService {
      providerBlock(id: string): Promise<Boolean>;
      providerUnBlock(id: string): Promise<Boolean>;
      getApprovalsList(page: string): Promise<IPaginatedApprovals | null>;
+     getApprovalDetails(id: string): Promise<IApprovalDetails[] | null>;
+     approvalStatusChange(id: string, status: string): Promise<Boolean>;
 }
 export default IAdminService;

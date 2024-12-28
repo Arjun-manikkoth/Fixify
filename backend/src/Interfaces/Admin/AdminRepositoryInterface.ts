@@ -1,8 +1,11 @@
 import {IAdmin} from "../../Models/AdminModels/AdminModel";
-import {IUser} from "../../Models/UserModels/UserModel";
-import {IPaginatedUsers} from "./SignInInterface";
+import {IApprovalDetails, IPaginatedUsers} from "./SignInInterface";
 import {IPaginatedProviders} from "./SignInInterface";
 import {IPaginatedApprovals} from "./SignInInterface";
+import {IApprovals} from "../../Models/ProviderModels/ApprovalModel";
+import {ObjectId} from "mongoose";
+import {IUser} from "../../Models/UserModels/UserModel";
+import {IProvider} from "../../Models/ProviderModels/ProviderModel";
 
 interface IAdminRepository {
      findAdminByEmail(email: string): Promise<IAdmin | null>;
@@ -17,6 +20,10 @@ interface IAdminRepository {
      changeProviderBlockStatus(id: string): Promise<boolean>;
      changeProviderUnBlockStatus(id: string): Promise<boolean>;
      getAllApprovals(page: string): Promise<IPaginatedApprovals | null>;
+     findApprovalDetail(id: string): Promise<IApprovalDetails[] | null>;
+     updateApprovalStatus(id: string, status: string): Promise<IApprovals | null>;
+     getProviderById(id: ObjectId): Promise<IProvider | null>;
+     updateProviderServiceApproval(providerId: ObjectId, serviceId: ObjectId): Promise<boolean>;
 }
 
 export default IAdminRepository;

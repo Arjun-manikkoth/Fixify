@@ -25,12 +25,14 @@ export interface Provider {
      is_approved: boolean | null;
      google_id: string | null;
 }
+
 export interface IServices {
      _id: string;
      name: string;
      is_active: boolean | null;
      description: string;
 }
+
 export interface IProviderProfile {
      provider: {
           _id: string;
@@ -48,4 +50,14 @@ export interface IProviderProfile {
           is_active: boolean;
           description: string;
      } | null; // Service can be null
+}
+
+export interface IApprovals {
+     _id: string;
+     provider_id: string | null;
+     provider_experience: string | null;
+     service_id: string | null;
+     proivder_work_images: string[] | null;
+     aadhar_picture: string | null;
+     status: string | null;
 }

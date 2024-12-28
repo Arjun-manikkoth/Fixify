@@ -272,7 +272,7 @@ class AdminController {
           }
      }
 
-     //block provider
+     //unblock provider
      async unBlockProvider(req: Request, res: Response): Promise<void> {
           try {
                const status = await this.AdminService.providerUnBlock(req.query.id as string);
@@ -285,6 +285,57 @@ class AdminController {
                     res.status(200).json({
                          success: false,
                          message: "Provider Unblocking failed",
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //get approval details with id
+     async approvalDetails(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.AdminService.getApprovalDetails(req.params.id as string);
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Provider approval details fetched successully",
+                         data: status,
+                    });
+               } else {
+                    res.status(200).json({
+                         success: false,
+                         message: "Provider approval details fetched sucessfully",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //update approval detail status
+     async approvalStatusUpdate(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.AdminService.approvalStatusChange(
+                    req.params.id as string,
+                    req.params.status as string
+               );
+               if (status) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Provider approval status updated successully",
+                         data: status,
+                    });
+               } else {
+                    res.status(200).json({
+                         success: false,
+                         message: "Provider approval status update failed",
+                         data: null,
                     });
                }
           } catch (error: any) {

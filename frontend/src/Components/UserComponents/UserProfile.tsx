@@ -179,6 +179,7 @@ const UserProfile: React.FC = () => {
                                              <img
                                                   src={user.url}
                                                   alt="Preview"
+                                                  referrerPolicy="no-referrer"
                                                   className="w-52 h-52 rounded-full mb-8 cursor-pointer"
                                                   onClick={handleImageUpload}
                                              />

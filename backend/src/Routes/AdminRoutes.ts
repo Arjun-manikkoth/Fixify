@@ -32,11 +32,11 @@ adminRoute.get("/users", verifyTokenAndRole(["admin"]), (req, res) => {
 });
 
 // // Route for blocking user
-adminRoute.get("/block_user", verifyTokenAndRole(["admin"]), (req, res) => {
+adminRoute.patch("/block_user", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.blockUser(req, res);
 });
 // // Route for unblocking user
-adminRoute.get("/unblock_user", verifyTokenAndRole(["admin"]), (req, res) => {
+adminRoute.patch("/unblock_user", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.unBlockUser(req, res);
 });
 
@@ -50,13 +50,23 @@ adminRoute.get("/approvals", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.getApprovals(req, res);
 });
 
+// // Route for fetching approval detail datas
+adminRoute.get("/approval_details/:id", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.approvalDetails(req, res);
+});
+
 // // Route for blocking provider
-adminRoute.get("/block_provider", verifyTokenAndRole(["admin"]), (req, res) => {
+adminRoute.patch("/block_provider", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.blockProvider(req, res);
 });
 // // Route for unblocking provider
-adminRoute.get("/unblock_provider", verifyTokenAndRole(["admin"]), (req, res) => {
+adminRoute.patch("/unblock_provider", verifyTokenAndRole(["admin"]), (req, res) => {
      adminController.unBlockProvider(req, res);
+});
+
+// // Route for approval status change
+adminRoute.patch("/approval_update/:id/:status", verifyTokenAndRole(["admin"]), (req, res) => {
+     adminController.approvalStatusUpdate(req, res);
 });
 
 export default adminRoute;

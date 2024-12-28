@@ -70,6 +70,7 @@ const ProviderProfile: React.FC = () => {
                //calls api to get lookup data of the provider
                getProviderData(provider.id)
                     .then((data) => {
+                         console.log(data.data);
                          setProfileData(data.data);
                     })
                     .catch((error) => {
@@ -318,6 +319,7 @@ const ProviderProfile: React.FC = () => {
                                              <img
                                                   src={provider.url}
                                                   alt="Preview"
+                                                  referrerPolicy="no-referrer"
                                                   className="w-52 h-52 rounded-full mb-8 cursor-pointer"
                                                   onClick={handleImageUpload}
                                              />
@@ -341,8 +343,16 @@ const ProviderProfile: React.FC = () => {
 
                                    {/* Profile Name and Phone Number */}
                                    <div className="w-full space-y-4">
-                                        <div className="text-center font-semibold text-lg">
-                                             Electrician
+                                        <div
+                                             className={`text-center  text-lg  ${
+                                                  profileData.service
+                                                       ? "font-semibold"
+                                                       : "text-red-700"
+                                             } `}
+                                        >
+                                             {profileData.service
+                                                  ? profileData.service.name
+                                                  : "Service not chosen"}
                                         </div>
                                         <div className="flex flex-col sm:flex-row sm:space-x-4">
                                              <div className="w-full sm:w-1/2">

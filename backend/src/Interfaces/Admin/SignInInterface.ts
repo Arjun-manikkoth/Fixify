@@ -32,17 +32,19 @@ export interface IApprovalDetails {
      _id: ObjectId;
      provider_id: ObjectId | null;
      service_id: ObjectId | null;
-     provider_experience: string | null;
+     provider_experience: string;
      provider_work_images: string[] | null;
-     aadhar_picture: string | null;
-     status: string | null;
+     aadhar_picture: string;
+     status: string;
      providerDetails: {
           name: string;
           email: string;
           mobile_no: string;
+          url: string;
+          is_blocked: boolean;
      } | null;
      serviceDetails: {
           name: string;
-          description: string;
+          is_active: boolean;
      } | null;
 }

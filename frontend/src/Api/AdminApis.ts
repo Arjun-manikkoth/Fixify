@@ -24,7 +24,7 @@ const signInApi = async (formData: SignIn) => {
 //admin logout api
 const logoutAdmin = async () => {
      try {
-          const response = await axiosAdmin.post(adminRoutes.logout);
+          const response = await axiosAdmin.get(adminRoutes.logout);
 
           return {
                success: true,
@@ -90,7 +90,7 @@ const getProviders = async (page: number, filter: string, search: string | numbe
 //user blocking api
 const blockUser = async (id: string) => {
      try {
-          const response = await axiosAdmin.get(`${adminRoutes.userBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.userBlock}?id=${id}`);
 
           return {success: true, message: "User blocked successfully", data: response.data};
      } catch (error: any) {
@@ -105,7 +105,7 @@ const blockUser = async (id: string) => {
 //user unblocking api
 const unBlockUser = async (id: string) => {
      try {
-          const response = await axiosAdmin.get(`${adminRoutes.userUnBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.userUnBlock}?id=${id}`);
 
           return {success: true, message: "User Unblocked successfully", data: response.data};
      } catch (error: any) {
@@ -121,7 +121,7 @@ const unBlockUser = async (id: string) => {
 //provider blocking api
 const blockProvider = async (id: string) => {
      try {
-          const response = await axiosAdmin.get(`${adminRoutes.providerBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.providerBlock}?id=${id}`);
 
           return {success: true, message: "Provider blocked successfully", data: response.data};
      } catch (error: any) {
@@ -136,7 +136,7 @@ const blockProvider = async (id: string) => {
 //provider unblocking api
 const unBlockProvider = async (id: string) => {
      try {
-          const response = await axiosAdmin.get(`${adminRoutes.providerUnBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.providerUnBlock}?id=${id}`);
 
           return {success: true, message: "Provider Unblocked successfully", data: response.data};
      } catch (error: any) {
@@ -168,6 +168,45 @@ const getProvidersForApproval = async (page: number) => {
           };
      }
 };
+
+//approvals api
+const approvalsDetails = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.approval_details}/${id}`);
+
+          return {
+               success: true,
+               message: "Fetched approvals data successfully",
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to fetch approval data",
+               data: null,
+          };
+     }
+};
+//approvals status change api
+const approvalStatusChange = async (id: string, status: string) => {
+     try {
+          const response = await axiosAdmin.patch(`${adminRoutes.approval_update}/${id}/${status}`);
+
+          return {
+               success: true,
+               message: "Approval status changed successfully",
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Failed to change approval status",
+               data: null,
+          };
+     }
+};
 export {
      signInApi,
      logoutAdmin,
@@ -179,4 +218,6 @@ export {
      blockProvider,
      unBlockProvider,
      getProvidersForApproval,
+     approvalsDetails,
+     approvalStatusChange,
 };

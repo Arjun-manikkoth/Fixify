@@ -3,11 +3,15 @@ import Pagination from "../CommonComponents/Pagination";
 import {toast} from "react-toastify";
 import {ToastContainer} from "react-toastify";
 import {getProvidersForApproval} from "../../Api/AdminApis";
+import {useNavigate} from "react-router-dom";
 
 const AdminApprovals: React.FC = () => {
      const [page, setPage] = useState<number>(1);
      const [data, setData] = useState<any[]>([]);
      const [totalPages, setTotalPages] = useState<number>(1);
+
+     //
+     const navigate = useNavigate();
 
      // Fetch providers for approval
 
@@ -61,9 +65,11 @@ const AdminApprovals: React.FC = () => {
                                    <div>
                                         <button
                                              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                                             //   onClick={() => {
-
-                                             //   }}
+                                             onClick={() => {
+                                                  navigate(
+                                                       `/admins/approval_details/${approval._id}`
+                                                  );
+                                             }}
                                         >
                                              View Details
                                         </button>

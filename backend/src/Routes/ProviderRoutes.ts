@@ -32,7 +32,7 @@ providerRoute.post("/sign_in", (req, res) => {
 });
 
 // // Route for provider logout
-providerRoute.post("/sign_out", (req, res) => {
+providerRoute.get("/sign_out", (req, res) => {
      providerController.signOut(req, res);
 });
 
@@ -47,12 +47,12 @@ providerRoute.get("/services", (req, res) => {
 });
 
 // Route for update profile
-providerRoute.post("/update_profile", verifyTokenAndRole(["provider"]), (req, res) => {
+providerRoute.patch("/update_profile", verifyTokenAndRole(["provider"]), (req, res) => {
      providerController.updateProfile(req, res);
 });
 
 // Route for oauth
-providerRoute.get("/o_auth", (req, res) => {
+providerRoute.patch("/o_auth", (req, res) => {
      providerController.googleAuth(req, res);
 });
 
@@ -61,7 +61,7 @@ providerRoute.get("/profile", (req, res) => {
      providerController.fetchProfile(req, res);
 });
 
-//get provider profile data
+//provider register for approval
 providerRoute.post("/register", (req, res) => {
      providerController.registerProfile(req, res);
 });

@@ -32,7 +32,7 @@ userRoute.post("/sign_in", (req, res) => {
 });
 
 // Route for user logout
-userRoute.post("/sign_out", (req, res) => {
+userRoute.get("/sign_out", (req, res) => {
      userController.signOut(req, res);
 });
 
@@ -42,12 +42,12 @@ userRoute.post("/refresh_token", (req, res) => {
 });
 
 // Route for update profile
-userRoute.post("/update_profile", verifyTokenAndRole(["user"]), (req, res) => {
+userRoute.patch("/update_profile", verifyTokenAndRole(["user"]), (req, res) => {
      userController.updateProfile(req, res);
 });
 
 // Route for oauth
-userRoute.get("/o_auth", (req, res) => {
+userRoute.patch("/o_auth", (req, res) => {
      userController.googleAuth(req, res);
 });
 

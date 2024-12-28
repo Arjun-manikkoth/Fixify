@@ -85,7 +85,7 @@ const otpResendApi = async (email: string) => {
 
 const logoutProvider = async () => {
      try {
-          const response = await axiosProvider.post(providerRoutes.logout);
+          const response = await axiosProvider.get(providerRoutes.logout);
 
           return {
                success: true,
@@ -130,7 +130,7 @@ const getServices = async () => {
 
 const googleAuthApi = async (code: string) => {
      try {
-          const response = await axiosProvider.get(`${providerRoutes.o_auth}?code=${code}`);
+          const response = await axiosProvider.patch(`${providerRoutes.o_auth}?code=${code}`);
 
           return {
                success: true,
@@ -158,7 +158,7 @@ const updateProfile = async (formData: {
      mobileNo: string;
 }) => {
      try {
-          const response = await axiosProvider.post(providerRoutes.update_profile, formData);
+          const response = await axiosProvider.patch(providerRoutes.update_profile, formData);
           return {
                success: true,
                message: "Profile updated Sucessfully",

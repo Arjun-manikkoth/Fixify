@@ -9,5 +9,7 @@ const adminRoutes = {
      providerBlock: "/block_provider",
      providerUnBlock: "/unblock_provider",
      approvals: "/approvals",
+     approval_details: "/approval_details",
+     approval_update: "/approval_update",
 };
 export default adminRoutes;

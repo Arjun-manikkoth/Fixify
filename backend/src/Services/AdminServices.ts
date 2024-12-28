@@ -1,5 +1,6 @@
 import IAdminService from "../Interfaces/Admin/AdminServiceInterface";
 import {
+     IApprovalDetails,
      IPaginatedApprovals,
      IPaginatedProviders,
      IPaginatedUsers,
@@ -139,7 +140,7 @@ class AdminService implements IAdminService {
           }
      }
 
-     //gets user list
+     //gets approvals list
      async getApprovalsList(page: string): Promise<IPaginatedApprovals | null> {
           try {
                const data = await this.adminRepository.getAllApprovals(page);
@@ -175,7 +176,7 @@ class AdminService implements IAdminService {
           }
      }
 
-     //gets user list
+     //gets providers list
      async getProvidersList(
           search: string,
           page: string,
@@ -193,7 +194,7 @@ class AdminService implements IAdminService {
           }
      }
 
-     //change user block status to block
+     //change provider block status to block
      async providerBlock(id: string): Promise<Boolean> {
           try {
                const status = await this.adminRepository.changeProviderBlockStatus(id);
@@ -203,11 +204,47 @@ class AdminService implements IAdminService {
                return false;
           }
      }
-     //change user block status to unblock
+     //change provider block status to unblock
      async providerUnBlock(id: string): Promise<Boolean> {
           try {
                const status = await this.adminRepository.changeProviderUnBlockStatus(id);
                return status ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+
+     //gets approvals detail
+     async getApprovalDetails(id: string): Promise<IApprovalDetails[] | null> {
+          try {
+               const approvalData = await this.adminRepository.findApprovalDetail(id);
+               return approvalData;
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+
+     //updates approval detail status to approved or rejected
+     async approvalStatusChange(id: string, status: string): Promise<Boolean> {
+          try {
+               const updatedData = await this.adminRepository.updateApprovalStatus(id, status);
+
+               if (updatedData?.status === "Approved" && updatedData?.provider_id) {
+                    const providerData = await this.adminRepository.getProviderById(
+                         updatedData.provider_id
+                    );
+
+                    if (providerData && updatedData?.service_id) {
+                         await this.adminRepository.updateProviderServiceApproval(
+                              providerData._id,
+                              updatedData.service_id
+                         );
+                    }
+               }
+
+               return updatedData ? true : false;
           } catch (error: any) {
                console.log(error.message);
                return false;

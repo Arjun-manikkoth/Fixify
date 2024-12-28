@@ -19,7 +19,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
                     Prev
                </button>
                <span className="text-sm md:text-base">
-                    Page {props.page} of {props.totalPages}
+                    Page {props.page} of {props.totalPages > 0 ? props.totalPages : 1}
                </span>
                <button
                     onClick={() => {

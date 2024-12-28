@@ -16,24 +16,15 @@ instance.interceptors.response.use(
      },
      async (error) => {
           const originalRequest = error.config;
-          console.log(originalRequest);
 
           if (
-               error.response &&
-               error.response.status === 401 &&
-               error.response.data.message === "Refresh Token expired"
-          ) {
-               //if refresh token is expired makes api call and clear cookies then logouts
-
-               await logoutUser();
-               store.dispatch(clearUser()); //clears user data from the store
-          } else if (
                error.response.status === 401 &&
                (error.response.data.message === "Refresh Token invalid" ||
                     error.response.data.message === "Refresh Token missing" ||
-                    error.response.data.message === "Unauthorized! Access Token is invalid")
+                    error.response.data.message === "Unauthorized! Access Token is invalid" ||
+                    error.response.data.message === "Refresh Token expired")
           ) {
-               //if access or refresh tokens are missing or invalid clear cookies and logouts
+               //if access tokens are invalid or refresh tokens are missing or invalid clear cookies and logouts
 
                await logoutUser();
                store.dispatch(clearUser()); //clears user data from the store

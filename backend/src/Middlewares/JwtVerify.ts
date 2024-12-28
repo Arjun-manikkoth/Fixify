@@ -18,59 +18,62 @@ const verifyTokenAndRole = (allowedRoles: string[]) => {
 
                if (!token) {
                     res.status(401).json({message: "Access Token is missing", status: false});
-               }
-
-               const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as JwtPayload;
-
-               if (!allowedRoles.includes(decoded.role)) {
-                    res.status(403).json({
-                         message: "Forbidden! Insufficient permissions",
-                         status: false,
-                    });
                } else {
-                    //checks whether the user is blocked
-                    if (decoded.role === "user") {
-                         userRepository
-                              .getUserDataWithId(decoded.id)
-                              .then((data) => {
-                                   if (data?.is_blocked) {
-                                        res.status(401).json({
-                                             message: "Blocked by admin",
+                    const decoded = jwt.verify(
+                         token,
+                         process.env.JWT_SECRET || "secret"
+                    ) as JwtPayload;
+
+                    if (!allowedRoles.includes(decoded.role)) {
+                         res.status(403).json({
+                              message: "Forbidden! Insufficient permissions",
+                              status: false,
+                         });
+                    } else {
+                         //checks whether the user is blocked
+                         if (decoded.role === "user") {
+                              userRepository
+                                   .getUserDataWithId(decoded.id)
+                                   .then((data) => {
+                                        if (data?.is_blocked) {
+                                             res.status(401).json({
+                                                  message: "Blocked by admin",
+                                                  status: false,
+                                             });
+                                        } else {
+                                             next();
+                                        }
+                                   })
+                                   .catch((error) => {
+                                        console.log("error");
+                                        res.status(500).json({
+                                             message: "Internal server error",
                                              status: false,
                                         });
-                                   } else {
-                                        next();
-                                   }
-                              })
-                              .catch((error) => {
-                                   console.log("error");
-                                   res.status(500).json({
-                                        message: "Internal server error",
-                                        status: false,
                                    });
-                              });
-                    } else if (decoded.role === "provider") {
-                         providerRepository
-                              .getProviderDataWithId(decoded.id)
-                              .then((data) => {
-                                   if (data?.is_blocked) {
-                                        res.status(401).json({
-                                             message: "Blocked by admin",
+                         } else if (decoded.role === "provider") {
+                              providerRepository
+                                   .getProviderDataWithId(decoded.id)
+                                   .then((data) => {
+                                        if (data?.is_blocked) {
+                                             res.status(401).json({
+                                                  message: "Blocked by admin",
+                                                  status: false,
+                                             });
+                                        } else {
+                                             next();
+                                        }
+                                   })
+                                   .catch((error) => {
+                                        console.log("error");
+                                        res.status(500).json({
+                                             message: "Internal server error",
                                              status: false,
                                         });
-                                   } else {
-                                        next();
-                                   }
-                              })
-                              .catch((error) => {
-                                   console.log("error");
-                                   res.status(500).json({
-                                        message: "Internal server error",
-                                        status: false,
                                    });
-                              });
-                    } else if (decoded.role === "admin") {
-                         next();
+                         } else if (decoded.role === "admin") {
+                              next();
+                         }
                     }
                }
           } catch (error: any) {

@@ -11,6 +11,7 @@ import AdminSignIn from "./Components/AdminComponents/AdminSignIn";
 import AdminUsersPage from "./Pages/Admin/AdminUsersPage";
 import AdminProvidersPage from "./Pages/Admin/AdminProvidersPage";
 import AdminApprovalsPage from "./Pages/Admin/AdminApprovalsPage";
+import AdminApprovalDetailsPage from "./Pages/Admin/AdminApprovalDetailsPage";
 
 const App: FC = () => {
      return (
@@ -39,6 +40,10 @@ const App: FC = () => {
                               <Route path="/admins/users" Component={AdminUsersPage} />
                               <Route path="/admins/providers" Component={AdminProvidersPage} />
                               <Route path="/admins/approvals" Component={AdminApprovalsPage} />
+                              <Route
+                                   path="/admins/approval_details/:id"
+                                   Component={AdminApprovalDetailsPage}
+                              />
                          </Route>
                     </Routes>
                </Router>
