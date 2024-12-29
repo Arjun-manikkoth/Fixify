@@ -11,6 +11,7 @@ import {ObjectId} from "mongoose";
 import {comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
 import {verifyToken} from "../Utils/CheckToken";
+import {sentMail} from "../Utils/SendMail";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -235,12 +236,18 @@ class AdminService implements IAdminService {
                     const providerData = await this.adminRepository.getProviderById(
                          updatedData.provider_id
                     );
-
-                    if (providerData && updatedData?.service_id) {
-                         await this.adminRepository.updateProviderServiceApproval(
-                              providerData._id,
-                              updatedData.service_id
-                         );
+                    if (providerData) {
+                         if (updatedData?.service_id) {
+                              await this.adminRepository.updateProviderServiceApproval(
+                                   providerData._id,
+                                   updatedData.service_id
+                              );
+                         }
+                         const mail = await sentMail(
+                              providerData.email,
+                              "Approval Mail",
+                              `<p>Your request has been successfully approved!. You can start working with Fixify.</p>`
+                         ); //utility function sends the email to the provider
                     }
                }
 

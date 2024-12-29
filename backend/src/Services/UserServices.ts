@@ -4,7 +4,7 @@ import {ISignIn} from "../Interfaces/User/SignUpInterface";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import {messages} from "../Constants/Messages";
 import {generateOtp, hashOtp, compareOtps} from "../Utils/GenerateOtp";
-import {sentOtpVerificationMail} from "../Utils/SendOtpMail";
+import {sentMail} from "../Utils/SendMail";
 import {ObjectId} from "mongoose";
 import {hashPassword, comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
@@ -120,7 +120,11 @@ class UserService implements IUserService {
           try {
                const otp = generateOtp(); //utility function generates otp
 
-               const mail = await sentOtpVerificationMail(email, otp); //this utility function sends otp through mail
+               const mail = await sentMail(
+                    email,
+                    "Verification Mail",
+                    `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
+               ); //this utility function sends otp through mail
 
                if (mail) {
                     // works if mail is sucessfully sent
@@ -153,7 +157,11 @@ class UserService implements IUserService {
 
                     const otp = generateOtp(); //generate otp
 
-                    const mail = await sentOtpVerificationMail(email, otp); //utility function sends the otp via email to the user
+                    const mail = await sentMail(
+                         email,
+                         "Verification Mail",
+                         `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
+                    ); //utility function sends the otp via email to the user
 
                     if (mail) {
                          //executes if mail mail sending successfull
