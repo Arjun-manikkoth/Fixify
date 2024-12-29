@@ -100,6 +100,13 @@
 import {Request, Response, NextFunction} from "express";
 import jwt, {JwtPayload} from "jsonwebtoken";
 
+declare global {
+     namespace Express {
+          interface Request {
+               data?: JwtPayload; // Extend Request to include 'data'
+          }
+     }
+}
 // Middleware to verify JWT
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
      const token = req.cookies.accessToken;
@@ -111,7 +118,8 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
      try {
           // Decode the token
           const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as JwtPayload;
-          req.data = decoded; // Attach decoded token data (client details) to request object
+          req.data = decoded;
+          console.log("this is request data in jwt", req.data);
           next(); // Proceed to the next middleware
      } catch (error: any) {
           if (error.name === "TokenExpiredError") {
