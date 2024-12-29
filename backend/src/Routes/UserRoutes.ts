@@ -2,7 +2,9 @@ import express, {Router, Request, Response} from "express";
 import UserServices from "../Services/UserServices";
 import UserController from "../Controllers/UserController";
 import UserRepository from "../Repositories/UserRepository";
-import verifyTokenAndRole from "../Middlewares/JwtVerify";
+import verifyToken from "../Middlewares/JwtVerify";
+import verifyRole from "../Middlewares/verifyRole";
+import checkBlockedStatus from "../Middlewares/BlockCheck";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const userService = new UserServices(userRepository); // Dependency injection of repository into service
@@ -42,9 +44,15 @@ userRoute.post("/refresh_token", (req, res) => {
 });
 
 // Route for update profile
-userRoute.patch("/update_profile", verifyTokenAndRole(["user"]), (req, res) => {
-     userController.updateProfile(req, res);
-});
+userRoute.patch(
+     "/update_profile",
+     verifyToken,
+     verifyRole(["user"]),
+     checkBlockedStatus,
+     (req, res) => {
+          userController.updateProfile(req, res);
+     }
+);
 
 // Route for oauth
 userRoute.patch("/o_auth", (req, res) => {
@@ -52,7 +60,7 @@ userRoute.patch("/o_auth", (req, res) => {
 });
 
 // Route for fetching user data with id
-userRoute.get("/", verifyTokenAndRole(["user"]), (req, res) => {
+userRoute.get("/", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
      userController.getUser(req, res);
 });
 

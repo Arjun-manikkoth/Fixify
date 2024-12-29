@@ -2,7 +2,9 @@ import express, {Router, Request, Response} from "express";
 import ProviderService from "../Services/ProviderServices";
 import ProviderController from "../Controllers/ProviderController";
 import ProviderRepository from "../Repositories/ProviderRepository";
-import verifyTokenAndRole from "../Middlewares/JwtVerify";
+import verifyToken from "../Middlewares/JwtVerify";
+import verifyRole from "../Middlewares/verifyRole";
+import checkBlockedStatus from "../Middlewares/BlockCheck";
 
 const providerRepository = new ProviderRepository(); // Initialize repository instance
 const providerService = new ProviderService(providerRepository); // Dependency injection of repository into service
@@ -47,9 +49,15 @@ providerRoute.get("/services", (req, res) => {
 });
 
 // Route for update profile
-providerRoute.patch("/update_profile", verifyTokenAndRole(["provider"]), (req, res) => {
-     providerController.updateProfile(req, res);
-});
+providerRoute.patch(
+     "/update_profile",
+     verifyToken,
+     verifyRole(["provider"]),
+     checkBlockedStatus,
+     (req, res) => {
+          providerController.updateProfile(req, res);
+     }
+);
 
 // Route for oauth
 providerRoute.patch("/o_auth", (req, res) => {
@@ -57,9 +65,15 @@ providerRoute.patch("/o_auth", (req, res) => {
 });
 
 //get provider profile data
-providerRoute.get("/profile", (req, res) => {
-     providerController.fetchProfile(req, res);
-});
+providerRoute.get(
+     "/profile",
+     verifyToken,
+     verifyRole(["provider"]),
+     checkBlockedStatus,
+     (req, res) => {
+          providerController.fetchProfile(req, res);
+     }
+);
 
 //provider register for approval
 providerRoute.post("/register", (req, res) => {
