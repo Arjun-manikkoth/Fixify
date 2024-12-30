@@ -1,14 +1,14 @@
-import {SignUp, IUserWithOtp} from "../Interfaces/User/SignUpInterface";
-import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
-import {IUser} from "../Models/UserModels/UserModel";
-import User from "../Models/UserModels/UserModel";
-import Otp from "../Models/CommonModels/OtpModel";
-import {IUpdateProfile} from "../Interfaces/User/SignUpInterface";
 import mongoose from "mongoose";
 import {ObjectId} from "mongoose";
+import {SignUp, IUserWithOtp} from "../Interfaces/User/SignUpInterface";
+import {IUpdateProfile} from "../Interfaces/User/SignUpInterface";
+import {IPaginatedUsers} from "../Interfaces/Admin/SignInInterface";
+import User from "../Models/UserModels/UserModel";
+import {IUser} from "../Models/UserModels/UserModel";
+import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 
 class UserRepository implements IUserRepository {
-     //insert a new user to db
+     //adds user to db
      async insertUser(userData: SignUp): Promise<IUser | null> {
           try {
                const user = new User({
@@ -27,23 +27,6 @@ class UserRepository implements IUserRepository {
                return null;
           }
      }
-
-     //store user otp to db
-     async storeOtp(otp: string, id: ObjectId): Promise<Boolean> {
-          try {
-               const otpNew = new Otp({
-                    account_id: id,
-                    value: otp,
-               });
-               const otpSaved = await otpNew.save();
-
-               return otpSaved ? true : false;
-          } catch (error: any) {
-               console.log(error.message);
-               return false;
-          }
-     }
-
      //find user with email id
      async findUserByEmail(email: string): Promise<IUser | null> {
           try {
@@ -143,6 +126,82 @@ class UserRepository implements IUserRepository {
           } catch (error: any) {
                console.log(error.message);
                return null;
+          }
+     }
+     //get all users based on queries
+     async getAllUsers(
+          search: string,
+          page: string,
+          filter: string
+     ): Promise<IPaginatedUsers | null> {
+          try {
+               let limit = 8; // Number of records per page
+               let pageNo: number = Number(page); // Current page number
+
+               // Initialize the filter query object
+               let filterQuery: any = {};
+
+               // Add conditions based on the `filter`
+               if (filter === "Verified") {
+                    filterQuery.is_verified = true;
+               } else if (filter === "Blocked") {
+                    filterQuery.is_blocked = true;
+               }
+
+               // Add search functionality
+               if (search) {
+                    filterQuery.$or = [
+                         {name: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {email: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {mobile_no: {$regex: ".*" + search + ".*", $options: "i"}},
+                    ];
+               }
+
+               // Fetch data with pagination
+               const userData = await User.find(filterQuery)
+                    .skip((pageNo - 1) * limit)
+                    .limit(limit);
+
+               //total count
+               const totalRecords = await User.countDocuments(filterQuery);
+
+               return {
+                    users: userData,
+                    currentPage: pageNo,
+                    totalPages: Math.ceil(totalRecords / limit),
+                    totalRecords,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     //blocks user by changing status in db
+     async changeUserBlockStatus(id: string): Promise<boolean> {
+          try {
+               const blockStatus = await User.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: true}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     // unblocks user by changing status in db
+     async changeUserUnBlockStatus(id: string): Promise<boolean> {
+          try {
+               const blockStatus = await User.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: false}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
           }
      }
 }

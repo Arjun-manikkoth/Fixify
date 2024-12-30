@@ -1,13 +1,15 @@
-import express, {Router, Request, Response} from "express";
+import express, {Router} from "express";
+import verifyToken from "../Middlewares/JwtVerify";
+import verifyRole from "../Middlewares/VerifyRole";
+import checkBlockedStatus from "../Middlewares/BlockCheck";
 import UserServices from "../Services/UserServices";
 import UserController from "../Controllers/UserController";
 import UserRepository from "../Repositories/UserRepository";
-import verifyToken from "../Middlewares/JwtVerify";
-import verifyRole from "../Middlewares/verifyRole";
-import checkBlockedStatus from "../Middlewares/BlockCheck";
+import OtpRepository from "../Repositories/OtpRepository";
 
 const userRepository = new UserRepository(); // Initialize repository instance
-const userService = new UserServices(userRepository); // Dependency injection of repository into service
+const otpRepository = new OtpRepository(); // Initialize repository instance
+const userService = new UserServices(userRepository, otpRepository); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
 // Initialize router instance

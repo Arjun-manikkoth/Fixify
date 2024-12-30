@@ -1,12 +1,23 @@
-import express, {Router, Request, Response} from "express";
+import express, {Router} from "express";
 import AdminService from "../Services/AdminServices";
 import AdminController from "../Controllers/AdminController";
 import AdminRepository from "../Repositories/AdminRepository";
 import verifyToken from "../Middlewares/JwtVerify";
-import verifyRole from "../Middlewares/verifyRole";
+import verifyRole from "../Middlewares/VerifyRole";
+import UserRepository from "../Repositories/UserRepository";
+import ProviderRepository from "../Repositories/ProviderRepository";
+import ApprovalRepository from "../Repositories/ApprovalRepository";
 
-const adminRepository = new AdminRepository(); // Initialize repository instance
-const adminService = new AdminService(adminRepository); // Dependency injection of repository into service
+const adminRepository = new AdminRepository(); // Initialize admin repository instance
+const userRepository = new UserRepository(); // Initialize user repository instance
+const providerRepository = new ProviderRepository(); // Initialize provider repository instance
+const approvalRepository = new ApprovalRepository(); // Initialize approval repository instance
+const adminService = new AdminService(
+     adminRepository,
+     userRepository,
+     providerRepository,
+     approvalRepository
+); // Dependency injection of repository into service
 const adminController = new AdminController(adminService); // Dependency injection of service into controller
 
 // // Initialize router instance

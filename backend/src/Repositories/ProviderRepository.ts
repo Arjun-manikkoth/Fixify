@@ -1,26 +1,14 @@
+import {ObjectId} from "mongoose";
+import mongoose from "mongoose";
 import {SignUp, IProviderWithOtp, IProviderWithService} from "../Interfaces/Provider/SignIn";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
-import {IProvider} from "../Models/ProviderModels/ProviderModel";
-import Service from "../Models/ProviderModels/ServiceModel";
-import Provider from "../Models/ProviderModels/ProviderModel";
-import Otp from "../Models/CommonModels/OtpModel";
-import {ObjectId} from "mongoose";
-import {IServices} from "../Models/ProviderModels/ServiceModel";
-import mongoose from "mongoose";
 import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
-import {IProviderRegistration} from "../Interfaces/Provider/SignIn";
-import Approval from "../Models/ProviderModels/ApprovalModel";
+import {IPaginatedProviders} from "../Interfaces/Admin/SignInInterface";
+import {IProvider} from "../Models/ProviderModels/ProviderModel";
+import Provider from "../Models/ProviderModels/ProviderModel";
 
 class ProviderRepository implements IProviderRepository {
-     // get all services
-     async getAllServices(): Promise<IServices[]> {
-          try {
-               return await Service.find({is_active: true});
-          } catch (error: any) {
-               console.log(error.message);
-               throw new Error("Failed to fetch services"); // Propagate error
-          }
-     }
+     //insert provider to db
      async insertProvider(data: SignUp): Promise<IProvider | null> {
           try {
                const provider = new Provider({
@@ -40,22 +28,7 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-
-     async storeOtp(otp: string, id: ObjectId): Promise<Boolean> {
-          try {
-               const otpNew = new Otp({
-                    account_id: id,
-                    value: otp,
-               });
-               const otpSaved = await otpNew.save();
-
-               return otpSaved ? true : false;
-          } catch (error: any) {
-               console.log(error.message);
-               return false;
-          }
-     }
-
+     //find provider with email id
      async findProviderByEmail(email: string): Promise<IProvider | null> {
           try {
                return await Provider.findOne({email: email});
@@ -64,6 +37,8 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
+
+     //find aggregated document with provider otp
      async findOtpWithId(id: ObjectId): Promise<IProviderWithOtp | null> {
           try {
                const data = await Provider.aggregate([
@@ -115,7 +90,7 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-     //update provider profile
+     //update provider profile data
      async updateProviderWithId(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
           try {
                interface Profile {
@@ -151,7 +126,7 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-     //fetch provider profile
+     //fetch and aggregates to get provider profile data
      async fetchProviderProfileData(id: string): Promise<Partial<IProviderWithService | null>> {
           try {
                const _id = new mongoose.Types.ObjectId(id); // Ensure the ID is in the correct ObjectId format
@@ -207,38 +182,107 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-
-     async providerRegistration(data: IProviderRegistration): Promise<boolean> {
+     //get all providers based on queries
+     async getAllProviders(
+          search: string,
+          page: string,
+          filter: string
+     ): Promise<IPaginatedProviders | null> {
           try {
-               const _id = new mongoose.Types.ObjectId(data._id);
-               const _idService = new mongoose.Types.ObjectId(data.expertise);
+               let limit = 8; // Number of records per page
+               let pageNo: number = Number(page); // Current page number
 
-               const approval = new Approval({
-                    provider_id: _id,
-                    provider_experience: data.description,
-                    provider_work_images: data.workImages,
-                    service_id: _idService,
-                    aadhar_picture: data.aadharImage,
-                    status: "Pending",
-               });
-               const result = await approval.save();
-               if (result) {
-                    return true;
-               } else {
-                    return false;
+               // Initialize the filter query object
+               let filterQuery: any = {};
+
+               // Add conditions based on the `filter`
+               if (filter === "Verified") {
+                    filterQuery.is_verified = true;
+               } else if (filter === "Approved") {
+                    filterQuery.is_approved = true;
                }
+
+               // Add search functionality
+               if (search) {
+                    filterQuery.$or = [
+                         {name: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {email: {$regex: ".*" + search + ".*", $options: "i"}},
+                         {mobile_no: {$regex: ".*" + search + ".*", $options: "i"}},
+                    ];
+               }
+
+               // Fetch data with pagination
+               const providerData = await Provider.find(filterQuery)
+                    .skip((pageNo - 1) * limit)
+                    .limit(limit);
+
+               //total count
+               const totalRecords = await Provider.countDocuments(filterQuery);
+
+               return {
+                    providers: providerData,
+                    currentPage: pageNo,
+                    totalPages: Math.ceil(totalRecords / limit),
+                    totalRecords,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
+     //blocks user by changing status in db
+     async changeProviderBlockStatus(id: string): Promise<boolean> {
+          try {
+               const blockStatus = await Provider.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: true}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
           } catch (error: any) {
                console.log(error.message);
                return false;
           }
      }
-     async approvalExists(id: string): Promise<boolean> {
+     // unblocks user by changing status in db
+     async changeProviderUnBlockStatus(id: string): Promise<boolean> {
           try {
-               const _id = new mongoose.Types.ObjectId(id);
+               const blockStatus = await Provider.findByIdAndUpdate(
+                    {_id: id},
+                    {$set: {is_blocked: false}},
+                    {new: true}
+               );
+               return blockStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
+     //get provider by id
+     async getProviderById(id: ObjectId): Promise<IProvider | null> {
+          try {
+               return await Provider.findById({_id: id});
+          } catch (error: any) {
+               console.log(error.message);
+               return null;
+          }
+     }
 
-               const exists = await Approval.findOne({provider_id: _id, status: {$ne: "Rejected"}});
+     //update providers status to approved and adds if there is no service
+     async updateProviderServiceApproval(
+          providerId: ObjectId,
+          serviceId: ObjectId
+     ): Promise<boolean> {
+          try {
+               const data = await Provider.findByIdAndUpdate(
+                    providerId,
+                    {
+                         $set: {service_id: serviceId, is_approved: true},
+                    },
+                    {new: true}
+               );
 
-               return exists ? true : false;
+               return true;
           } catch (error: any) {
                console.log(error.message);
                return false;

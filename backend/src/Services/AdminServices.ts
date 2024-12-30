@@ -6,12 +6,15 @@ import {
      IPaginatedUsers,
      ISignIn,
 } from "../Interfaces/Admin/SignInInterface";
-import IAdminRepository from "../Interfaces/Admin/AdminRepositoryInterface";
 import {ObjectId} from "mongoose";
 import {comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
 import {verifyToken} from "../Utils/CheckToken";
 import {sentMail} from "../Utils/SendMail";
+import IAdminRepository from "../Interfaces/Admin/AdminRepositoryInterface";
+import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
+import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
+import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterface";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -31,7 +34,12 @@ export interface IRefreshTokenResponse {
 
 class AdminService implements IAdminService {
      //injecting respositories dependency to service
-     constructor(private adminRepository: IAdminRepository) {}
+     constructor(
+          private adminRepository: IAdminRepository,
+          private userRepository: IUserRepository,
+          private providerRepository: IProviderRepository,
+          private approvalRepository: IApprovalRepository
+     ) {}
 
      //authenticates admin by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
      async authenticateAdmin(data: ISignIn): Promise<ISignInResponse | null> {
@@ -130,7 +138,7 @@ class AdminService implements IAdminService {
           filter: string
      ): Promise<IPaginatedUsers | null> {
           try {
-               const data = await this.adminRepository.getAllUsers(search, page, filter);
+               const data = await this.userRepository.getAllUsers(search, page, filter);
                if (data?.users) {
                     return data;
                }
@@ -144,7 +152,7 @@ class AdminService implements IAdminService {
      //gets approvals list
      async getApprovalsList(page: string): Promise<IPaginatedApprovals | null> {
           try {
-               const data = await this.adminRepository.getAllApprovals(page);
+               const data = await this.approvalRepository.getAllApprovals(page);
 
                if (data?.approvals) {
                     return data;
@@ -159,7 +167,7 @@ class AdminService implements IAdminService {
      //change user block status to block
      async userBlock(id: string): Promise<Boolean> {
           try {
-               const status = await this.adminRepository.changeUserBlockStatus(id);
+               const status = await this.userRepository.changeUserBlockStatus(id);
                return status ? true : false;
           } catch (error: any) {
                console.log(error.message);
@@ -169,7 +177,7 @@ class AdminService implements IAdminService {
      //change user block status to unblock
      async userUnBlock(id: string): Promise<Boolean> {
           try {
-               const status = await this.adminRepository.changeUserUnBlockStatus(id);
+               const status = await this.userRepository.changeUserUnBlockStatus(id);
                return status ? true : false;
           } catch (error: any) {
                console.log(error.message);
@@ -184,7 +192,7 @@ class AdminService implements IAdminService {
           filter: string
      ): Promise<IPaginatedProviders | null> {
           try {
-               const data = await this.adminRepository.getAllProviders(search, page, filter);
+               const data = await this.providerRepository.getAllProviders(search, page, filter);
                if (data?.providers) {
                     return data;
                }
@@ -198,7 +206,7 @@ class AdminService implements IAdminService {
      //change provider block status to block
      async providerBlock(id: string): Promise<Boolean> {
           try {
-               const status = await this.adminRepository.changeProviderBlockStatus(id);
+               const status = await this.providerRepository.changeProviderBlockStatus(id);
                return status ? true : false;
           } catch (error: any) {
                console.log(error.message);
@@ -208,7 +216,7 @@ class AdminService implements IAdminService {
      //change provider block status to unblock
      async providerUnBlock(id: string): Promise<Boolean> {
           try {
-               const status = await this.adminRepository.changeProviderUnBlockStatus(id);
+               const status = await this.providerRepository.changeProviderUnBlockStatus(id);
                return status ? true : false;
           } catch (error: any) {
                console.log(error.message);
@@ -219,7 +227,7 @@ class AdminService implements IAdminService {
      //gets approvals detail
      async getApprovalDetails(id: string): Promise<IApprovalDetails[] | null> {
           try {
-               const approvalData = await this.adminRepository.findApprovalDetail(id);
+               const approvalData = await this.approvalRepository.findApprovalDetail(id);
                return approvalData;
           } catch (error: any) {
                console.log(error.message);
@@ -230,15 +238,15 @@ class AdminService implements IAdminService {
      //updates approval detail status to approved or rejected
      async approvalStatusChange(id: string, status: string): Promise<Boolean> {
           try {
-               const updatedData = await this.adminRepository.updateApprovalStatus(id, status);
+               const updatedData = await this.approvalRepository.updateApprovalStatus(id, status);
 
                if (updatedData?.status === "Approved" && updatedData?.provider_id) {
-                    const providerData = await this.adminRepository.getProviderById(
+                    const providerData = await this.providerRepository.getProviderById(
                          updatedData.provider_id
                     );
                     if (providerData) {
                          if (updatedData?.service_id) {
-                              await this.adminRepository.updateProviderServiceApproval(
+                              await this.providerRepository.updateProviderServiceApproval(
                                    providerData._id,
                                    updatedData.service_id
                               );

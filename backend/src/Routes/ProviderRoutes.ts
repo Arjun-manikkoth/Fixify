@@ -1,13 +1,27 @@
-import express, {Router, Request, Response} from "express";
+import express, {Router} from "express";
+import checkBlockedStatus from "../Middlewares/BlockCheck";
+import verifyToken from "../Middlewares/JwtVerify";
+import verifyRole from "../Middlewares/VerifyRole";
 import ProviderService from "../Services/ProviderServices";
 import ProviderController from "../Controllers/ProviderController";
 import ProviderRepository from "../Repositories/ProviderRepository";
-import verifyToken from "../Middlewares/JwtVerify";
-import verifyRole from "../Middlewares/verifyRole";
-import checkBlockedStatus from "../Middlewares/BlockCheck";
+import OtpRepository from "../Repositories/OtpRepository";
+import ServiceRepository from "../Repositories/ServiceRepository";
+import ApprovalRepository from "../Repositories/ApprovalRepository";
 
-const providerRepository = new ProviderRepository(); // Initialize repository instance
-const providerService = new ProviderService(providerRepository); // Dependency injection of repository into service
+const providerRepository = new ProviderRepository(); // Initialise repository instance
+const otpRepository = new OtpRepository(); // Initialise otp repository instance
+const serviceRepository = new ServiceRepository(); //initialise service repository
+const approvalRepository = new ApprovalRepository(); //initialise approval repository
+
+const providerService = new ProviderService(
+     providerRepository,
+     otpRepository,
+     serviceRepository,
+     approvalRepository
+);
+
+// Dependency injection of repository into service
 const providerController = new ProviderController(providerService); // Dependency injection of service into controller
 
 // // Initialize router instance

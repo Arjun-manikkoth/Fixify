@@ -12,6 +12,7 @@ import {verifyToken} from "../Utils/CheckToken";
 import {oAuth2Client} from "../Utils/GoogleConfig";
 import axios from "axios";
 import {IUser} from "../Models/UserModels/UserModel";
+import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -47,7 +48,7 @@ export interface IRefreshTokenResponse {
 
 class UserService implements IUserService {
      //injecting respositories dependency to service
-     constructor(private userRepository: IUserRepository) {}
+     constructor(private userRepository: IUserRepository, private otpRepository: IOtpRepository) {}
 
      /**
       * Creates a user account by validating the user's email and password,
@@ -131,7 +132,7 @@ class UserService implements IUserService {
 
                     const hashedOtp = await hashOtp(otp); // this utility function hash otp
 
-                    const otpStatus = await this.userRepository.storeOtp(hashedOtp, id); //stores otp in the database
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id); //stores otp in the database
 
                     return otpStatus ? true : false; //returns status if otp storing to db is success or failure
                }
@@ -168,7 +169,7 @@ class UserService implements IUserService {
 
                          const hashedOtp = await hashOtp(otp); //this utility function hashes otp
 
-                         const otpStatus = await this.userRepository.storeOtp(hashedOtp, data._id); //stores otp to the database
+                         const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id); //stores otp to the database
 
                          return otpStatus ? true : false; //returns the otp storing status
                     }

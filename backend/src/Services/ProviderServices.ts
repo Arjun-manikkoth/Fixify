@@ -1,20 +1,23 @@
-import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
-import {IProviderWithService, SignUp} from "../Interfaces/Provider/SignIn";
-import {ISignIn} from "../Interfaces/Provider/SignIn";
-import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
+import {ObjectId} from "mongoose";
+import axios from "axios";
 import {messages} from "../Constants/Messages";
 import {generateOtp, hashOtp, compareOtps} from "../Utils/GenerateOtp";
+import {oAuth2Client} from "../Utils/GoogleConfig";
 import {sentMail} from "../Utils/SendMail";
-import {ObjectId} from "mongoose";
 import {hashPassword, comparePasswords} from "../Utils/HashPassword";
 import {generateTokens} from "../Utils/GenerateTokens";
 import {verifyToken} from "../Utils/CheckToken";
-import {IServices} from "../Models/ProviderModels/ServiceModel";
-import {oAuth2Client} from "../Utils/GoogleConfig";
-import axios from "axios";
+import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
+import {IProviderWithService, SignUp} from "../Interfaces/Provider/SignIn";
+import {ISignIn} from "../Interfaces/Provider/SignIn";
 import {IUpdateProfile} from "../Interfaces/Provider/SignIn";
 import {IProviderRegistration} from "../Interfaces/Provider/SignIn";
+import {IServices} from "../Models/ProviderModels/ServiceModel";
 import {IProvider} from "../Models/ProviderModels/ProviderModel";
+import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
+import IServiceRepository from "../Interfaces/Service/IServiceRepository";
+import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
+import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterface";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -51,11 +54,16 @@ export interface IRefreshTokenResponse {
 
 class ProviderService implements IProviderService {
      //injecting respositories dependency to service
-     constructor(private providerRepository: IProviderRepository) {}
-
+     constructor(
+          private providerRepository: IProviderRepository,
+          private otpRepository: IOtpRepository,
+          private serviceRepository: IServiceRepository,
+          private approvalRepository: IApprovalRepository
+     ) {}
+     //get all services
      async getServices(): Promise<IServices[] | null> {
           try {
-               const services = await this.providerRepository.getAllServices();
+               const services = await this.serviceRepository.getAllServices();
 
                if (services.length > 0) {
                     return services;
@@ -67,7 +75,7 @@ class ProviderService implements IProviderService {
                return null;
           }
      }
-
+     //create provider account to db
      async createProvider(data: SignUp): Promise<ISignUpResponse | null> {
           try {
                const exists = await this.providerRepository.findProviderByEmail(data.email); //checking the registration status of the provider
@@ -147,7 +155,7 @@ class ProviderService implements IProviderService {
 
                     const hashedOtp = await hashOtp(otp); // this utility function hash otp
 
-                    const otpStatus = await this.providerRepository.storeOtp(hashedOtp, id); //stores otp in the database
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id); //stores otp in the database
 
                     return otpStatus ? true : false; //returns status if otp storing to db is success or failure
                }
@@ -184,10 +192,7 @@ class ProviderService implements IProviderService {
 
                          const hashedOtp = await hashOtp(otp); //this utility function hashes otp
 
-                         const otpStatus = await this.providerRepository.storeOtp(
-                              hashedOtp,
-                              data._id
-                         ); //stores otp to the database
+                         const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id); //stores otp to the database
 
                          return otpStatus ? true : false; //returns the otp storing status
                     }
@@ -529,9 +534,10 @@ class ProviderService implements IProviderService {
                return null;
           }
      }
+     //register provider for approval request
      async registerProvider(data: IProviderRegistration): Promise<IOtpResponse> {
           try {
-               const exists = await this.providerRepository.approvalExists(data._id);
+               const exists = await this.approvalRepository.approvalExists(data._id);
 
                if (!exists) {
                     let expertise = data.expertise;
@@ -544,7 +550,7 @@ class ProviderService implements IProviderService {
                               expertise = providerData.service_id.toString();
                          }
                     }
-                    const status = await this.providerRepository.providerRegistration({
+                    const status = await this.approvalRepository.providerApprovalRegistration({
                          ...data,
                          expertise,
                     });
