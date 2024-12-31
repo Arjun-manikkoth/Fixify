@@ -191,26 +191,26 @@ class UserController {
                     //if the cookie is deleted or expired
 
                     res.status(401).json({success: false, message: "Token missing"});
-               }
-
-               //checks  the validity of refresh token and returns access token
-               const response = await this.UserService.refreshTokenCheck(token);
-
-               if (response.accessToken) {
-                    //sends the token via cookie for successfull refresh token
-
-                    res.status(200)
-                         .cookie("accessToken", response.accessToken, {
-                              httpOnly: true,
-                              secure: false,
-                              // sameSite: 'none',
-                              maxAge: process.env.MAX_AGE_ACCESS_COOKIE
-                                   ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
-                                   : 15 * 60 * 1000, // 15 minutes
-                         })
-                         .json({success: true, message: "Access token sent successfully"});
                } else {
-                    res.status(401).json({success: true, message: response.message});
+                    //checks  the validity of refresh token and returns access token
+                    const response = await this.UserService.refreshTokenCheck(token);
+
+                    if (response.accessToken) {
+                         //sends the token via cookie for successfull refresh token
+
+                         res.status(200)
+                              .cookie("accessToken", response.accessToken, {
+                                   httpOnly: true,
+                                   secure: false,
+                                   // sameSite: 'none',
+                                   maxAge: process.env.MAX_AGE_ACCESS_COOKIE
+                                        ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
+                                        : 15 * 60 * 1000, // 15 minutes
+                              })
+                              .json({success: true, message: "Access token sent successfully"});
+                    } else {
+                         res.status(401).json({success: true, message: response.message});
+                    }
                }
           } catch (error: any) {
                console.error(error.message);
