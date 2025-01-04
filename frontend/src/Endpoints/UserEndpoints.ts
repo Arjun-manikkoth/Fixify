@@ -1,8 +1,8 @@
 const userRoutes = {
-     signIn: "/sign_in",
-     signUp: "/sign_up",
-     otpVerify: "/otp_verify",
-     otpResend: "/otp_resend",
+     sign_in: "/sign_in",
+     sign_up: "/sign_up",
+     otp_verify: "/otp_verify",
+     otp_resend: "/otp_resend",
      logout: "/sign_out",
      refresh_token: "/refresh_token",
      o_auth: `/o_auth`,

@@ -77,7 +77,7 @@ const AdminApprovals: React.FC = () => {
                               </div>
                          ))
                     ) : (
-                         <div className="text-center text-gray-500">No providers found</div>
+                         <div className="text-center text-gray-500">No Pending Approvals</div>
                     )}
                </div>
 

@@ -182,7 +182,7 @@ class ProviderRepository implements IProviderRepository {
                return null;
           }
      }
-     //get all providers based on queries
+     //get all provider*s based on queries
      async getAllProviders(
           search: string,
           page: string,
@@ -200,6 +200,8 @@ class ProviderRepository implements IProviderRepository {
                     filterQuery.is_verified = true;
                } else if (filter === "Approved") {
                     filterQuery.is_approved = true;
+               } else if (filter === "Blocked") {
+                    filterQuery.is_blocked = true;
                }
 
                // Add search functionality

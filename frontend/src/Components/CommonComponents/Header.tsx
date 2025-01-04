@@ -48,7 +48,7 @@ const Header: FC = () => {
      };
      const handleProfileNavigation = () => {
           if (user.id) navigate("/users/profile");
-          else navigate("/providers/home");
+          else navigate("/providers/profile");
      };
 
      const toggleMenu = () => setIsMenuOpen(!isMenuOpen);

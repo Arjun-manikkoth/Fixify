@@ -24,7 +24,7 @@ const providerService = new ProviderService(
 // Dependency injection of repository into service
 const providerController = new ProviderController(providerService); // Dependency injection of service into controller
 
-// // Initialize router instance
+// // Initialize provider router instance
 const providerRoute: Router = express.Router();
 
 // // Route for provider registration (sign-up)

@@ -7,20 +7,23 @@ import verifyRole from "../Middlewares/VerifyRole";
 import UserRepository from "../Repositories/UserRepository";
 import ProviderRepository from "../Repositories/ProviderRepository";
 import ApprovalRepository from "../Repositories/ApprovalRepository";
+import ServiceRepository from "../Repositories/ServiceRepository";
 
 const adminRepository = new AdminRepository(); // Initialize admin repository instance
 const userRepository = new UserRepository(); // Initialize user repository instance
 const providerRepository = new ProviderRepository(); // Initialize provider repository instance
 const approvalRepository = new ApprovalRepository(); // Initialize approval repository instance
+const serviceRepository = new ServiceRepository(); // Initialize approval repository instance
 const adminService = new AdminService(
      adminRepository,
      userRepository,
      providerRepository,
-     approvalRepository
+     approvalRepository,
+     serviceRepository
 ); // Dependency injection of repository into service
 const adminController = new AdminController(adminService); // Dependency injection of service into controller
 
-// // Initialize router instance
+// // Initialize admin router instance
 const adminRoute: Router = express.Router();
 
 // // Route for provider login (sign-in)
@@ -79,6 +82,31 @@ adminRoute.patch("/unblock_provider", verifyToken, verifyRole(["admin"]), (req, 
 // // Route for approval status change
 adminRoute.patch("/approval_update/:id/:status", verifyToken, verifyRole(["admin"]), (req, res) => {
      adminController.approvalStatusUpdate(req, res);
+});
+
+// // Route for fetching services
+adminRoute.get("/services", verifyToken, verifyRole(["admin"]), (req, res) => {
+     adminController.getAllServices(req, res);
+});
+
+// // Route for fetching services
+adminRoute.patch("/manage_service/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
+     adminController.changeServiceStatus(req, res);
+});
+
+// // Route for fetching services
+adminRoute.post("/add_service", verifyToken, verifyRole(["admin"]), (req, res) => {
+     adminController.addService(req, res);
+});
+
+// // Route for fetching service
+adminRoute.get("/update_service/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
+     adminController.getService(req, res);
+});
+
+// // Route for updating service data
+adminRoute.patch("/update_service/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
+     adminController.updateService(req, res);
 });
 
 export default adminRoute;

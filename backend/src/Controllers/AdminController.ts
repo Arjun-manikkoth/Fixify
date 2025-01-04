@@ -228,7 +228,6 @@ class AdminController {
      //list approval request in the admin side based on the page no
      async getApprovals(req: Request, res: Response): Promise<void> {
           try {
-               console.log("approval call reached at the controller");
                const status = await this.AdminService.getApprovalsList(req.query.page as string);
                if (status) {
                     res.status(200).json({
@@ -342,6 +341,150 @@ class AdminController {
                console.error(error.message);
 
                res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //get all services
+     async getAllServices(req: Request, res: Response): Promise<void> {
+          try {
+               const services = await this.AdminService.getServices(
+                    req.query.search as string,
+                    req.query.page as string,
+                    req.query.filter as string
+               );
+
+               res.status(200).json({
+                    success: true,
+                    message: "services fetched sucessfully",
+                    data: services,
+               });
+          } catch (error: any) {
+               console.log(error.message);
+
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
+     // update the service status to list or unlist
+     async changeServiceStatus(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.AdminService.changeServiceStatus(
+                    req.body.status,
+                    req.params.id
+               );
+
+               if (response) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Service status updated",
+                         data: null,
+                    });
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Failed to update service status",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
+     // add new service
+     async addService(req: Request, res: Response): Promise<void> {
+          try {
+               console.log("");
+               const response = await this.AdminService.createService(req.body.data);
+               console.log("response", response);
+               if (response.success) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Service created successfully",
+                         data: null,
+                    });
+               } else if (response.message === "Service already exists") {
+                    res.status(409).json({success: false, message: response.message, data: null});
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Failed to create service",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
+     // get service
+     async getService(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.AdminService.getServiceDetails(req.params.id);
+
+               if (response) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Service details fetched successfully",
+                         data: response,
+                    });
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Failed to fetch service detail",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
+
+     // update  service
+     async updateService(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.AdminService.updateService(
+                    req.params.id as string,
+                    req.body.data
+               );
+
+               if (response.success) {
+                    res.status(200).json({
+                         success: true,
+                         message: "Service updated successfully",
+                         data: response,
+                    });
+               } else if (response.message === "Service exists already") {
+                    res.status(500).json({
+                         success: false,
+                         message: "Service already exists",
+                         data: null,
+                    });
+               } else {
+                    res.status(500).json({
+                         success: false,
+                         message: "Failed to update service",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
           }
      }
 }

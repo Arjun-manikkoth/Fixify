@@ -1,5 +1,3 @@
-import {IServices, Provider} from "../ProviderInterfaces/SignInInterface";
-
 export interface SignIn {
      email: string;
      password: string;
@@ -23,4 +21,11 @@ export interface IApprovalDetails {
           name: string;
           is_active: boolean;
      } | null;
+}
+
+export interface IService {
+     _id: string;
+     name: string;
+     is_active: boolean;
+     description: string;
 }

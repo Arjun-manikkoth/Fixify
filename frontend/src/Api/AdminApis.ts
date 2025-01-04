@@ -5,7 +5,7 @@ import adminRoutes from "../Endpoints/AdminEndPoints";
 //sign in api
 const signInApi = async (formData: SignIn) => {
      try {
-          const response = await axiosAdmin.post(adminRoutes.signIn, formData);
+          const response = await axiosAdmin.post(adminRoutes.sign_in, formData);
           return {
                success: true,
                message: "Sucessfully signed Into Account",
@@ -90,7 +90,7 @@ const getProviders = async (page: number, filter: string, search: string | numbe
 //user blocking api
 const blockUser = async (id: string) => {
      try {
-          const response = await axiosAdmin.patch(`${adminRoutes.userBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.user_block}?id=${id}`);
 
           return {success: true, message: "User blocked successfully", data: response.data};
      } catch (error: any) {
@@ -105,7 +105,7 @@ const blockUser = async (id: string) => {
 //user unblocking api
 const unBlockUser = async (id: string) => {
      try {
-          const response = await axiosAdmin.patch(`${adminRoutes.userUnBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.user_unblock}?id=${id}`);
 
           return {success: true, message: "User Unblocked successfully", data: response.data};
      } catch (error: any) {
@@ -121,7 +121,7 @@ const unBlockUser = async (id: string) => {
 //provider blocking api
 const blockProvider = async (id: string) => {
      try {
-          const response = await axiosAdmin.patch(`${adminRoutes.providerBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.provider_block}?id=${id}`);
 
           return {success: true, message: "Provider blocked successfully", data: response.data};
      } catch (error: any) {
@@ -136,7 +136,7 @@ const blockProvider = async (id: string) => {
 //provider unblocking api
 const unBlockProvider = async (id: string) => {
      try {
-          const response = await axiosAdmin.patch(`${adminRoutes.providerUnBlock}?id=${id}`);
+          const response = await axiosAdmin.patch(`${adminRoutes.provider_unblock}?id=${id}`);
 
           return {success: true, message: "Provider Unblocked successfully", data: response.data};
      } catch (error: any) {
@@ -207,6 +207,118 @@ const approvalStatusChange = async (id: string, status: string) => {
           };
      }
 };
+
+//get all services
+const getServices = async (page: number, filter: string, search: string | number) => {
+     try {
+          const response = await axiosAdmin.get(
+               `${adminRoutes.get_services}?page=${page}&filter=${filter}&search=${search}`
+          );
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Cannot fetch services at this moment",
+               data: [],
+          };
+     }
+};
+
+//list unlist service
+const listUnlistService = async (id: string, status: string) => {
+     try {
+          const response = await axiosAdmin.patch(`${adminRoutes.manage_service}/${id}`, {
+               status: status,
+          });
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: "Cannot update service at this moment",
+               data: [],
+          };
+     }
+};
+
+//create  service
+const addService = async (data: {serviceName: string; description: string}) => {
+     try {
+          const response = await axiosAdmin.post(adminRoutes.add_service, {
+               data: data,
+          });
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//edit  service
+const editService = async (id: string, data: {serviceName: string; description: string}) => {
+     try {
+          const response = await axiosAdmin.patch(`${adminRoutes.update_service}/${id}`, {
+               data: data,
+          });
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//get service
+const getService = async (id: string) => {
+     try {
+          const response = await axiosAdmin.get(`${adminRoutes.update_service}/${id}`);
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
 export {
      signInApi,
      logoutAdmin,
@@ -220,4 +332,9 @@ export {
      getProvidersForApproval,
      approvalsDetails,
      approvalStatusChange,
+     getServices,
+     listUnlistService,
+     addService,
+     editService,
+     getService,
 };

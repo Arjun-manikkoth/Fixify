@@ -15,7 +15,7 @@ interface ISignUpResponse {
 //api sends sign in data to the server
 const signInApi = async (formData: SignIn) => {
      try {
-          const response = await axiosUser.post(userRoutes.signIn, formData);
+          const response = await axiosUser.post(userRoutes.sign_in, formData);
           return {
                success: true,
                message: "Sucessfully signed Into Account",
@@ -36,7 +36,7 @@ const signInApi = async (formData: SignIn) => {
 //api sends signup data to the server
 const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
      try {
-          const response = await axiosUser.post(userRoutes.signUp, formData);
+          const response = await axiosUser.post(userRoutes.sign_up, formData);
 
           return {success: true, message: "Sucessfully Created Account", email: response.data.data};
      } catch (error: any) {
@@ -47,7 +47,7 @@ const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
 //api to send otp to server for verification
 const otpVerifyApi = async (otp: string, email: string) => {
      try {
-          const response = await axiosUser.post(userRoutes.otpVerify, {otp: otp, email: email});
+          const response = await axiosUser.post(userRoutes.otp_verify, {otp: otp, email: email});
           return {
                success: true,
                message: "Please Sign to continue",
@@ -64,7 +64,7 @@ const otpVerifyApi = async (otp: string, email: string) => {
 //api to resend otp
 const otpResendApi = async (email: string) => {
      try {
-          const response = await axiosUser.post(userRoutes.otpResend, {email: email});
+          const response = await axiosUser.post(userRoutes.otp_resend, {email: email});
 
           return {
                success: true,

@@ -1,8 +1,11 @@
 import {ObjectId} from "mongoose";
-import {ISignInResponse, IRefreshTokenResponse} from "../../Services/AdminServices";
+import {ISignInResponse, IRefreshTokenResponse, IResponse} from "../../Services/AdminServices";
 import {IApprovalDetails, IPaginatedUsers, ISignIn} from "./SignInInterface";
 import {IPaginatedProviders} from "./SignInInterface";
 import {IPaginatedApprovals} from "./SignInInterface";
+import {IPaginatedServices} from "../Service/IServices";
+import {IAddService} from "./SignInInterface";
+import {IServices} from "../../Models/ProviderModels/ServiceModel";
 
 interface IAdminService {
      authenticateAdmin(data: ISignIn): Promise<ISignInResponse | null>;
@@ -20,5 +23,10 @@ interface IAdminService {
      getApprovalsList(page: string): Promise<IPaginatedApprovals | null>;
      getApprovalDetails(id: string): Promise<IApprovalDetails[] | null>;
      approvalStatusChange(id: string, status: string): Promise<Boolean>;
+     getServices(search: string, page: string, filter: string): Promise<IPaginatedServices | null>;
+     changeServiceStatus(status: string, id: string): Promise<Boolean>;
+     createService(data: IAddService): Promise<IResponse>;
+     getServiceDetails(id: string): Promise<IServices | null>;
+     updateService(id: string, data: IAddService): Promise<IResponse>;
 }
 export default IAdminService;

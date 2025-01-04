@@ -12,7 +12,7 @@ const otpRepository = new OtpRepository(); // Initialize repository instance
 const userService = new UserServices(userRepository, otpRepository); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
-// Initialize router instance
+// Initialize user router instance
 const userRoute: Router = express.Router();
 
 // Route for user registration (sign-up)

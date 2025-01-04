@@ -17,7 +17,7 @@ interface ISignUpResponse {
 
 const signInApi = async (formData: SignIn) => {
      try {
-          const response = await axiosProvider.post(providerRoutes.signIn, formData);
+          const response = await axiosProvider.post(providerRoutes.sign_in, formData);
           return {
                success: true,
                message: "Sucessfully signed Into Account",
@@ -39,7 +39,7 @@ const signInApi = async (formData: SignIn) => {
 
 const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
      try {
-          const response = await axiosProvider.post(providerRoutes.signUp, formData);
+          const response = await axiosProvider.post(providerRoutes.sign_up, formData);
 
           return {success: true, message: "Sucessfully Created Account", email: response.data.data};
      } catch (error: any) {
@@ -50,7 +50,7 @@ const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
 
 const otpVerifyApi = async (otp: string, email: string) => {
      try {
-          const response = await axiosProvider.post(providerRoutes.otpVerify, {
+          const response = await axiosProvider.post(providerRoutes.otp_verify, {
                otp: otp,
                email: email,
           });
@@ -68,7 +68,7 @@ const otpVerifyApi = async (otp: string, email: string) => {
 };
 const otpResendApi = async (email: string) => {
      try {
-          const response = await axiosProvider.post(providerRoutes.otpResend, {email: email});
+          const response = await axiosProvider.post(providerRoutes.otp_resend, {email: email});
 
           return {
                success: true,

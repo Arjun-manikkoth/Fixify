@@ -48,3 +48,7 @@ export interface IApprovalDetails {
           is_active: boolean;
      } | null;
 }
+export interface IAddService {
+     serviceName: string;
+     description: string;
+}

@@ -147,7 +147,7 @@ const AdminProviderList: React.FC = () => {
                               </div>
                          ))
                     ) : (
-                         <div className="text-center text-gray-500">No users found</div>
+                         <div className="text-center text-gray-500">No providers found</div>
                     )}
                </div>
                <div className="mt-4">

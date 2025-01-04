@@ -1,4 +1,3 @@
-import {timeStamp} from "console";
 import mongoose, {Schema, Document, ObjectId} from "mongoose";
 
 export interface IServices extends Document {
