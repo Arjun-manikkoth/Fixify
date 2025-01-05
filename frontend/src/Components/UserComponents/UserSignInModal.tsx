@@ -10,7 +10,7 @@ import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
 
 //interface for sign in props
 interface SignInProps {
-     openModal: (type: "userSignUp" | "userOtpVerify") => void;
+     openModal: (type: "userSignUp" | "userOtpVerify" | "userForgotPassword") => void;
      closeModal: () => void;
      message: string | null;
 }
@@ -149,13 +149,16 @@ const UserSignInModal: React.FC<SignInProps> = (props) => {
                               />
                          </div>
                          <div className="flex justify-end">
-                              <a href="#" className="text-sm text-slate-800 hover:underline">
+                              <span
+                                   className="text-sm text-slate-800 hover:underline"
+                                   onClick={() => props.openModal("userForgotPassword")}
+                              >
                                    Forgot Password
-                              </a>
+                              </span>
                          </div>
                          <button
                               type="submit"
-                              className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                          >
                               Sign In
                          </button>

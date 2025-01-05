@@ -6,7 +6,8 @@ const userRoutes = {
      logout: "/sign_out",
      refresh_token: "/refresh_token",
      o_auth: `/o_auth`,
-     update_profile: "update_profile",
+     update_profile: "/update_profile",
      get_details: "/",
+     forgot_password: "/forgot_password",
 };
 export default userRoutes;

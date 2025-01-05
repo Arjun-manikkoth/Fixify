@@ -9,6 +9,7 @@ import {RootState} from "../../Redux/Store";
 import {useNavigate} from "react-router-dom";
 import ProviderSignInModal from "../ProviderComponents/ProviderSignInModal";
 import ProviderSignUpModal from "../ProviderComponents/ProviderSignUpModal";
+import UserForgotPasswordModal from "../UserComponents/UserForgotPassword";
 
 export const ModalContext = React.createContext("");
 
@@ -22,6 +23,7 @@ const Header: FC = () => {
           | "providerSignIn"
           | "providerSignUp"
           | "providerOtpVerify"
+          | "userForgotPassword"
           | ""
      >("");
      console.log("header rendering");
@@ -40,6 +42,7 @@ const Header: FC = () => {
                | "providerSignIn"
                | "providerSignUp"
                | "providerOtpVerify"
+               | "userForgotPassword"
      ) => {
           setModalType(type);
      };
@@ -239,6 +242,11 @@ const Header: FC = () => {
                          </ModalContext.Provider>
                     )}
 
+                    {/* user forgot password */}
+                    {modalType === "userForgotPassword" && (
+                         <UserForgotPasswordModal closeModal={closeModal} />
+                    )}
+
                     {/* provider sign in modal */}
                     {modalType === "providerSignIn" && (
                          <ProviderSignInModal
@@ -248,12 +256,12 @@ const Header: FC = () => {
                          />
                     )}
 
-                    {/* user sign up modal */}
+                    {/* provider sign up modal */}
                     {modalType === "providerSignUp" && (
                          <ProviderSignUpModal closeModal={closeModal} openModal={openModal} />
                     )}
 
-                    {/* user otp verification modal */}
+                    {/* provider otp verification modal */}
                     {modalType === "providerOtpVerify" && (
                          <ProviderOtpVerificationModal
                               openModal={openModal}

@@ -196,6 +196,28 @@ const getUserData = async (id: string) => {
           };
      }
 };
+
+//api to get user data with id
+const forgotPasswordApi = async (email: string) => {
+     try {
+          const formData = new FormData();
+          formData.append("email", email);
+          const response = await axiosUser.post(userRoutes.forgot_password, formData);
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
 export {
      signInApi,
      signUpApi,
@@ -207,4 +229,5 @@ export {
      cloudinaryApi,
      updateProfile,
      getUserData,
+     forgotPasswordApi,
 };

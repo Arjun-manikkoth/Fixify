@@ -5,6 +5,7 @@ import {IOtpResponse} from "../../Services/UserServices";
 import {ObjectId} from "mongoose";
 import {ISignInResponse, IRefreshTokenResponse} from "../../Services/UserServices";
 import {IUser} from "../../Models/UserModels/UserModel";
+import {IResponse} from "../../Services/AdminServices";
 
 interface IUserService {
      createUser(userData: SignUp): Promise<ISignUpResponse | null>;
@@ -16,5 +17,6 @@ interface IUserService {
      googleAuth(code: string): Promise<ISignInResponse>;
      editProfile(data: IUpdateProfile): Promise<Partial<IUser> | null>;
      getUserData(id: string): Promise<Partial<IUser> | null>;
+     forgotPasswordVerify(id: string): Promise<IResponse>;
 }
 export default IUserService;

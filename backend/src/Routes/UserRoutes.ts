@@ -66,4 +66,9 @@ userRoute.get("/", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, 
      userController.getUser(req, res);
 });
 
+// Route for forgot password mail verify
+userRoute.post("/forgot_password", (req, res) => {
+     userController.forgotPassword(req, res);
+});
+
 export default userRoute;

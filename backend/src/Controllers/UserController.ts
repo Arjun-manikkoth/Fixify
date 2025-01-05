@@ -327,5 +327,39 @@ class UserController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
+
+     // Checks email and sends OTP for verifying emails
+     async forgotPassword(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.UserService.forgotPasswordVerify(req.body.email);
+
+               if (status.message === "Mail sent successfully") {
+                    res.status(200).json({
+                         success: true,
+                         message: "OTP email sent successfully",
+                         data: status,
+                    });
+               } else if (status.message === "Mail not registered as user") {
+                    res.status(404).json({
+                         success: false,
+                         message: "Email is not registered as a user",
+                         data: null,
+                    });
+               } else {
+                    res.status(400).json({
+                         success: false,
+                         message: "Failed to verify email",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error("Forgot Password Error:", error.message);
+
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
 }
 export default UserController;

@@ -12,6 +12,7 @@ import {verifyToken} from "../Utils/CheckToken";
 import {oAuth2Client} from "../Utils/GoogleConfig";
 import axios from "axios";
 import {IUser} from "../Models/UserModels/UserModel";
+import {IResponse} from "./AdminServices";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 
 //interface for signup response
@@ -492,6 +493,47 @@ class UserService implements IUserService {
           } catch (error: any) {
                console.log(error.message);
                return null;
+          }
+     }
+     async forgotPasswordVerify(email: string): Promise<IResponse> {
+          try {
+               const userData = await this.userRepository.findUserByEmail(email);
+               if (!userData) {
+                    return {
+                         success: false,
+                         message: "Mail not registered as user",
+                         data: null,
+                    };
+               }
+               const otp = generateOtp(); //utility function generates otp
+
+               const mail = await sentMail(
+                    email,
+                    "Forgot Password Verification",
+                    `<p>Enter this code <b>${otp}</b> to verify your email for resetting the password.</p><p>This code expires in <b>2 Minutes</b></p>`
+               ); //this utility function sends otp through mail
+
+               if (mail) {
+                    // works if mail is sucessfully sent
+
+                    const hashedOtp = await hashOtp(otp); // this utility function hash otp
+
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id); //stores otp in the database
+
+                    return {
+                         success: true,
+                         message: "Mail sent successfully",
+                         data: userData.email,
+                    };
+               }
+               return {
+                    success: false,
+                    message: "Failed to verify mail",
+                    data: null,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return {success: false, message: "Couldnt verify mail", data: null};
           }
      }
 }
