@@ -348,7 +348,7 @@ class UserController {
                } else if (status.message === "Please Sign in with your google account") {
                     res.status(401).json({
                          success: false,
-                         message: "Please Sign in withs your google account",
+                         message: "Please Sign in with your google account",
                          data: null,
                     });
                } else {

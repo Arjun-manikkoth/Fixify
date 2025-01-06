@@ -44,7 +44,7 @@ const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
           return {success: false, message: error.response.data.message || "something went wrong"};
      }
 };
-//api to send otp to server for verification
+//api to send otp to server for account verification
 const otpVerifyApi = async (otp: string, email: string) => {
      try {
           const response = await axiosUser.post(userRoutes.otp_verify, {otp: otp, email: email});
@@ -71,6 +71,28 @@ const otpResendApi = async (email: string) => {
           return {
                success: true,
                message: response.data.message,
+               data: null,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//api to send otp to server for forgot password email verification
+const forgotOtpVerifyApi = async (otp: string, email: string) => {
+     try {
+          const response = await axiosUser.post(userRoutes.forgot_otp_verify, {
+               otp: otp,
+               email: email,
+          });
+          return {
+               success: true,
+               message: "Please Sign to continue",
                data: null,
           };
      } catch (error: any) {
@@ -232,4 +254,5 @@ export {
      updateProfile,
      getUserData,
      forgotPasswordApi,
+     forgotOtpVerifyApi,
 };

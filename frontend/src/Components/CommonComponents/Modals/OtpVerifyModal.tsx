@@ -12,7 +12,9 @@ interface OtpVerifyModalProps {
      onSubmit: (otp: string, mailType: string) => Promise<IResponse>; // Callback to handle OTP submission
      onResend: (email: string) => Promise<IResponse>; // Callback to handle OTP resend
      accountType: string;
-     openModal: (type: "userSignIn" | "providerSignIn") => void;
+     openModal: (
+          type: "userSignIn" | "providerSignIn" | "userPasswordOtp" | "providerPasswordOtp"
+     ) => void;
      messageDisplay: React.Dispatch<React.SetStateAction<string | null>>;
      mailType: string;
      title: string; // Modal title

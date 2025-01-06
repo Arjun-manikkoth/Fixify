@@ -2,6 +2,7 @@ const userRoutes = {
      sign_in: "/sign_in",
      sign_up: "/sign_up",
      otp_verify: "/otp_verify",
+     forgot_otp_verify: "/forgot_otp_verify",
      otp_resend: "/otp_resend",
      logout: "/sign_out",
      refresh_token: "/refresh_token",

@@ -2,15 +2,23 @@ import React, {FC, useState} from "react";
 import {FaMapMarkerAlt, FaEnvelope, FaBars, FaTimes, FaUser} from "react-icons/fa";
 import UserSignInModal from "../UserComponents/UserSignInModal";
 import UserSignUpModal from "../UserComponents/UserSignUpModal";
-import UserOtpVerificationModal from "../UserComponents/UserOtpVerificationModal";
-import ProviderOtpVerificationModal from "../ProviderComponents/ProviderOtpVerificationModal";
 import {useSelector} from "react-redux";
 import {RootState} from "../../Redux/Store";
 import {useNavigate} from "react-router-dom";
 import ProviderSignInModal from "../ProviderComponents/ProviderSignInModal";
 import ProviderSignUpModal from "../ProviderComponents/ProviderSignUpModal";
 import UserForgotPasswordModal from "../UserComponents/UserForgotPassword";
+import UserForgotVerifyModal from "../UserComponents/UserForgotVerify";
 
+import OtpVerifyModal from "./Modals/OtpVerifyModal";
+import {
+     otpVerifyApi as otpVerifyApiUser,
+     otpResendApi as otpResendApiUser,
+} from "../../Api/UserApis";
+import {
+     otpResendApi as otpResendApiProvider,
+     otpVerifyApi as otpVerifyApiProvider,
+} from "../../Api/ProviderApis";
 export const ModalContext = React.createContext("");
 
 const Header: FC = () => {
@@ -24,9 +32,12 @@ const Header: FC = () => {
           | "providerSignUp"
           | "providerOtpVerify"
           | "userForgotPassword"
+          | "providerForgotPassword"
+          | "userPasswordOtp"
+          | "providerPasswordOtp"
           | ""
      >("");
-     console.log("header rendering");
+
      const [signInMessage, setSignInMessage] = useState<string | null>(null);
 
      const user = useSelector((state: RootState) => state.user);
@@ -43,6 +54,9 @@ const Header: FC = () => {
                | "providerSignUp"
                | "providerOtpVerify"
                | "userForgotPassword"
+               | "providerForgotPassword"
+               | "userPasswordOtp"
+               | "providerPasswordOtp"
      ) => {
           setModalType(type);
      };
@@ -227,11 +241,23 @@ const Header: FC = () => {
                          />
                     )}
 
-                    {/* user otp verification modal */}
+                    {/* user otp verification modal*/}
                     {modalType === "userOtpVerify" && (
-                         <UserOtpVerificationModal
+                         //      <UserOtpVerificationModal
+                         //           openModal={openModal}
+                         //           otpOnSucess={setSignInMessage}
+                         //      />
+                         //
+
+                         <OtpVerifyModal
+                              title="Verify Account"
+                              onSubmit={otpVerifyApiUser}
+                              onResend={otpResendApiUser}
+                              accountType="user"
+                              mailType="userEmail"
                               openModal={openModal}
-                              otpOnSucess={setSignInMessage}
+                              message="We’ve sent a one-time password (OTP) to your registered email. Enter the  code here to verify your account."
+                              messageDisplay={setSignInMessage}
                          />
                     )}
 
@@ -244,9 +270,17 @@ const Header: FC = () => {
 
                     {/* user forgot password */}
                     {modalType === "userForgotPassword" && (
-                         <UserForgotPasswordModal closeModal={closeModal} />
+                         <UserForgotPasswordModal
+                              closeModal={closeModal}
+                              openModal={openModal}
+                              accountType="user"
+                         />
                     )}
 
+                    {/* user forgot password otp verification
+                    {modalType === "userPasswordOtp" && (
+                         <UserForgotVerifyModal openModal={openModal} accountType="user" />
+                    )} */}
                     {/* provider sign in modal */}
                     {modalType === "providerSignIn" && (
                          <ProviderSignInModal
@@ -263,9 +297,15 @@ const Header: FC = () => {
 
                     {/* provider otp verification modal */}
                     {modalType === "providerOtpVerify" && (
-                         <ProviderOtpVerificationModal
+                         <OtpVerifyModal
+                              title="Verify Account"
+                              onSubmit={otpVerifyApiProvider}
+                              onResend={otpResendApiProvider}
+                              accountType="provider"
+                              mailType="providerEmail"
                               openModal={openModal}
-                              otpOnSucess={setSignInMessage}
+                              message="We’ve sent a one-time password (OTP) to your registered email. Enter the  code here to verify your account."
+                              messageDisplay={setSignInMessage}
                          />
                     )}
                </ModalContext.Provider>

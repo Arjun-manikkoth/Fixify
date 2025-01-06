@@ -191,7 +191,7 @@ class UserService implements IUserService {
                     const user = await this.userRepository.findUserByEmail(email); //gets user account details
 
                     if (user) {
-                         //executs if the user exists
+                         //executes if the user exists
 
                          const data = await this.userRepository.findOtpWithId(user._id); //does look up between user and otp collection and return the data
 

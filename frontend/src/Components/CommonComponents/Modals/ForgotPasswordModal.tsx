@@ -9,10 +9,17 @@ interface ISendMailResponse {
 
 interface ForgotPasswordModalProps {
      closeModal: () => void;
+     openModal: (type: "userPasswordOtp" | "providerPasswordOtp") => void;
      sendMail: (email: string) => Promise<ISendMailResponse>;
+     accountType: string;
 }
 
-const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({closeModal, sendMail}) => {
+const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
+     closeModal,
+     openModal,
+     accountType,
+     sendMail,
+}) => {
      const [email, setEmail] = useState<string>("");
      const [error, setError] = useState<string>("");
 
@@ -32,7 +39,11 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({closeModal, se
                sendMail(email)
                     .then((response) => {
                          if (response.success) {
-                              toast.success(response.message);
+                              if (accountType === "user") {
+                                   openModal("userPasswordOtp");
+                              } else {
+                                   openModal("providerPasswordOtp");
+                              }
                          } else {
                               toast.error(response.message);
                          }
