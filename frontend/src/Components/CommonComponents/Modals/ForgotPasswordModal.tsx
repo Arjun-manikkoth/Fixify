@@ -30,8 +30,16 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({closeModal, se
           }
           if (isValid) {
                sendMail(email)
-                    .then(() => {})
-                    .catch(() => {});
+                    .then((response) => {
+                         if (response.success) {
+                              toast.success(response.message);
+                         } else {
+                              toast.error(response.message);
+                         }
+                    })
+                    .catch(() => {
+                         console.log("error occured at forgot password");
+                    });
           }
      };
 

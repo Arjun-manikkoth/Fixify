@@ -345,6 +345,12 @@ class UserController {
                          message: "Email is not registered as a user",
                          data: null,
                     });
+               } else if (status.message === "Please Sign in with your google account") {
+                    res.status(401).json({
+                         success: false,
+                         message: "Please Sign in withs your google account",
+                         data: null,
+                    });
                } else {
                     res.status(400).json({
                          success: false,

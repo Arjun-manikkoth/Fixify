@@ -505,6 +505,13 @@ class UserService implements IUserService {
                          data: null,
                     };
                }
+               if (userData?.google_id) {
+                    return {
+                         success: false,
+                         message: "Please Sign in with your google account",
+                         data: null,
+                    };
+               }
                const otp = generateOtp(); //utility function generates otp
 
                const mail = await sentMail(
