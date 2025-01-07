@@ -13,9 +13,9 @@ interface OtpVerifyModalProps {
      onResend: (email: string) => Promise<IResponse>; // Callback to handle OTP resend
      accountType: string;
      openModal: (
-          type: "userSignIn" | "providerSignIn" | "userPasswordOtp" | "providerPasswordOtp"
+          type: "userSignIn" | "providerSignIn" | "resetPasswordUser" | "resetPasswordProvider"
      ) => void;
-     messageDisplay: React.Dispatch<React.SetStateAction<string | null>>;
+     messageDisplay?: React.Dispatch<React.SetStateAction<string | null>>;
      mailType: string;
      title: string; // Modal title
      message: string; // Message to display in the modal
@@ -73,7 +73,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
           const oneTimePassword = otp.join("");
           const email = localStorage.getItem(mailType) || "";
           if (!email) {
-               console.error("Email not found in sessionStorage");
+               console.error("Email not found in localStorage");
                return;
           }
           if (oneTimePassword.length === 6) {
@@ -82,12 +82,19 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
 
                     if (response.success === true) {
                          if (accountType === "user") {
-                              openModal("userSignIn");
+                              if (title === "Verify Account") {
+                                   openModal("userSignIn");
+                              } else if (title === "Verify Email") {
+                                   openModal("resetPasswordUser");
+                              }
                          } else {
-                              openModal("providerSignIn");
+                              if (title === "Verify Account") {
+                                   openModal("providerSignIn");
+                              } else if (title === "Verify Email") {
+                                   openModal("resetPasswordProvider");
+                              }
                          }
-
-                         messageDisplay(response.message);
+                         messageDisplay?.(response.message);
                     } else {
                          toast.error(response.message);
                     }

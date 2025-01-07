@@ -1,11 +1,12 @@
 import {access} from "fs";
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import {Request, Response} from "express";
+import {messages} from "../Constants/Messages";
 
 class UserController {
      constructor(private UserService: IUserService) {}
 
-     // sign up and sends the corresponding success code
+     // sign up if account doesnot exists and sends the corresponding success code
 
      async signUp(req: Request, res: Response): Promise<void> {
           try {
@@ -29,7 +30,7 @@ class UserController {
           }
      }
 
-     // login and sends the corresponding status code
+     // login if account exists and sends the corresponding status code
      async signIn(req: Request, res: Response): Promise<void> {
           try {
                const response = await this.UserService.authenticateUser(req.body); //this function checks and verify the credentials
@@ -101,7 +102,7 @@ class UserController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
-
+     //verifies the otp associated with the mail id for account verification
      async otpVerify(req: Request, res: Response): Promise<void> {
           try {
                const otpStatus = await this.UserService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
@@ -219,7 +220,7 @@ class UserController {
           }
      }
 
-     //google authentication
+     //sign and sign in with google
      async googleAuth(req: Request, res: Response) {
           try {
                const {code} = req.query;
@@ -303,7 +304,7 @@ class UserController {
           }
      }
 
-     //fetches and send the user data
+     //fetches and send the user profile data
      async getUser(req: Request, res: Response): Promise<void> {
           try {
                const status = await this.UserService.getUserData(req.query.id as string);
@@ -328,7 +329,7 @@ class UserController {
           }
      }
 
-     // Checks email and sends OTP for verifying emails
+     // Checks email and sends OTP for verifying email for forgot password
      async forgotPassword(req: Request, res: Response): Promise<void> {
           try {
                const status = await this.UserService.forgotPasswordVerify(req.body.email);
@@ -337,12 +338,12 @@ class UserController {
                     res.status(200).json({
                          success: true,
                          message: "OTP email sent successfully",
-                         data: status,
+                         data: status.data,
                     });
-               } else if (status.message === "Mail not registered as user") {
+               } else if (status.message === "Mail not registered") {
                     res.status(404).json({
                          success: false,
-                         message: "Email is not registered as a user",
+                         message: "Email is not registered",
                          data: null,
                     });
                } else if (status.message === "Please Sign in with your google account") {
@@ -364,6 +365,74 @@ class UserController {
                res.status(500).json({
                     success: false,
                     message: "Internal server error",
+               });
+          }
+     }
+
+     //verifies the otp associated with the mail id for forgot password
+     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
+          try {
+               const otpStatus = await this.UserService.passworOtpCheck(
+                    req.body.otp,
+                    req.body.email
+               ); //checks for otp and validate
+
+               // Check the OTP verification status
+               if (otpStatus.success) {
+                    //sends on a successfull verification
+
+                    res.status(200).json({success: true, message: otpStatus.message});
+               } else {
+                    // Error handling based on  error messages
+                    switch (otpStatus.message) {
+                         case "Invalid Otp":
+                              res.status(400).json({success: false, message: otpStatus.message});
+                              break;
+                         case "Otp is expired":
+                              res.status(410).json({success: false, message: otpStatus.message});
+                              break;
+                         case "Otp error":
+                              res.status(500).json({success: false, message: otpStatus.message});
+                              break;
+                         default:
+                              res.status(404).json({success: false, message: "Account not found"});
+                              break;
+                    }
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //updates with new password
+     async resetPassword(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.UserService.changePassword(
+                    req.body.email as string,
+                    req.body.password as string
+               );
+
+               if (response.success) {
+                    res.status(200).json({
+                         success: true,
+                         message: response.message,
+                         data: null,
+                    });
+               } else {
+                    res.status(400).json({
+                         success: false,
+                         message: response.message,
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "An internal server error occurred.",
+                    data: null,
                });
           }
      }

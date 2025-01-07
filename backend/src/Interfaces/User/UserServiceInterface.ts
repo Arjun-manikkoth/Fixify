@@ -18,5 +18,7 @@ interface IUserService {
      editProfile(data: IUpdateProfile): Promise<Partial<IUser> | null>;
      getUserData(id: string): Promise<Partial<IUser> | null>;
      forgotPasswordVerify(id: string): Promise<IResponse>;
+     passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;
+     changePassword(email: string, password: string): Promise<IResponse>;
 }
 export default IUserService;

@@ -360,5 +360,113 @@ class ProviderController {
                res.status(500).json({success: false, message: "Internal server error"});
           }
      }
+
+     // Checks email and sends OTP for verifying email for forgot password
+     async forgotPassword(req: Request, res: Response): Promise<void> {
+          try {
+               const status = await this.providerService.forgotPasswordVerify(req.body.email);
+
+               if (status.message === "Mail sent successfully") {
+                    res.status(200).json({
+                         success: true,
+                         message: "OTP email sent successfully",
+                         data: status.data,
+                    });
+               } else if (status.message === "Mail not registered") {
+                    res.status(404).json({
+                         success: false,
+                         message: "Email is not registered",
+                         data: null,
+                    });
+               } else if (status.message === "Please Sign in with your google account") {
+                    res.status(401).json({
+                         success: false,
+                         message: "Please Sign in with your google account",
+                         data: null,
+                    });
+               } else {
+                    res.status(400).json({
+                         success: false,
+                         message: "Failed to verify email",
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error("Forgot Password Error:", error.message);
+
+               res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+               });
+          }
+     }
+
+     //verifies the otp associated with the mail id for forgot password
+     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
+          try {
+               const otpStatus = await this.providerService.passworOtpCheck(
+                    req.body.otp,
+                    req.body.email
+               ); //checks for otp and validate
+
+               // Check the OTP verification status
+               if (otpStatus.success) {
+                    //sends on a successfull verification
+
+                    res.status(200).json({success: true, message: otpStatus.message});
+               } else {
+                    // Error handling based on  error messages
+                    switch (otpStatus.message) {
+                         case "Invalid Otp":
+                              res.status(400).json({success: false, message: otpStatus.message});
+                              break;
+                         case "Otp is expired":
+                              res.status(410).json({success: false, message: otpStatus.message});
+                              break;
+                         case "Otp error":
+                              res.status(500).json({success: false, message: otpStatus.message});
+                              break;
+                         default:
+                              res.status(404).json({success: false, message: "Account not found"});
+                              break;
+                    }
+               }
+          } catch (error: any) {
+               console.error(error.message);
+
+               res.status(500).json({success: false, message: "Internal server error"});
+          }
+     }
+
+     //updates with new password
+     async resetPassword(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.providerService.changePassword(
+                    req.body.email as string,
+                    req.body.password as string
+               );
+
+               if (response.success) {
+                    res.status(200).json({
+                         success: true,
+                         message: response.message,
+                         data: null,
+                    });
+               } else {
+                    res.status(400).json({
+                         success: false,
+                         message: response.message,
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "An internal server error occurred.",
+                    data: null,
+               });
+          }
+     }
 }
 export default ProviderController;

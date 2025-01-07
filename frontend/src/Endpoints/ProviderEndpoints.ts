@@ -10,5 +10,8 @@ const providerRoutes = {
      update_profile: "update_profile",
      get_profile_details: "/profile",
      register: "/register",
+     forgot_password: "/forgot_password",
+     forgot_otp_verify: "/forgot_otp_verify",
+     reset_password: "/reset_password",
 };
 export default providerRoutes;

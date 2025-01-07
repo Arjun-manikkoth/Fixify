@@ -7,6 +7,7 @@ import {ISignInResponse, IRefreshTokenResponse} from "../../Services/ProviderSer
 import {IServices} from "../../Models/ProviderModels/ServiceModel";
 import {IUpdateProfile} from "./SignIn";
 import {IProvider} from "../../Models/ProviderModels/ProviderModel";
+import {IResponse} from "../../Services/AdminServices";
 
 interface IProviderService {
      createProvider(providerData: SignUp): Promise<ISignUpResponse | null>;
@@ -19,6 +20,9 @@ interface IProviderService {
      googleAuth(code: string): Promise<ISignInResponse>;
      editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>>;
      getProfileData(id: string): Promise<Partial<IProviderWithService> | null>;
+     forgotPasswordVerify(id: string): Promise<IResponse>;
      registerProvider(data: IProviderRegistration): Promise<IOtpResponse>;
+     changePassword(email: string, password: string): Promise<IResponse>;
+     passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;
 }
 export default IProviderService;

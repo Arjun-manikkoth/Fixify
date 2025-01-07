@@ -184,7 +184,7 @@ class UserService implements IUserService {
           }
      }
 
-     //verifiying otp
+     //verifiying otp for verifiying account
      async otpCheck(otp: string, email: string): Promise<IOtpResponse> {
           {
                try {
@@ -377,6 +377,8 @@ class UserService implements IUserService {
                };
           }
      }
+
+     //sign in or sign up via google
      async googleAuth(code: string): Promise<ISignInResponse> {
           try {
                const googleRes = await oAuth2Client.getToken(code);
@@ -482,6 +484,8 @@ class UserService implements IUserService {
                return null;
           }
      }
+
+     //fetches user document from db
      async getUserData(id: string): Promise<Partial<IUser | null>> {
           try {
                const status = await this.userRepository.getUserDataWithId(id);
@@ -495,13 +499,14 @@ class UserService implements IUserService {
                return null;
           }
      }
+     //verifies email for sending otp for forgot password
      async forgotPasswordVerify(email: string): Promise<IResponse> {
           try {
                const userData = await this.userRepository.findUserByEmail(email);
                if (!userData) {
                     return {
                          success: false,
-                         message: "Mail not registered as user",
+                         message: "Mail not registered ",
                          data: null,
                     };
                }
@@ -541,6 +546,74 @@ class UserService implements IUserService {
           } catch (error: any) {
                console.log(error.message);
                return {success: false, message: "Couldnt verify mail", data: null};
+          }
+     }
+
+     //verifiying otp for verifiying account
+     async passworOtpCheck(otp: string, email: string): Promise<IOtpResponse> {
+          {
+               try {
+                    const user = await this.userRepository.findUserByEmail(email); //gets user account details
+
+                    if (user) {
+                         //executes if the user exists
+
+                         const data = await this.userRepository.findOtpWithId(user._id); //does look up between user and otp collection and return the data
+
+                         //checking whether otp exists in the aggregated result
+                         if (data?.otp[0]?.value) {
+                              const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
+
+                              if (otpStatus) {
+                                   // works if otp is verified
+
+                                   return {success: true, message: "Otp verified successfully"};
+                              } else {
+                                   //return if the otp is invalid
+
+                                   return {success: false, message: "Invalid Otp"};
+                              }
+                         } else if (!data?.otp.length) {
+                              //evaluates true if the otp is not found
+
+                              return {success: false, message: "Otp is expired"};
+                         }
+                    } //if user account doesnot exists returns
+                    return {
+                         success: false,
+                         message: "Account not found",
+                    };
+               } catch (error: any) {
+                    console.log(error.message);
+                    return {success: false, message: "Otp error"};
+               }
+          }
+     }
+
+     //find and resets with new password
+     async changePassword(email: string, password: string): Promise<IResponse> {
+          try {
+               const hashedPassword = await hashPassword(password);
+
+               const updateStatus = await this.userRepository.updatePassword(email, hashedPassword);
+               return updateStatus
+                    ? {
+                           success: true,
+                           message: "Password updated sucessfully",
+                           data: null,
+                      }
+                    : {
+                           success: false,
+                           message: "Failed to update password",
+                           data: null,
+                      };
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Failed to update password",
+                    data: null,
+               };
           }
      }
 }

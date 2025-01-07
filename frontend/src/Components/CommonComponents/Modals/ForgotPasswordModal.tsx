@@ -40,8 +40,10 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     .then((response) => {
                          if (response.success) {
                               if (accountType === "user") {
+                                   localStorage.setItem("userEmail", response.data);
                                    openModal("userPasswordOtp");
                               } else {
+                                   localStorage.setItem("providerEmail", response.data);
                                    openModal("providerPasswordOtp");
                               }
                          } else {

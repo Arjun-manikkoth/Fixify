@@ -94,4 +94,19 @@ providerRoute.post("/register", (req, res) => {
      providerController.registerProfile(req, res);
 });
 
+// Route for forgot password mail verify
+providerRoute.post("/forgot_password", (req, res) => {
+     providerController.forgotPassword(req, res);
+});
+
+// Route for forgot password mail verify
+providerRoute.post("/forgot_otp_verify", (req, res) => {
+     providerController.forgotPasswordOtpVerify(req, res);
+});
+
+// Route for updating the new password
+providerRoute.post("/reset_password", (req, res) => {
+     providerController.resetPassword(req, res);
+});
+
 export default providerRoute;

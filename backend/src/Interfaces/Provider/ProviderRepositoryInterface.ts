@@ -22,6 +22,7 @@ interface IProviderRepository {
      changeProviderUnBlockStatus(id: string): Promise<boolean>;
      getProviderById(id: ObjectId): Promise<IProvider | null>;
      updateProviderServiceApproval(providerId: ObjectId, serviceId: ObjectId): Promise<boolean>;
+     updatePassword(email: string, password: string): Promise<boolean>;
 }
 
 export default IProviderRepository;

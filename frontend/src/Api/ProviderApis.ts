@@ -243,6 +243,71 @@ const registerProvider = async (
      }
 };
 
+//api to authenticated email and send otp
+const forgotPasswordApi = async (email: string) => {
+     try {
+          const response = await axiosProvider.post(providerRoutes.forgot_password, {email});
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+//api to send otp to server for forgot password email verification
+const forgotOtpVerifyApi = async (otp: string, email: string) => {
+     try {
+          const response = await axiosProvider.post(providerRoutes.forgot_otp_verify, {
+               otp: otp,
+               email: email,
+          });
+          console.log(response.data.message);
+          return {
+               success: true,
+               message: response.data.message,
+               data: null,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//api to authenticated email and send otp
+const resetPasswordApi = async (email: string, password: string) => {
+     try {
+          const response = await axiosProvider.post(providerRoutes.reset_password, {
+               email,
+               password,
+          });
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
 export {
      signInApi,
      signUpApi,
@@ -256,4 +321,7 @@ export {
      uploadImagesToCloudinary,
      getProviderData,
      registerProvider,
+     forgotPasswordApi,
+     forgotOtpVerifyApi,
+     resetPasswordApi,
 };

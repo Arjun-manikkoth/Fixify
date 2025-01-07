@@ -206,5 +206,18 @@ class UserRepository implements IUserRepository {
                return false;
           }
      }
+     // updates document with new password
+     async updatePassword(email: string, password: string): Promise<boolean> {
+          try {
+               const updatedStatus = await User.findOneAndUpdate(
+                    {email: email},
+                    {$set: {password: password}}
+               );
+               return updatedStatus ? true : false;
+          } catch (error: any) {
+               console.log(error.message);
+               return false;
+          }
+     }
 }
 export default UserRepository;

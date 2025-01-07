@@ -71,4 +71,14 @@ userRoute.post("/forgot_password", (req, res) => {
      userController.forgotPassword(req, res);
 });
 
+// Route for forgot password mail verify
+userRoute.post("/forgot_otp_verify", (req, res) => {
+     userController.forgotPasswordOtpVerify(req, res);
+});
+
+// Route for updating the new password
+userRoute.post("/reset_password", (req, res) => {
+     userController.resetPassword(req, res);
+});
+
 export default userRoute;

@@ -13,6 +13,7 @@ interface IUserRepository {
      getAllUsers(search: string, page: string, filter: string): Promise<IPaginatedUsers | null>;
      changeUserBlockStatus(id: string): Promise<boolean>;
      changeUserUnBlockStatus(id: string): Promise<boolean>;
+     updatePassword(email: string, password: string): Promise<boolean>;
 }
 
 export default IUserRepository;

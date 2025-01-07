@@ -10,5 +10,6 @@ const userRoutes = {
      update_profile: "/update_profile",
      get_details: "/",
      forgot_password: "/forgot_password",
+     reset_password: "/reset_password",
 };
 export default userRoutes;

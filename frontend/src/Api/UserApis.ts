@@ -90,9 +90,10 @@ const forgotOtpVerifyApi = async (otp: string, email: string) => {
                otp: otp,
                email: email,
           });
+          console.log(response.data.message);
           return {
                success: true,
-               message: "Please Sign to continue",
+               message: response.data.message,
                data: null,
           };
      } catch (error: any) {
@@ -223,10 +224,30 @@ const getUserData = async (id: string) => {
      }
 };
 
-//api to get user data with id
+//api to authenticated email and send otp
 const forgotPasswordApi = async (email: string) => {
      try {
           const response = await axiosUser.post(userRoutes.forgot_password, {email});
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//api to  send email and new password
+const resetPasswordApi = async (email: string, password: string) => {
+     try {
+          const response = await axiosUser.post(userRoutes.reset_password, {email, password});
 
           return {
                success: true,
@@ -255,4 +276,5 @@ export {
      getUserData,
      forgotPasswordApi,
      forgotOtpVerifyApi,
+     resetPasswordApi,
 };

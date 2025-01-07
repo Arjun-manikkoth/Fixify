@@ -7,18 +7,25 @@ import {RootState} from "../../Redux/Store";
 import {useNavigate} from "react-router-dom";
 import ProviderSignInModal from "../ProviderComponents/ProviderSignInModal";
 import ProviderSignUpModal from "../ProviderComponents/ProviderSignUpModal";
-import UserForgotPasswordModal from "../UserComponents/UserForgotPassword";
-import UserForgotVerifyModal from "../UserComponents/UserForgotVerify";
+import ForgotPasswordModal from "./Modals/ForgotPasswordModal";
+import ResetPasswordModal from "./Modals/ResetPasswordModal";
 
 import OtpVerifyModal from "./Modals/OtpVerifyModal";
 import {
      otpVerifyApi as otpVerifyApiUser,
      otpResendApi as otpResendApiUser,
+     resetPasswordApi as resetPasswordApiUser,
+     forgotOtpVerifyApi as forgotOtpVerifyApiUser,
+     forgotPasswordApi as forgotPasswordApiUser,
 } from "../../Api/UserApis";
 import {
      otpResendApi as otpResendApiProvider,
      otpVerifyApi as otpVerifyApiProvider,
+     resetPasswordApi as resetPasswordApiProvider,
+     forgotPasswordApi as forgotPasswordApiProvider,
+     forgotOtpVerifyApi as forgotOtpVerifyApiProvider,
 } from "../../Api/ProviderApis";
+
 export const ModalContext = React.createContext("");
 
 const Header: FC = () => {
@@ -35,9 +42,11 @@ const Header: FC = () => {
           | "providerForgotPassword"
           | "userPasswordOtp"
           | "providerPasswordOtp"
+          | "resetPasswordUser"
+          | "resetPasswordProvider"
           | ""
      >("");
-
+     console.log("modal type", modalType);
      const [signInMessage, setSignInMessage] = useState<string | null>(null);
 
      const user = useSelector((state: RootState) => state.user);
@@ -57,6 +66,8 @@ const Header: FC = () => {
                | "providerForgotPassword"
                | "userPasswordOtp"
                | "providerPasswordOtp"
+               | "resetPasswordUser"
+               | "resetPasswordProvider"
      ) => {
           setModalType(type);
      };
@@ -231,6 +242,7 @@ const Header: FC = () => {
                          </div>
                     )}
                </div>
+
                <ModalContext.Provider value={modalType}>
                     {/* user sign in modal */}
                     {modalType === "userSignIn" && (
@@ -241,14 +253,15 @@ const Header: FC = () => {
                          />
                     )}
 
+                    {/* user sign up modal */}
+                    {modalType === "userSignUp" && (
+                         <ModalContext.Provider value="userSignUp">
+                              <UserSignUpModal closeModal={closeModal} openModal={openModal} />
+                         </ModalContext.Provider>
+                    )}
+
                     {/* user otp verification modal*/}
                     {modalType === "userOtpVerify" && (
-                         //      <UserOtpVerificationModal
-                         //           openModal={openModal}
-                         //           otpOnSucess={setSignInMessage}
-                         //      />
-                         //
-
                          <OtpVerifyModal
                               title="Verify Account"
                               onSubmit={otpVerifyApiUser}
@@ -261,26 +274,40 @@ const Header: FC = () => {
                          />
                     )}
 
-                    {/* user sign up modal */}
-                    {modalType === "userSignUp" && (
-                         <ModalContext.Provider value="userSignUp">
-                              <UserSignUpModal closeModal={closeModal} openModal={openModal} />
-                         </ModalContext.Provider>
-                    )}
-
-                    {/* user forgot password */}
+                    {/* user forgot password email verify modal*/}
                     {modalType === "userForgotPassword" && (
-                         <UserForgotPasswordModal
+                         <ForgotPasswordModal
                               closeModal={closeModal}
                               openModal={openModal}
                               accountType="user"
+                              sendMail={forgotPasswordApiUser}
                          />
                     )}
 
-                    {/* user forgot password otp verification
+                    {/* user forgot password otp verification modal*/}
                     {modalType === "userPasswordOtp" && (
-                         <UserForgotVerifyModal openModal={openModal} accountType="user" />
-                    )} */}
+                         <OtpVerifyModal
+                              title="Verify Email"
+                              onSubmit={forgotOtpVerifyApiUser}
+                              onResend={otpResendApiUser}
+                              accountType="user"
+                              mailType="userEmail"
+                              openModal={openModal}
+                              message="Enter the one-time password (OTP) send to your mail associated with your account for verification."
+                         />
+                    )}
+
+                    {/* user reset password modal*/}
+                    {modalType === "resetPasswordUser" && (
+                         <ResetPasswordModal
+                              title="Reset Password"
+                              accountType="user"
+                              openModal={openModal}
+                              messageDisplay={setSignInMessage}
+                              submitPassword={resetPasswordApiUser}
+                         />
+                    )}
+
                     {/* provider sign in modal */}
                     {modalType === "providerSignIn" && (
                          <ProviderSignInModal
@@ -306,6 +333,40 @@ const Header: FC = () => {
                               openModal={openModal}
                               message="We’ve sent a one-time password (OTP) to your registered email. Enter the  code here to verify your account."
                               messageDisplay={setSignInMessage}
+                         />
+                    )}
+
+                    {/* provider forgot password */}
+                    {modalType === "providerForgotPassword" && (
+                         <ForgotPasswordModal
+                              closeModal={closeModal}
+                              openModal={openModal}
+                              accountType="provider"
+                              sendMail={forgotPasswordApiProvider}
+                         />
+                    )}
+
+                    {/* provider forgot password otp verification modal*/}
+                    {modalType === "providerPasswordOtp" && (
+                         <OtpVerifyModal
+                              title="Verify Email"
+                              onSubmit={forgotOtpVerifyApiProvider}
+                              onResend={otpResendApiProvider}
+                              accountType="provider"
+                              mailType="providerEmail"
+                              openModal={openModal}
+                              message="Enter the one-time password (OTP) send to your mail associated with your account for verification."
+                         />
+                    )}
+
+                    {/* provider reset password modal*/}
+                    {modalType === "resetPasswordProvider" && (
+                         <ResetPasswordModal
+                              title="Reset Password"
+                              accountType="provider"
+                              openModal={openModal}
+                              messageDisplay={setSignInMessage}
+                              submitPassword={resetPasswordApiProvider}
                          />
                     )}
                </ModalContext.Provider>

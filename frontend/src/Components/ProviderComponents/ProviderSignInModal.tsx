@@ -9,7 +9,7 @@ import {setProvider} from "../../Redux/ProviderSlice";
 import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
 
 interface SignInProps {
-     openModal: (type: "providerSignUp" | "providerOtpVerify") => void;
+     openModal: (type: "providerSignUp" | "providerOtpVerify" | "providerForgotPassword") => void;
      closeModal: () => void;
      message: string | null;
 }
@@ -138,9 +138,12 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                               />
                          </div>
                          <div className="flex justify-end">
-                              <a href="#" className="text-sm text-slate-800 hover:underline">
+                              <span
+                                   className="text-sm text-slate-800 hover:underline"
+                                   onClick={() => props.openModal("providerForgotPassword")}
+                              >
                                    Forgot Password
-                              </a>
+                              </span>
                          </div>
                          <button
                               type="submit"

@@ -19,6 +19,11 @@ import IServiceRepository from "../Interfaces/Service/IServiceRepository";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterface";
 
+interface IResponse {
+     success: boolean;
+     message: string;
+     data: string | null;
+}
 //interface for signup response
 export interface ISignUpResponse {
      success: boolean;
@@ -576,6 +581,126 @@ class ProviderService implements IProviderService {
                return {
                     success: false,
                     message: "Failed to register",
+               };
+          }
+     }
+
+     //verifies email for sending otp for forgot password
+     async forgotPasswordVerify(email: string): Promise<IResponse> {
+          try {
+               const userData = await this.providerRepository.findProviderByEmail(email);
+               if (!userData) {
+                    return {
+                         success: false,
+                         message: "Mail not registered",
+                         data: null,
+                    };
+               }
+               if (userData?.google_id) {
+                    return {
+                         success: false,
+                         message: "Please Sign in with your google account",
+                         data: null,
+                    };
+               }
+               const otp = generateOtp(); //utility function generates otp
+
+               const mail = await sentMail(
+                    email,
+                    "Forgot Password Verification",
+                    `<p>Enter this code <b>${otp}</b> to verify your email for resetting the password.</p><p>This code expires in <b>2 Minutes</b></p>`
+               ); //this utility function sends otp through mail
+
+               if (mail) {
+                    // works if mail is sucessfully sent
+
+                    const hashedOtp = await hashOtp(otp); // this utility function hash otp
+
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id); //stores otp in the database
+
+                    return {
+                         success: true,
+                         message: "Mail sent successfully",
+                         data: userData.email,
+                    };
+               }
+               return {
+                    success: false,
+                    message: "Failed to verify mail",
+                    data: null,
+               };
+          } catch (error: any) {
+               console.log(error.message);
+               return {success: false, message: "Couldnt verify mail", data: null};
+          }
+     }
+
+     //verifiying otp for verifiying account
+     async passworOtpCheck(otp: string, email: string): Promise<IOtpResponse> {
+          {
+               try {
+                    const provider = await this.providerRepository.findProviderByEmail(email); //gets provider account details
+
+                    if (provider) {
+                         //executes if the account exists
+
+                         const data = await this.providerRepository.findOtpWithId(provider._id); //does look up between provider and otp collection and return the data
+
+                         //checking whether otp exists in the aggregated result
+                         if (data?.otp[0]?.value) {
+                              const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
+
+                              if (otpStatus) {
+                                   // works if otp is verified
+
+                                   return {success: true, message: "Otp verified successfully"};
+                              } else {
+                                   //return if the otp is invalid
+
+                                   return {success: false, message: "Invalid Otp"};
+                              }
+                         } else if (!data?.otp.length) {
+                              //evaluates true if the otp is not found
+
+                              return {success: false, message: "Otp is expired"};
+                         }
+                    } //if user account doesnot exists returns
+                    return {
+                         success: false,
+                         message: "Account not found",
+                    };
+               } catch (error: any) {
+                    console.log(error.message);
+                    return {success: false, message: "Otp error"};
+               }
+          }
+     }
+     //find and resets with new password
+     async changePassword(email: string, password: string): Promise<IResponse> {
+          try {
+               const hashedPassword = await hashPassword(password);
+
+               const updateStatus = await this.providerRepository.updatePassword(
+                    email,
+                    hashedPassword
+               );
+               return updateStatus
+                    ? {
+                           success: true,
+                           message: "Password updated sucessfully",
+                           data: null,
+                      }
+                    : {
+                           success: false,
+                           message: "Failed to update password",
+                           data: null,
+                      };
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Failed to update password",
+                    data: null,
                };
           }
      }
