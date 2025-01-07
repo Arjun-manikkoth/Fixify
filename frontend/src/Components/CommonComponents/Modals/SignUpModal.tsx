@@ -1,164 +1,157 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {signUpApi} from "../../Api/UserApis";
-import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
+import GoogleAuthWrapper from "../GoogleOAuthWrapper";
 
-//interface for sign up props
-interface SignUpProps {
-     openModal: (type: "userSignIn" | "userOtpVerify") => void;
-     closeModal: () => void;
+interface IServiceData {
+     _id: string;
+     name: string;
+     description: string;
+     is_active: boolean;
 }
 
-//interface for form Data
+interface IServiceResponse {
+     success: boolean;
+     message: string;
+     services: IServiceData[] | [];
+}
+
+interface SignUpModalProps {
+     role: "user" | "provider";
+     openModal: (
+          type: "userOtpVerify" | "providerOtpVerify" | "userSignIn" | "providerSignIn"
+     ) => void;
+     closeModal: () => void;
+     handleSignUp: (formData: any) => Promise<any>;
+     getServices?: () => Promise<IServiceResponse>;
+}
+
 interface FormState {
      userName: string;
      email: string;
+     service_id?: string;
      mobileNo: string;
      password: string;
      passwordConfirm: string;
 }
 
-const UserSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => {
-     //state object to store the form data
+const SignUpModal: React.FC<SignUpModalProps> = ({
+     role,
+     openModal,
+     closeModal,
+     handleSignUp,
+     getServices,
+}) => {
      const [formData, setFormData] = useState<FormState>({
           userName: "",
           email: "",
+          service_id: "",
           mobileNo: "",
           password: "",
           passwordConfirm: "",
      });
 
-     //form data input state updation
-     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
-          setFormData({...formData, [e.target.id]: e.target.value});
-     }
+     const [services, setServices] = useState<IServiceData[]>([]);
 
-     //validate email
-     const validateEmail = (email: string): boolean => {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          return emailRegex.test(email);
+     useEffect(() => {
+          if (role === "provider" && getServices) {
+               getServices()
+                    .then((data) => {
+                         if (data.success) setServices(data.services);
+                    })
+                    .catch(() => {});
+          }
+     }, [role, getServices]);
+
+     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+          setFormData({...formData, [e.target.id]: e.target.value});
      };
 
-     //validate password input which specifies one capital letter one number and one special character
-     function validatePassword(password: string): boolean {
-          let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).*$/;
-          return regex.test(password);
-     }
+     const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+     const validatePassword = (password: string) =>
+          /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).*$/.test(password);
 
-     //input validation
-     async function validateSignUp(e: React.FormEvent<HTMLFormElement>) {
-          e.preventDefault(); //prevents submission event
+     const validateForm = () => {
+          let isValid = true;
 
-          let isValid = true; //sets to true initially
-
-          //checks username inputs
-          if (formData.userName.trim() === "") {
+          if (!formData.userName.trim()) {
                toast.error("Please enter a username.");
                isValid = false;
           }
 
-          //checks email inputs
-          if (formData.email.trim() === "") {
-               toast.error("Please enter an email address");
-               isValid = false;
-          } else if (!validateEmail(formData.email)) {
+          if (!formData.email.trim() || !validateEmail(formData.email)) {
                toast.error("Please enter a valid email.");
                isValid = false;
           }
 
-          //checks mobileNo inputs is empty
-          if (formData.mobileNo.trim() === "") {
-               toast.error("Please enter a phone number");
+          if (role === "provider" && !formData.service_id) {
+               toast.error("Please select a service.");
                isValid = false;
-          } else if (formData.mobileNo.trim().length !== 10) {
-               //checks whether it is 10 numbers long
+          }
 
+          if (!formData.mobileNo.trim() || formData.mobileNo.trim().length !== 10) {
                toast.error("Phone number must be 10 digits.");
                isValid = false;
           }
 
-          //check password input is empty
-          if (formData.password.trim().length < 8) {
-               toast.error("Password must be at least 8 characters long.");
+          if (formData.password.trim().length < 8 || !validatePassword(formData.password)) {
+               toast.error("Password must meet complexity requirements.");
                isValid = false;
+          }
+
+          if (formData.password !== formData.passwordConfirm) {
+               toast.error("Passwords do not match.");
+               isValid = false;
+          }
+
+          return isValid;
+     };
+
+     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          if (!validateForm()) return;
+
+          const response = await handleSignUp(formData);
+          if (response.success) {
+               localStorage.setItem(`${role}Email`, response.email || "");
+               openModal(`${role}OtpVerify`);
           } else {
-               //validates password aligns with the given format
-
-               if (!validatePassword(formData.password.trim())) {
-                    toast.error(
-                         "Password must contain at least one uppercase letter, one number, and one special character."
-                    );
-                    isValid = false;
-               } else {
-                    //checks confirm password field is empty
-                    if (formData.passwordConfirm.trim() === "") {
-                         toast.error("Please Re-enter password ");
-                         isValid = false;
-                    } else if (formData.password.trim() !== formData.passwordConfirm) {
-                         //sends toast error if the passwords didnt match
-
-                         toast.error("Passwords doesnt match");
-                         isValid = false;
-                    }
-               }
+               toast.error(response.message);
           }
-
-          if (isValid) {
-               //makes an api call to backend to save the formdata to db
-               const response = await signUpApi(formData);
-
-               if (response.success === true) {
-                    localStorage.setItem("userEmail", response.email || ""); //storing email in localstorage storage
-
-                    //open otp verify modal
-                    openModal("userOtpVerify");
-               } else {
-                    toast.error(response.message);
-               }
-          }
-     }
+     };
 
      return (
           <div
                className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60 overflow-y-auto"
-               onClick={() => closeModal()}
+               onClick={closeModal}
           >
                <div
                     className="bg-white pt-10 pb-8 px-10 rounded-lg shadow-lg w-full max-w-md max-h-full overflow-y-auto scrollbar-hide"
                     onClick={(e) => e.stopPropagation()}
                >
-                    {/* Modal Header */}
                     <h2 className="text-4xl font-semibold mb-11 text-center text-gray-900">
-                         Customer
+                         {role === "user" ? "Customer" : "Service Provider"}
                     </h2>
 
-                    {/* Google Sign-In Button */}
                     <div className="flex justify-center mb-6">
                          <GoogleAuthWrapper />
                     </div>
 
-                    {/* Divider */}
                     <div className="flex items-center justify-center mb-6">
                          <div className="border-t border-gray-300 w-full"></div>
                          <span className="text-gray-500 text-sm px-2">or</span>
                          <div className="border-t border-gray-300 w-full"></div>
                     </div>
 
-                    {/* Form */}
-                    <form className="space-y-6" onSubmit={validateSignUp}>
-                         {/* Name Input */}
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                          <input
                               type="text"
-                              placeholder="Enter your Name"
                               id="userName"
-                              maxLength={15}
+                              placeholder="Enter your Name"
                               value={formData.userName}
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-
-                         {/* Email Input */}
                          <input
                               type="email"
                               id="email"
@@ -167,41 +160,47 @@ const UserSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => {
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-
-                         {/* Mobile Number Input */}
+                         {role === "provider" && (
+                              <select
+                                   id="service_id"
+                                   value={formData.service_id}
+                                   onChange={handleInputChange}
+                                   className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              >
+                                   <option value="" disabled>
+                                        Select Your Service
+                                   </option>
+                                   {services.map((service) => (
+                                        <option key={service._id} value={service._id}>
+                                             {service.name}
+                                        </option>
+                                   ))}
+                              </select>
+                         )}
                          <input
                               type="tel"
                               id="mobileNo"
-                              placeholder="Enter Mobile no"
+                              placeholder="Enter Mobile Number"
                               value={formData.mobileNo}
-                              maxLength={13}
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-
-                         {/* Password Input */}
                          <input
                               type="password"
                               id="password"
                               placeholder="Enter Password"
-                              maxLength={15}
                               value={formData.password}
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-
-                         {/* Confirm Password Input */}
                          <input
                               type="password"
                               id="passwordConfirm"
-                              placeholder="Re-enter Password"
-                              maxLength={15}
+                              placeholder="Confirm Password"
                               value={formData.passwordConfirm}
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-
-                         {/* Submit Button */}
                          <button
                               type="submit"
                               className="w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -209,13 +208,11 @@ const UserSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => {
                               Sign Up
                          </button>
                     </form>
-
-                    {/* Footer */}
                     <p className="mt-4 text-center text-sm text-gray-600">
                          Already Have An Account?{" "}
                          <span
                               className="text-blue-500 hover:underline cursor-pointer"
-                              onClick={() => openModal("userSignIn")}
+                              onClick={() => openModal(`${role}SignIn`)}
                          >
                               Sign In
                          </span>
@@ -226,4 +223,4 @@ const UserSignUpModal: React.FC<SignUpProps> = ({openModal, closeModal}) => {
      );
 };
 
-export default UserSignUpModal;
+export default SignUpModal;

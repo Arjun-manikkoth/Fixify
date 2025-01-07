@@ -1,22 +1,21 @@
 import React, {FC, useState} from "react";
 import {FaMapMarkerAlt, FaEnvelope, FaBars, FaTimes, FaUser} from "react-icons/fa";
-import UserSignInModal from "../UserComponents/UserSignInModal";
-import UserSignUpModal from "../UserComponents/UserSignUpModal";
 import {useSelector} from "react-redux";
 import {RootState} from "../../Redux/Store";
 import {useNavigate} from "react-router-dom";
-import ProviderSignInModal from "../ProviderComponents/ProviderSignInModal";
-import ProviderSignUpModal from "../ProviderComponents/ProviderSignUpModal";
 import ForgotPasswordModal from "./Modals/ForgotPasswordModal";
 import ResetPasswordModal from "./Modals/ResetPasswordModal";
-
+import SignUpModal from "./Modals/SignUpModal";
 import OtpVerifyModal from "./Modals/OtpVerifyModal";
+import SignInModal from "./Modals/SignInModal";
 import {
      otpVerifyApi as otpVerifyApiUser,
      otpResendApi as otpResendApiUser,
      resetPasswordApi as resetPasswordApiUser,
      forgotOtpVerifyApi as forgotOtpVerifyApiUser,
      forgotPasswordApi as forgotPasswordApiUser,
+     signUpApi as signUpApiUser,
+     signInApi as signInApiUser,
 } from "../../Api/UserApis";
 import {
      otpResendApi as otpResendApiProvider,
@@ -24,7 +23,12 @@ import {
      resetPasswordApi as resetPasswordApiProvider,
      forgotPasswordApi as forgotPasswordApiProvider,
      forgotOtpVerifyApi as forgotOtpVerifyApiProvider,
+     signUpApi as signUpApiProvider,
+     signInApi as signInApiProvider,
+     getServices,
 } from "../../Api/ProviderApis";
+import {setUser} from "../../Redux/UserSlice";
+import {setProvider} from "../../Redux/ProviderSlice";
 
 export const ModalContext = React.createContext("");
 
@@ -246,7 +250,12 @@ const Header: FC = () => {
                <ModalContext.Provider value={modalType}>
                     {/* user sign in modal */}
                     {modalType === "userSignIn" && (
-                         <UserSignInModal
+                         <SignInModal
+                              title="Customer"
+                              signInApi={signInApiUser}
+                              role="user"
+                              setReduxAction={setUser}
+                              navigateTo="/users/profile"
                               closeModal={closeModal}
                               openModal={openModal}
                               message={signInMessage}
@@ -255,9 +264,12 @@ const Header: FC = () => {
 
                     {/* user sign up modal */}
                     {modalType === "userSignUp" && (
-                         <ModalContext.Provider value="userSignUp">
-                              <UserSignUpModal closeModal={closeModal} openModal={openModal} />
-                         </ModalContext.Provider>
+                         <SignUpModal
+                              role="user"
+                              openModal={openModal}
+                              closeModal={closeModal}
+                              handleSignUp={signUpApiUser}
+                         />
                     )}
 
                     {/* user otp verification modal*/}
@@ -310,7 +322,12 @@ const Header: FC = () => {
 
                     {/* provider sign in modal */}
                     {modalType === "providerSignIn" && (
-                         <ProviderSignInModal
+                         <SignInModal
+                              title="Provider"
+                              signInApi={signInApiProvider}
+                              role="provider"
+                              setReduxAction={setProvider}
+                              navigateTo="/providers/profile"
                               closeModal={closeModal}
                               openModal={openModal}
                               message={signInMessage}
@@ -319,7 +336,13 @@ const Header: FC = () => {
 
                     {/* provider sign up modal */}
                     {modalType === "providerSignUp" && (
-                         <ProviderSignUpModal closeModal={closeModal} openModal={openModal} />
+                         <SignUpModal
+                              role="provider"
+                              openModal={openModal}
+                              closeModal={closeModal}
+                              handleSignUp={signUpApiProvider}
+                              getServices={getServices}
+                         />
                     )}
 
                     {/* provider otp verification modal */}

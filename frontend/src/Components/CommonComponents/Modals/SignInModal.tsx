@@ -1,15 +1,25 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {signInApi} from "../../Api/ProviderApis";
-import {useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
-import {setProvider} from "../../Redux/ProviderSlice";
-import GoogleAuthWrapper from "../CommonComponents/GoogleOAuthWrapper";
+import GoogleAuthWrapper from "../GoogleOAuthWrapper";
 
 interface SignInProps {
-     openModal: (type: "providerSignUp" | "providerOtpVerify" | "providerForgotPassword") => void;
+     title: string;
+     signInApi: (formData: FormState) => Promise<SignInResponse>;
+     setReduxAction: (data: any) => any;
+     role: "user" | "provider";
+     navigateTo: string;
+     openModal: (
+          type:
+               | "userSignUp"
+               | "providerSignUp"
+               | "userOtpVerify"
+               | "providerOtpVerify"
+               | "userForgotPassword"
+               | "providerForgotPassword"
+     ) => void;
      closeModal: () => void;
      message: string | null;
 }
@@ -19,31 +29,46 @@ interface FormState {
      password: string;
 }
 
-const ProviderSignInModal: React.FC<SignInProps> = (props) => {
+interface SignInResponse {
+     success: boolean;
+     message: string;
+     email?: string;
+     id?: string;
+     name?: string;
+     phone?: string;
+     service_id?: string;
+     url?: string;
+}
+
+const SignInModal: React.FC<SignInProps> = ({
+     title,
+     signInApi,
+     setReduxAction,
+     role,
+     navigateTo,
+     openModal,
+     closeModal,
+     message,
+}) => {
      const [formData, setFormData] = useState<FormState>({
           email: "",
           password: "",
      });
 
      const dispatch = useDispatch();
-
      const navigate = useNavigate();
 
-     //form data input updation
-     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           setFormData({...formData, [e.target.id]: e.target.value});
-     }
+     };
 
-     //validate email
      const validateEmail = (email: string): boolean => {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           return emailRegex.test(email);
      };
 
-     //input validation
      const validateSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
           e.preventDefault();
-
           let isValid = true;
 
           if (formData.email.trim() === "") {
@@ -62,22 +87,32 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
           if (isValid) {
                const response = await signInApi(formData);
 
-               if (response.success === true) {
-                    dispatch(
-                         setProvider({
+               if (response.success) {
+                    //object to store the action creator argument
+                    let reduxState = {};
+                    if (role === "provider") {
+                         reduxState = {
                               email: response.email,
                               id: response.id,
                               service_id: response.service_id,
                               name: response.name,
                               url: response.url,
                               phone: response.phone,
-                         })
-                    );
-
-                    navigate("/providers/profile");
+                         };
+                    } else if (role === "user") {
+                         reduxState = {
+                              email: response.email,
+                              id: response.id,
+                              name: response.name,
+                              phone: response.phone,
+                              url: response.url,
+                         };
+                    }
+                    dispatch(setReduxAction(reduxState));
+                    navigate(navigateTo);
                } else {
                     if (response.message === "Didn't complete otp verification") {
-                         props.openModal("providerOtpVerify");
+                         openModal(`${role}OtpVerify`);
                     } else {
                          toast.error(response.message);
                     }
@@ -86,31 +121,26 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
      };
 
      useEffect(() => {
-          if (props.message) {
-               toast.info(props.message);
+          if (message) {
+               toast.info(message);
           }
-     }, [props.message]); // Trigger this effect when message changes
+     }, [message]);
 
      return (
           <div
                className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
-               onClick={() => {
-                    props.closeModal();
-               }}
+               onClick={closeModal}
           >
                <div
-                    className="bg-white pt-10 pb-8 px-10  rounded-lg shadow-lg w-full max-w-sm"
+                    className="bg-white pt-10 pb-8 px-10 rounded-lg shadow-lg w-full max-w-sm"
                     onClick={(e) => e.stopPropagation()}
                >
                     <h2 className="text-4xl font-semibold mb-11 text-center text-gray-900">
-                         Service Provider
+                         {title}
                     </h2>
-                    {/* Google Sign-In Button */}
                     <div className="flex justify-center mb-6">
                          <GoogleAuthWrapper />
                     </div>
-
-                    {/* Divider */}
                     <div className="flex items-center justify-center mb-6">
                          <div className="border-t border-gray-300 w-full"></div>
                          <span className="text-gray-500 text-sm px-2">or</span>
@@ -124,7 +154,7 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                                    placeholder="Enter Email Address"
                                    value={formData.email}
                                    onChange={handleInputChange}
-                                   className="w-full px-4 py-3 border border-gray-500    rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                                   className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
                          </div>
                          <div>
@@ -140,14 +170,14 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                          <div className="flex justify-end">
                               <span
                                    className="text-sm text-slate-800 hover:underline"
-                                   onClick={() => props.openModal("providerForgotPassword")}
+                                   onClick={() => openModal(`${role}ForgotPassword`)}
                               >
                                    Forgot Password
                               </span>
                          </div>
                          <button
                               type="submit"
-                              className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                          >
                               Sign In
                          </button>
@@ -156,7 +186,7 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
                          Don't have an Account?{" "}
                          <span
                               className="text-blue-500 hover:underline"
-                              onClick={() => props.openModal("providerSignUp")}
+                              onClick={() => openModal(`${role}SignUp`)}
                          >
                               Sign Up
                          </span>
@@ -167,4 +197,4 @@ const ProviderSignInModal: React.FC<SignInProps> = (props) => {
      );
 };
 
-export default ProviderSignInModal;
+export default SignInModal;
