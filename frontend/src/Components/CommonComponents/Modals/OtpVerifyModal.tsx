@@ -15,7 +15,7 @@ interface OtpVerifyModalProps {
      openModal: (
           type: "userSignIn" | "providerSignIn" | "resetPasswordUser" | "resetPasswordProvider"
      ) => void;
-     messageDisplay?: React.Dispatch<React.SetStateAction<string | null>>;
+     messageDisplay?: React.Dispatch<React.SetStateAction<string>>;
      mailType: string;
      title: string; // Modal title
      message: string; // Message to display in the modal

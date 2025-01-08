@@ -1,6 +1,10 @@
 import React from "react";
 import {toast, ToastContainer} from "react-toastify";
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../../Redux/Store";
+import {clearUser} from "../../../Redux/UserSlice";
+import {clearProvider} from "../../../Redux/ProviderSlice";
 
 //reset password form state interface
 interface IResetPassword {
@@ -17,24 +21,30 @@ interface IResponse {
 
 interface IResetPasswordProps {
      title: string;
-     messageDisplay: React.Dispatch<React.SetStateAction<string>>;
      submitPassword: (id: string, data: string) => Promise<IResponse>;
-     accountType: string;
-     openModal: (type: "userSignIn" | "providerSignIn") => void;
+     setModal: (type: "") => void;
+     role: "user" | "provider";
+     logout: () => Promise<IResponse>;
 }
-const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
+
+const NewPasswordModal: React.FC<IResetPasswordProps> = ({
      title,
-     messageDisplay,
      submitPassword,
-     accountType,
-     openModal,
+     setModal,
+     role,
+     logout,
 }) => {
+     const user = useSelector((state: RootState) => state.user);
+     const provider = useSelector((state: RootState) => state.provider);
+
      // state to store the passwords
      const [formData, setFormData] = useState<IResetPassword>({
           password: "",
           confirmPassword: "",
      });
-     console.log("reset password modal");
+
+     const dispatch = useDispatch();
+
      //form data input updation
      function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
           setFormData({...formData, [e.target.id]: e.target.value});
@@ -78,21 +88,22 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
                          }
                     }
                }
-               let emailType = "providerEmail";
-               if (accountType === "user") {
-                    emailType = "userEmail";
-               }
+
                if (isValid) {
-                    const email = localStorage.getItem(emailType) || "";
+                    let email = role === "user" ? user.email : provider.email;
                     const response = await submitPassword(email, formData.password); // calls backend api with email and password
                     if (response.success === true) {
-                         console.log(response);
-                         messageDisplay("Please Sign In with the new password");
-                         if (accountType === "user") {
-                              openModal("userSignIn");
-                         } else {
-                              openModal("providerSignIn");
-                         }
+                         toast.success(
+                              "Password Changed successfully,Kindly login with new password"
+                         );
+                         setTimeout(async () => {
+                              const logoutStatus = await logout();
+                              if (logoutStatus.success) {
+                                   role === "user"
+                                        ? dispatch(clearUser())
+                                        : dispatch(clearProvider());
+                              }
+                         }, 3000);
                     } else {
                          toast.error(response.message);
                     }
@@ -106,7 +117,7 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
           <div
                className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
                onClick={() => {
-                    //    props.closeModal();
+                    setModal("");
                }}
           >
                <div
@@ -152,4 +163,4 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
      );
 };
 
-export default ResetPasswordModal;
+export default NewPasswordModal;

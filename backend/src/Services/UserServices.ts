@@ -14,6 +14,7 @@ import axios from "axios";
 import {IUser} from "../Models/UserModels/UserModel";
 import {IResponse} from "./AdminServices";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
+import mongoose from "mongoose";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -612,6 +613,40 @@ class UserService implements IUserService {
                return {
                     success: false,
                     message: "Failed to update password",
+                    data: null,
+               };
+          }
+     }
+     // verifies the old password
+     async verifyPassword(id: string, password: string): Promise<IResponse> {
+          try {
+               const data = await this.userRepository.getUserDataWithId(id);
+
+               if (data?.password) {
+                    const status = await comparePasswords(password, data.password);
+                    return status
+                         ? {
+                                success: true,
+                                message: "Password verified successfully",
+                                data: null,
+                           }
+                         : {
+                                success: false,
+                                message: "Incorrect Password",
+                                data: null,
+                           };
+               } else {
+                    return {
+                         success: false,
+                         message: "Invalid id",
+                         data: null,
+                    };
+               }
+          } catch (error: any) {
+               console.log(error.message);
+               return {
+                    success: false,
+                    message: "Failed to verify password",
                     data: null,
                };
           }

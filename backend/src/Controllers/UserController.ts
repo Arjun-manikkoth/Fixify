@@ -436,5 +436,42 @@ class UserController {
                });
           }
      }
+
+     //confirm the old password
+     async confirmPassword(req: Request, res: Response): Promise<void> {
+          try {
+               const response = await this.UserService.verifyPassword(
+                    req.params.id as string,
+                    req.body.password as string
+               );
+
+               if (response.success) {
+                    res.status(200).json({
+                         success: true,
+                         message: response.message,
+                         data: null,
+                    });
+               } else if (response.message === "Failed to verify password") {
+                    res.status(500).json({
+                         success: false,
+                         message: response.message,
+                         data: null,
+                    });
+               } else {
+                    res.status(401).json({
+                         success: false,
+                         message: response.message,
+                         data: null,
+                    });
+               }
+          } catch (error: any) {
+               console.error(error.message);
+               res.status(500).json({
+                    success: false,
+                    message: "An internal server error occurred.",
+                    data: null,
+               });
+          }
+     }
 }
 export default UserController;

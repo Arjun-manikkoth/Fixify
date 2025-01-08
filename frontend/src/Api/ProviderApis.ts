@@ -94,12 +94,14 @@ const logoutProvider = async () => {
           return {
                success: true,
                message: response.data.message,
+               data: null,
           };
      } catch (error: any) {
           console.log(error.message);
           return {
                success: false,
                message: error.response.data.message,
+               data: null,
           };
      }
 };
@@ -288,7 +290,7 @@ const forgotOtpVerifyApi = async (otp: string, email: string) => {
 //api to authenticated email and send otp
 const resetPasswordApi = async (email: string, password: string) => {
      try {
-          const response = await axiosProvider.post(providerRoutes.reset_password, {
+          const response = await axiosProvider.patch(providerRoutes.reset_password, {
                email,
                password,
           });
@@ -297,6 +299,28 @@ const resetPasswordApi = async (email: string, password: string) => {
                success: true,
                message: response.data.message,
                data: response.data.data,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
+//api to validate the current password
+const confirmPasswordApi = async (id: string | null, password: string) => {
+     try {
+          const response = await axiosProvider.post(`${providerRoutes.confirm_password}/${id}`, {
+               password,
+          });
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: null,
           };
      } catch (error: any) {
           console.log(error.message);
@@ -324,4 +348,5 @@ export {
      forgotPasswordApi,
      forgotOtpVerifyApi,
      resetPasswordApi,
+     confirmPasswordApi,
 };

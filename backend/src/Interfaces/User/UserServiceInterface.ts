@@ -20,5 +20,6 @@ interface IUserService {
      forgotPasswordVerify(id: string): Promise<IResponse>;
      passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;
      changePassword(email: string, password: string): Promise<IResponse>;
+     verifyPassword(id: string, password: string): Promise<IResponse>;
 }
 export default IUserService;

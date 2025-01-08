@@ -24,5 +24,6 @@ interface IProviderService {
      registerProvider(data: IProviderRegistration): Promise<IOtpResponse>;
      changePassword(email: string, password: string): Promise<IResponse>;
      passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;
+     verifyPassword(id: string, password: string): Promise<IResponse>;
 }
 export default IProviderService;

@@ -16,12 +16,15 @@ import {setProvider} from "../../Redux/ProviderSlice";
 import {profileData} from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import {IServices} from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import {IProviderProfile} from "../../Interfaces/ProviderInterfaces/SignInInterface";
+import ChangePasswordModalProvider from "./ProviderChangePassword";
+import ProviderResetPassword from "./ProviderResetPassword";
 
 const ProviderProfile: React.FC = () => {
      const ref = useRef<HTMLInputElement | null>(null);
 
      const dispatch = useDispatch();
 
+     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
      //state to store services
      const [services, setServices] = useState<IServices[]>([]);
      const [profileData, setProfileData] = useState<IProviderProfile>({
@@ -465,7 +468,10 @@ const ProviderProfile: React.FC = () => {
                                              For optimal security, consider updating your password
                                              periodically.
                                         </p>
-                                        <button className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600">
+                                        <button
+                                             className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600"
+                                             onClick={() => setModal("changePassword")}
+                                        >
                                              Change Now
                                         </button>
                                    </>
@@ -607,6 +613,10 @@ const ProviderProfile: React.FC = () => {
                          </div>
                     </div>
                )}
+               {modalType === "changePassword" && (
+                    <ChangePasswordModalProvider setModal={setModal} />
+               )}
+               {modalType === "newPassword" && <ProviderResetPassword setModal={setModal} />}
           </>
      );
 };

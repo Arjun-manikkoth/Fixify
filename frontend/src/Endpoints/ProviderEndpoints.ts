@@ -11,6 +11,7 @@ const providerRoutes = {
      get_profile_details: "/profile",
      register: "/register",
      forgot_password: "/forgot_password",
+     confirm_password: "/confirm_password",
      forgot_otp_verify: "/forgot_otp_verify",
      reset_password: "/reset_password",
 };

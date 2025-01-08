@@ -8,12 +8,15 @@ import {useDispatch} from "react-redux";
 import {setUser} from "../../Redux/UserSlice";
 import {profileData} from "../../Interfaces/UserInterfaces/SignInInterface";
 import {User} from "../../Interfaces/UserInterfaces/SignInInterface";
+import ChangePasswordModalUser from "./UserChangePassword";
+import UserResetPassword from "./UserPasswordReset";
 
 const UserProfile: React.FC = () => {
      const ref = useRef<HTMLInputElement | null>(null);
 
      const dispatch = useDispatch();
 
+     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
      const [profileData, setProfileData] = useState<User>({
           _id: "",
           name: "",
@@ -314,7 +317,10 @@ const UserProfile: React.FC = () => {
                                              For optimal security, consider updating your password
                                              periodically.
                                         </p>
-                                        <button className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600">
+                                        <button
+                                             className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600"
+                                             onClick={() => setModal("changePassword")}
+                                        >
                                              Change Now
                                         </button>
                                    </>
@@ -332,6 +338,8 @@ const UserProfile: React.FC = () => {
                          </div>
                     </div>
                </div>
+               {modalType === "changePassword" && <ChangePasswordModalUser setModal={setModal} />}
+               {modalType === "newPassword" && <UserResetPassword setModal={setModal} />}
                <ToastContainer position="bottom-right" />
           </>
      );

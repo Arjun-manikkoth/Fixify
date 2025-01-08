@@ -33,7 +33,7 @@ import {setProvider} from "../../Redux/ProviderSlice";
 export const ModalContext = React.createContext("");
 
 const Header: FC = () => {
-     const [isMenuOpen, setIsMenuOpen] = useState(false);
+     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
      const [modalType, setModalType] = useState<
           | "userSignIn"
@@ -51,7 +51,7 @@ const Header: FC = () => {
           | ""
      >("");
      console.log("modal type", modalType);
-     const [signInMessage, setSignInMessage] = useState<string | null>(null);
+     const [signInMessage, setSignInMessage] = useState<string>("");
 
      const user = useSelector((state: RootState) => state.user);
      const provider = useSelector((state: RootState) => state.provider);
@@ -83,7 +83,7 @@ const Header: FC = () => {
           else navigate("/providers/profile");
      };
 
-     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
      return (
           <>

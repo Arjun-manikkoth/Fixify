@@ -114,12 +114,14 @@ const logoutUser = async () => {
           return {
                success: true,
                message: response.data.message,
+               data: null,
           };
      } catch (error: any) {
           console.log(error.message);
           return {
                success: false,
                message: error.response.data.message,
+               data: null,
           };
      }
 };
@@ -247,7 +249,7 @@ const forgotPasswordApi = async (email: string) => {
 //api to  send email and new password
 const resetPasswordApi = async (email: string, password: string) => {
      try {
-          const response = await axiosUser.post(userRoutes.reset_password, {email, password});
+          const response = await axiosUser.patch(userRoutes.reset_password, {email, password});
 
           return {
                success: true,
@@ -263,6 +265,27 @@ const resetPasswordApi = async (email: string, password: string) => {
           };
      }
 };
+
+//api to validate the current password
+const confirmPasswordApi = async (id: string | null, password: string) => {
+     try {
+          const response = await axiosUser.post(`${userRoutes.confirm_password}/${id}`, {password});
+
+          return {
+               success: true,
+               message: response.data.message,
+               data: null,
+          };
+     } catch (error: any) {
+          console.log(error.message);
+          return {
+               success: false,
+               message: error.response.data.message,
+               data: null,
+          };
+     }
+};
+
 export {
      signInApi,
      signUpApi,
@@ -277,4 +300,5 @@ export {
      forgotPasswordApi,
      forgotOtpVerifyApi,
      resetPasswordApi,
+     confirmPasswordApi,
 };
