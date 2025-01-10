@@ -507,7 +507,7 @@ class UserService implements IUserService {
                if (!userData) {
                     return {
                          success: false,
-                         message: "Mail not registered ",
+                         message: "Mail not registered",
                          data: null,
                     };
                }
