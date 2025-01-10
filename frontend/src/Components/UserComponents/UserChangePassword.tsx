@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import ChangePasswordModal from "../CommonComponents/Modals/ChangePasswordModal";
 import {confirmPasswordApi} from "../../Api/UserApis";
 

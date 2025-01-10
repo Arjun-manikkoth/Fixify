@@ -17,6 +17,7 @@ const UserProfile: React.FC = () => {
      const dispatch = useDispatch();
 
      const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
+
      const [profileData, setProfileData] = useState<User>({
           _id: "",
           name: "",

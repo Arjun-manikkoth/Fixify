@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import {toast, ToastContainer} from "react-toastify";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../Redux/Store";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
+
 // Change password form state interface
 interface IChangePassword {
      currentPassword: string;
@@ -37,11 +39,24 @@ const ChangePasswordModal: React.FC<IChangePasswordProps> = ({
           confirmCurrentPassword: "",
      });
 
+     // password show hide
+     const [inputType, setInputType] = useState<{password: boolean; passwordConfirm: boolean}>({
+          password: false,
+          passwordConfirm: false,
+     });
+
      // Form data input updation
      function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
           setFormData({...formData, [e.target.id]: e.target.value});
      }
+     //show and hide passwords
 
+     const toggleEyeButton = (input: "password" | "passwordConfirm") => {
+          setInputType((prev) => ({
+               ...prev,
+               [input]: !prev[input],
+          }));
+     };
      // Input validation
      const validateForm = async (e: React.FormEvent<HTMLFormElement>) => {
           e.preventDefault(); // Prevents default form submission event
@@ -86,30 +101,42 @@ const ChangePasswordModal: React.FC<IChangePasswordProps> = ({
                     className="bg-white pt-8 pb-14 px-10 rounded-lg shadow-lg w-full max-w-sm"
                     onClick={(e) => e.stopPropagation()}
                >
-                    <h2 className="text-4xl font-semibold mb-12 text-center text-gray-900">
+                    <h2 className="text-3xl font-semibold mb-12 text-center text-gray-900">
                          {title}
                     </h2>
 
                     <form className="space-y-7" onSubmit={validateForm}>
-                         <div>
+                         <div className="relative w-full ">
                               <input
-                                   type="password"
+                                   type={inputType.password ? "text" : "password"}
                                    id="currentPassword"
                                    placeholder="Current Password"
                                    value={formData.currentPassword}
                                    onChange={handleInputChange}
                                    className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-                              />
+                              />{" "}
+                              <span
+                                   onClick={() => toggleEyeButton("password")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.password ? <FaEye /> : <FaEyeSlash />}
+                              </span>
                          </div>
-                         <div>
+                         <div className="relative w-full ">
                               <input
-                                   type="password"
+                                   type={inputType.passwordConfirm ? "text" : "password"}
                                    id="confirmCurrentPassword"
                                    placeholder="Confirm Current Password"
                                    value={formData.confirmCurrentPassword}
                                    onChange={handleInputChange}
                                    className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
+                              <span
+                                   onClick={() => toggleEyeButton("passwordConfirm")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.passwordConfirm ? <FaEye /> : <FaEyeSlash />}
+                              </span>
                          </div>
 
                          <button

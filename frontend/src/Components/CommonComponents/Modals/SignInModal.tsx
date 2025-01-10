@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import GoogleAuthWrapper from "../GoogleOAuthWrapper";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
 interface SignInProps {
      title: string;
@@ -55,8 +56,16 @@ const SignInModal: React.FC<SignInProps> = ({
           password: "",
      });
 
+     const [inputType, setInputType] = useState<boolean>(false);
+     const [showPassword, setShowPassword] = useState<boolean>(false);
+
      const dispatch = useDispatch();
      const navigate = useNavigate();
+
+     const toggleEyeButton = () => {
+          setShowPassword((prev) => !prev);
+          setInputType((prev) => !prev);
+     };
 
      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           setFormData({...formData, [e.target.id]: e.target.value});
@@ -157,16 +166,23 @@ const SignInModal: React.FC<SignInProps> = ({
                                    className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
                          </div>
-                         <div>
+                         <div className="relative w-full">
                               <input
-                                   type="password"
+                                   type={inputType ? "text" : "password"}
                                    id="password"
                                    placeholder="Enter Password"
                                    value={formData.password}
                                    onChange={handleInputChange}
-                                   className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                                   className="w-full px-4 py-3 pr-10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
+                              <span
+                                   onClick={toggleEyeButton}
+                                   className="absolute inset-y-0 right-8 flex items-center cursor-pointer"
+                              >
+                                   {showPassword ? <FaEye /> : <FaEyeSlash />}
+                              </span>
                          </div>
+
                          <div className="flex justify-end">
                               <span
                                    className="text-sm text-slate-800 hover:underline"

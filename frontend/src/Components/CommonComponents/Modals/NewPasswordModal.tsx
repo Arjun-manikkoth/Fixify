@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../Redux/Store";
 import {clearUser} from "../../../Redux/UserSlice";
 import {clearProvider} from "../../../Redux/ProviderSlice";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
 //reset password form state interface
 interface IResetPassword {
@@ -42,8 +43,22 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
           password: "",
           confirmPassword: "",
      });
+     // password show hide
+     const [inputType, setInputType] = useState<{password: boolean; passwordConfirm: boolean}>({
+          password: false,
+          passwordConfirm: false,
+     });
 
      const dispatch = useDispatch();
+
+     //show and hide passwords
+
+     const toggleEyeButton = (input: "password" | "passwordConfirm") => {
+          setInputType((prev) => ({
+               ...prev,
+               [input]: !prev[input],
+          }));
+     };
 
      //form data input updation
      function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -124,30 +139,42 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
                     className="bg-white pt-8 pb-14 px-10  rounded-lg shadow-lg w-full max-w-sm"
                     onClick={(e) => e.stopPropagation()}
                >
-                    <h2 className="text-4xl font-semibold mb-12 text-center text-gray-900">
+                    <h2 className="text-3xl font-semibold mb-12 text-center text-gray-900">
                          {title}
                     </h2>
 
                     <form className="space-y-7" onSubmit={validateForm}>
-                         <div>
+                         <div className="relative w-full ">
                               <input
-                                   type="password"
+                                   type={inputType.password ? "text" : "password"}
                                    id="password"
                                    placeholder="Enter New Password"
                                    value={formData.password}
                                    onChange={handleInputChange}
                                    className="w-full px-4 py-3 border border-gray-500    rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
+                              <span
+                                   onClick={() => toggleEyeButton("password")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.password ? <FaEye /> : <FaEyeSlash />}
+                              </span>
                          </div>
-                         <div>
+                         <div className="relative w-full">
                               <input
-                                   type="password"
+                                   type={inputType.passwordConfirm ? "text" : "password"}
                                    id="confirmPassword"
                                    placeholder="Confirm Password"
                                    value={formData.confirmPassword}
                                    onChange={handleInputChange}
                                    className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                               />
+                              <span
+                                   onClick={() => toggleEyeButton("passwordConfirm")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.passwordConfirm ? <FaEye /> : <FaEyeSlash />}
+                              </span>
                          </div>
 
                          <button

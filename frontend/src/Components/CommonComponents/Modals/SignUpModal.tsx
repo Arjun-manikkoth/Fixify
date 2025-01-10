@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GoogleAuthWrapper from "../GoogleOAuthWrapper";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
 interface IServiceData {
      _id: string;
@@ -53,6 +54,11 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
 
      const [services, setServices] = useState<IServiceData[]>([]);
 
+     const [inputType, setInputType] = useState<{password: boolean; passwordConfirm: boolean}>({
+          password: false,
+          passwordConfirm: false,
+     });
+
      useEffect(() => {
           if (role === "provider" && getServices) {
                getServices()
@@ -62,6 +68,13 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
                     .catch(() => {});
           }
      }, [role, getServices]);
+
+     const toggleEyeButton = (input: "password" | "passwordConfirm") => {
+          setInputType((prev) => ({
+               ...prev,
+               [input]: !prev[input],
+          }));
+     };
 
      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
           setFormData({...formData, [e.target.id]: e.target.value});
@@ -185,22 +198,40 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
                               onChange={handleInputChange}
                               className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                          />
-                         <input
-                              type="password"
-                              id="password"
-                              placeholder="Enter Password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                         />
-                         <input
-                              type="password"
-                              id="passwordConfirm"
-                              placeholder="Confirm Password"
-                              value={formData.passwordConfirm}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                         />
+                         <div className="relative w-full">
+                              <input
+                                   type={inputType.password ? "text" : "password"}
+                                   id="password"
+                                   placeholder="Enter Password"
+                                   value={formData.password}
+                                   onChange={handleInputChange}
+                                   className="w-full px-4 py-3 pr-10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                              />
+                              <span
+                                   onClick={() => toggleEyeButton("password")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.password ? <FaEye /> : <FaEyeSlash />}
+                              </span>
+                         </div>
+
+                         <div className="relative w-full">
+                              <input
+                                   type={inputType.passwordConfirm ? "text" : "password"}
+                                   id="passwordConfirm"
+                                   placeholder="Confirm Password"
+                                   value={formData.passwordConfirm}
+                                   onChange={handleInputChange}
+                                   className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                              />
+                              <span
+                                   onClick={() => toggleEyeButton("passwordConfirm")}
+                                   className="absolute inset-y-0 right-6 flex items-center cursor-pointer"
+                              >
+                                   {inputType.passwordConfirm ? <FaEye /> : <FaEyeSlash />}
+                              </span>
+                         </div>
+
                          <button
                               type="submit"
                               className="w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
