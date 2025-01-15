@@ -3,6 +3,7 @@ import UserHeader from "../../Components/UserComponents/UserHeader";
 import UserSidebar from "../../Components/UserComponents/UserSidebar";
 import UserProfile from "../../Components/UserComponents/UserProfile";
 
+
 const HomePage: React.FC = () => {
      return (
           <>
@@ -13,6 +14,8 @@ const HomePage: React.FC = () => {
                          <UserHeader />
 
                          <UserProfile />
+               
+     
                     </div>
                </div>
           </>

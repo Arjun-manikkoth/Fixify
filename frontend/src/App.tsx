@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import {FC} from "react";
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import LandingPage from "./Pages/Common/LandingPage";
 import ProviderHomePage from "./Pages/Provider/ProviderHomePage";
@@ -13,7 +13,7 @@ import AdminProvidersPage from "./Pages/Admin/AdminProvidersPage";
 import AdminApprovalsPage from "./Pages/Admin/AdminApprovalsPage";
 import AdminApprovalDetailsPage from "./Pages/Admin/AdminApprovalDetailsPage";
 import AdminServicesPage from "./Pages/Admin/AdminServicesPage";
-
+import UserAddressPage from "./Pages/User/UserAddressPage";
 const App: FC = () => {
      return (
           <div>
@@ -26,6 +26,9 @@ const App: FC = () => {
                          <Route Component={UserProtected}>
                               {/*user home*/}
                               <Route path="/users/profile" Component={UserProfilePage} />
+
+                               {/*user addresses*/}
+                               <Route path="/users/addresses" Component={UserAddressPage} />
                          </Route>
 
                          {/*provider protected component wrapper*/}

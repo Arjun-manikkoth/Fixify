@@ -10,6 +10,7 @@ declare global {
 }
 // Middleware to verify JWT
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+
      const token = req.cookies.accessToken;
 
      try {
@@ -29,6 +30,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction) => {
                     status: false,
                });
           } else if (error.name === "JsonWebTokenError") {
+               console.log("JsonWebTokenError")
                res.status(401).json({
                     message: "Unauthorized! Access Token is invalid",
                     status: false,

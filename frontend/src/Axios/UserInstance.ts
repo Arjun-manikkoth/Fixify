@@ -26,7 +26,7 @@ instance.interceptors.response.use(
           ) {
                //if access tokens are invalid or refresh tokens are missing or invalid clear cookies and logouts
 
-               await logoutUser();
+                await logoutUser();
                store.dispatch(clearUser()); //clears user data from the store
           } else if (
                error.response.status === 401 &&

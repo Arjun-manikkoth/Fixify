@@ -27,11 +27,11 @@ const UserSidebar: React.FC = () => {
                </div>
                <nav className="mt-10">
                     <ul>
-                         <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
+                         <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4" onClick={() => handleNavigation("/users/profile")}>
                               <FiUser className="text-xl text-black" />
                               <span
                                    className="text-black text-lg font-semibold"
-                                   onClick={() => handleNavigation("/users/profile")}
+                                   
                               >
                                    {" "}
                                    My Profile
@@ -47,9 +47,9 @@ const UserSidebar: React.FC = () => {
                                    Conversations
                               </span>
                          </li>
-                         <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
+                         <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4" onClick={()=>handleNavigation("/users/addresses")}>
                               <FiMapPin className="text-xl text-black" />
-                              <span className="text-black text-lg font-semibold">Addresses</span>
+                              <span className="text-black text-lg font-semibold" >Addresses</span>
                          </li>
                          <li
                               onClick={handleLogout}

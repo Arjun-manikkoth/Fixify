@@ -348,13 +348,13 @@ const ProviderProfile: React.FC = () => {
                                    <div className="w-full space-y-4">
                                         <div
                                              className={`text-center  text-lg  ${
-                                                  profileData.service
+                                                  profileData?.service
                                                        ? "font-semibold"
                                                        : "text-red-700"
                                              } `}
                                         >
-                                             {profileData.service
-                                                  ? profileData.service.name
+                                             {profileData?.service
+                                                  ? profileData?.service.name
                                                   : "Service not chosen"}
                                         </div>
                                         <div className="flex flex-col sm:flex-row sm:space-x-4">
