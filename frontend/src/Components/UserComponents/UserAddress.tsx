@@ -146,8 +146,7 @@ const AddressPage: React.FC = () => {
                     <div className="bg-white shadow p-6 rounded-xl flex flex-col justify-center">
                         <h2 className="text-lg font-semibold text-black mb-4">Add New Address</h2>
                         <p className="text-md text-gray-800 mb-8 px-2">
-                            You can add up to 3 addresses. Further additions will replace the oldest
-                            addresses.
+                            You can add up to 3 addresses.
                         </p>
                         <button
                             onClick={() => setShowAddAddress(true)}
