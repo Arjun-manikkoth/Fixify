@@ -5,10 +5,11 @@ import { toast, ToastContainer } from "react-toastify";
 
 interface IAddAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
+    refreshAddress: React.Dispatch<React.SetStateAction<number>>;
     id: string;
 }
 
-const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id }) => {
+const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddress }) => {
     const [address, setAddress] = useState({
         houseName: "",
         landmark: "",
@@ -22,15 +23,9 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id }) => {
     //show map
     const [showMap, setShowMap] = useState<boolean>(false);
 
-    //close the map modal
-    const close = () => {
-        closeModal(false);
-    };
-
     useEffect(() => {
         getAddressApi(id)
             .then((response) => {
-                console.log(response);
                 setAddress({
                     houseName: response.data.house_name,
                     landmark: response.data.landmark,
@@ -62,7 +57,7 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id }) => {
         }));
         setShowMap(false);
     };
-
+    console.log("upate address modal rendered");
     // Handle form input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -80,9 +75,11 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id }) => {
             .then((response) => {
                 if (response.success) {
                     toast.success(response.message);
-
+                    console.log("refresh address state changed at update address");
+                    refreshAddress((prev) => prev + 1);
                     setTimeout(() => {
-                        close();
+                        console.log("close modal state change call");
+                        closeModal(false);
                     }, 3000);
                 } else {
                     toast.error(response.message);
@@ -107,7 +104,7 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id }) => {
                     >
                         {/* Close Button */}
                         <button
-                            onClick={close}
+                            onClick={() => closeModal(false)}
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
                             aria-label="Close Modal"
                         >

@@ -11,7 +11,8 @@ interface MapModalProps {
         lng: number,
         city: string,
         state: string,
-        country: string
+        country: string,
+        street?: string
     ) => void;
 }
 
@@ -84,10 +85,13 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
             const pincode =
                 addressComponents.find((c: any) => c.types.includes("postal_code"))?.long_name ||
                 "";
-            return { city, state, pincode };
+            const street =
+                addressComponents.find((c: any) => c.types.includes("political"))?.long_name || "";
+            console.log(street, "at frontend");
+            return { city, state, pincode, street };
         } else {
             toast.error("Error fetching address details:", message);
-            return { city: "", state: "", pincode: "" };
+            return { city: "", state: "", pincode: "", street: "" };
         }
     };
 
@@ -95,8 +99,8 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
     const handleConfirmLocation = async () => {
         if (currentLocation) {
             const { lat, lng } = currentLocation;
-            const { city, state, pincode } = await fetchAddressDetails(lat, lng);
-            onLocationSelect(lat, lng, city, state, pincode);
+            const { city, state, pincode, street } = await fetchAddressDetails(lat, lng);
+            onLocationSelect(lat, lng, city, state, pincode, street);
         }
     };
 

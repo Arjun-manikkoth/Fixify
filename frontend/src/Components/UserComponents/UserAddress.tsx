@@ -24,11 +24,16 @@ const AddressPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [showAddAddress, setShowAddAddress] = useState<boolean>(false);
     const [showEditAddress, setShowEditAddress] = useState<boolean>(false);
+    const [refresh, setRefresh] = useState<number>(0);
 
     const user = useSelector((state: RootState) => state.user) || "";
 
     //state to store the edit address id
     const [selectedId, setSelectedId] = useState<string>("");
+
+    console.log(refresh);
+    console.log(addresses);
+    console.log("user addresses rendered");
 
     // Delete an address
     const handleDeleteAddress = async (id: string) => {
@@ -51,6 +56,8 @@ const AddressPage: React.FC = () => {
         getAddressesApi(user?.id)
             .then((response) => {
                 if (response.success) {
+                    console.log("get address api called");
+                    console.log("this data will be stored in the address statje", response.data);
                     setAddresses(response.data);
                     setLoading(false);
 
@@ -65,7 +72,7 @@ const AddressPage: React.FC = () => {
                 console.log("there is some error");
                 toast.error(error.response?.data?.message || "Error fetching the address.");
             });
-    }, []);
+    }, [refresh]);
 
     return (
         <>
@@ -86,32 +93,32 @@ const AddressPage: React.FC = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <input
                                         type="text"
-                                        className="w-full py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={address.house_name}
+                                        className="w-full py-1 border-b-2 border-brandBlue focus:outline-none focus:border-blue-500"
+                                        value={address.house_name}
                                         readOnly
                                     />
                                     <input
                                         type="text"
                                         className="w-full py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={address.landmark}
+                                        value={address.landmark}
                                         readOnly
                                     />
                                     <input
                                         type="text"
                                         className="w-full py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={address.city}
+                                        value={address.city}
                                         readOnly
                                     />
                                     <input
                                         type="text"
                                         className="w-full py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={address.state}
+                                        value={address.state}
                                         readOnly
                                     />
                                     <input
                                         type="text"
                                         className="w-full py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={address.pincode}
+                                        value={address.pincode}
                                         readOnly
                                     />
                                 </div>
@@ -150,7 +157,12 @@ const AddressPage: React.FC = () => {
                         </p>
                         <button
                             onClick={() => setShowAddAddress(true)}
-                            className="px-5 py-2.5 bg-brandBlue text-white rounded-3xl hover:bg-blue-700"
+                            className={`px-5 py-2.5 rounded-3xl ${
+                                addresses?.length >= 3
+                                    ? "bg-brandBlue text-white hover:bg-blue-400 cursor-not-allowed"
+                                    : "bg-brandBlue text-white hover:bg-blue-700"
+                            }`}
+                            disabled={addresses.length >= 3}
                         >
                             Add New
                         </button>
@@ -159,9 +171,15 @@ const AddressPage: React.FC = () => {
             </div>
             <ToastContainer position="bottom-right" />
 
-            {showAddAddress && <AddAddressModal closeModal={setShowAddAddress} />}
+            {showAddAddress && (
+                <AddAddressModal closeModal={setShowAddAddress} refreshAddress={setRefresh} />
+            )}
             {showEditAddress && (
-                <UpdateAddressModal closeModal={setShowEditAddress} id={selectedId} />
+                <UpdateAddressModal
+                    closeModal={setShowEditAddress}
+                    id={selectedId}
+                    refreshAddress={setRefresh}
+                />
             )}
         </>
     );

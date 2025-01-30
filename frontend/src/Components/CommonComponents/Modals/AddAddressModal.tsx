@@ -7,9 +7,10 @@ import { toast, ToastContainer } from "react-toastify";
 
 interface IAddAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
+    refreshAddress: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const AddAddress: React.FC<IAddAddressProps> = ({ closeModal }) => {
+const AddAddress: React.FC<IAddAddressProps> = ({ closeModal, refreshAddress }) => {
     const [address, setAddress] = useState({
         houseName: "",
         landmark: "",
@@ -19,16 +20,11 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal }) => {
         state: "",
         pincode: "",
     });
-
+    console.log("add address modal rendered");
     //show map
     const [showMap, setShowMap] = useState<boolean>(false);
 
     const user = useSelector((state: RootState) => state.user);
-
-    //close the map modal
-    const close = () => {
-        closeModal(false);
-    };
 
     // Handle location selection from MapModal
     const handleLocationSelect = (
@@ -67,9 +63,9 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal }) => {
                 .then((response) => {
                     if (response.success) {
                         toast.success(response.message);
-
+                        refreshAddress((prev) => prev + 1);
                         setTimeout(() => {
-                            close();
+                            closeModal(false);
                         }, 3000);
                     } else {
                         toast.error(response.message);
@@ -95,7 +91,7 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal }) => {
                     >
                         {/* Close Button */}
                         <button
-                            onClick={close}
+                            onClick={() => closeModal(false)}
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
                             aria-label="Close Modal"
                         >
