@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { useRef } from "react";
 import {
     getProviderData,
@@ -415,7 +415,6 @@ const ProviderProfile: React.FC = () => {
                 )}
             </div>
 
-            <ToastContainer position="bottom-right" />
             {!profileData.provider.is_approved && (
                 <div className="flex space-x-6 bg-customBlue p-9 mt-4 me-12 rounded-xl">
                     <div className="w-full bg-white shadow p-11 rounded-xl">

@@ -1,5 +1,5 @@
 import React from "react";
-import { FiUser, FiBook, FiMessageCircle, FiMapPin, FiLogOut } from "react-icons/fi";
+import { FiUser, FiBook, FiMessageCircle, FiMapPin, FiLogOut, FiSearch } from "react-icons/fi";
 import { clearUser } from "../../Redux/UserSlice";
 import { logoutUser } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";
@@ -14,7 +14,6 @@ const UserSidebar: React.FC = () => {
 
         if (response.success) {
             dispatch(clearUser());
-            console.log("User logged out");
         }
     };
     const handleNavigation = (route: string) => {
@@ -37,6 +36,13 @@ const UserSidebar: React.FC = () => {
                     <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
                         <FiBook className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Bookings</span>
+                    </li>
+                    <li
+                        className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
+                        onClick={() => handleNavigation("/users/slots")}
+                    >
+                        <FiSearch className="text-xl text-black" />
+                        <span className="text-black text-lg font-semibold">Find Service</span>
                     </li>
                     <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
                         <FiMessageCircle className="text-xl text-black" />

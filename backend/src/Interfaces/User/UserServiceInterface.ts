@@ -1,4 +1,4 @@
-import { IUpdateProfile, SignUp } from "./SignUpInterface";
+import { ISlotFetch, IUpdateProfile, SignUp } from "./SignUpInterface";
 import { ISignIn } from "./SignUpInterface";
 import { ISignUpResponse } from "../../Services/UserServices";
 import { IOtpResponse } from "../../Services/UserServices";
@@ -27,5 +27,6 @@ interface IUserService {
     changeAddressStatus(id: string): Promise<IResponse>;
     getAddress(addressId: string): Promise<IResponse>;
     editAddress(address: IAddAddress, id: string): Promise<IResponse>;
+    getSlots(data: ISlotFetch): Promise<IResponse>;
 }
 export default IUserService;

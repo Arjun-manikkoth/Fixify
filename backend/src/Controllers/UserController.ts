@@ -2,6 +2,7 @@ import { access } from "fs";
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { messages } from "../Constants/Messages";
+import { ISlotFetch } from "../Interfaces/User/SignUpInterface";
 
 class UserController {
     constructor(private UserService: IUserService) {}
@@ -660,6 +661,46 @@ class UserController {
                 res.status(400).json({
                     success: false,
                     message: status?.message || "Address creation failed.",
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in createAddress:", error.message);
+
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+            });
+        }
+    }
+
+    //fetch all available slots based on location
+    async fetchSlots(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.UserService.getSlots({
+                service_id: req.query.service_id as string,
+                lat: parseFloat(req.query.lat as string),
+                long: parseFloat(req.query.long as string),
+                date: req.query.date as string,
+                time: req.query.time as string,
+            });
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else if (response.message === "Failed to fetch slots") {
+                res.status(500).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            } else {
+                res.status(401).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
                 });
             }
         } catch (error: any) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import AddAddressModal from "../CommonComponents/Modals/AddAddressModal";
 import UpdateAddressModal from "../CommonComponents/Modals/UpdateAddressModal";
@@ -169,7 +169,6 @@ const AddressPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <ToastContainer position="bottom-right" />
 
             {showAddAddress && (
                 <AddAddressModal closeModal={setShowAddAddress} refreshAddress={setRefresh} />

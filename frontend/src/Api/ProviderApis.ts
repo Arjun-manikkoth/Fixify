@@ -3,7 +3,6 @@ import { SignIn } from "../Interfaces/ProviderInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
 import { cloudinaryApi } from "./UserApis";
-import { lchownSync } from "fs";
 
 interface ISignUpResponse {
     success: boolean;
@@ -146,6 +145,7 @@ const getServices = async () => {
     }
 };
 
+//api to sign in /sign up with google
 const googleAuthApi = async (code: string) => {
     try {
         const response = await axiosProvider.patch(`${providerRoutes.o_auth}?code=${code}`);

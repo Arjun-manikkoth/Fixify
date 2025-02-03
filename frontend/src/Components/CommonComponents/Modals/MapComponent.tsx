@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { GoogleMap, Marker, useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { reverseGeocodingApi } from "../../../Api/UserApis";
 import { Libraries } from "@react-google-maps/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 interface MapModalProps {
     onClose: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,6 +33,11 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(
         null
     );
+
+    useEffect(() => {
+        console.log("map mounted");
+        return console.log("map unmounted");
+    }, []);
 
     const mapRef = useRef<google.maps.Map | null>(null);
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -164,9 +169,8 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
                     <p>Loading map...</p>
                 )}
             </div>
-            <ToastContainer position="bottom-right" />
         </div>
     );
 };
 
-export default MapModal;
+export default React.memo(MapModal);

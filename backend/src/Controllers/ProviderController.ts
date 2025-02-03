@@ -510,7 +510,6 @@ class ProviderController {
     //creates a schedule for the day with locacation
     async createSchedule(req: Request, res: Response): Promise<void> {
         try {
-            console.log(req.body);
             const response = await this.providerService.addSchedule(
                 req.body.id,
                 req.body.date,

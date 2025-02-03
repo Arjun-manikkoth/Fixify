@@ -3,7 +3,7 @@ import MapModal from "./MapComponent";
 import { addAddressApi } from "../../../Api/UserApis";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../Redux/Store";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 interface IAddAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -223,7 +223,6 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal, refreshAddress }) 
                 </div>
                 )
             </div>{" "}
-            <ToastContainer position="bottom-right" />
         </>
     );
 };

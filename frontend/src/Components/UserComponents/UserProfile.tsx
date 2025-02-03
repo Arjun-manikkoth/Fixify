@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { useRef } from "react";
+import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import { cloudinaryApi, getUserData, updateProfile } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../Redux/UserSlice";
@@ -17,7 +18,9 @@ const UserProfile: React.FC = () => {
     const dispatch = useDispatch();
 
     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
-
+    //state to show loading indicator
+    const [loading, setLoading] = useState<boolean>(false);
+    //state to store the profile data
     const [profileData, setProfileData] = useState<User>({
         _id: "",
         name: "",
@@ -89,6 +92,7 @@ const UserProfile: React.FC = () => {
                 }
 
                 if (user.id) {
+                    setLoading(true);
                     const updateResponse = await updateProfile({
                         ...formData,
                         url: imageUrl,
@@ -108,6 +112,7 @@ const UserProfile: React.FC = () => {
                         );
                         setPreview("");
                     }
+                    setLoading(false);
                 }
             }
         } catch (error: any) {
@@ -158,92 +163,96 @@ const UserProfile: React.FC = () => {
                 <div className="w-1/2 bg-white shadow p-11 rounded-xl">
                     <h2 className="text-lg font-semibold text-black mb-4">My Profile</h2>
                     <div className="flex flex-col items-center">
-                        <form
-                            onSubmit={validateProfile}
-                            className="flex flex-col items-center w-full"
-                        >
-                            {/* Profile Image */}
-                            <div className="relative w-full flex justify-center">
-                                {preview ? (
-                                    <>
+                        {loading ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <form
+                                onSubmit={validateProfile}
+                                className="flex flex-col items-center w-full"
+                            >
+                                {/* Profile Image */}
+                                <div className="relative w-full flex justify-center">
+                                    {preview ? (
+                                        <>
+                                            <img
+                                                src={preview}
+                                                alt="Profile"
+                                                className="w-52 h-52 rounded-full mb-8 cursor-pointer"
+                                                onClick={handleImageUpload}
+                                            />
+                                            <button
+                                                onClick={() => cancelUpload()}
+                                                className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg"
+                                            >
+                                                ✕
+                                            </button>
+                                        </>
+                                    ) : user.url ? (
                                         <img
-                                            src={preview}
-                                            alt="Profile"
+                                            src={user.url}
+                                            alt="Preview"
+                                            referrerPolicy="no-referrer"
                                             className="w-52 h-52 rounded-full mb-8 cursor-pointer"
                                             onClick={handleImageUpload}
                                         />
-                                        <button
-                                            onClick={() => cancelUpload()}
-                                            className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg"
-                                        >
-                                            ✕
-                                        </button>
-                                    </>
-                                ) : user.url ? (
-                                    <img
-                                        src={user.url}
-                                        alt="Preview"
-                                        referrerPolicy="no-referrer"
-                                        className="w-52 h-52 rounded-full mb-8 cursor-pointer"
-                                        onClick={handleImageUpload}
-                                    />
-                                ) : (
-                                    <img
-                                        src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
-                                        alt="Default Profile"
-                                        className="w-52 h-52 rounded-full mb-8 cursor-pointer"
-                                        onClick={handleImageUpload}
-                                    />
-                                )}
-                            </div>
-
-                            <input
-                                type="file"
-                                ref={ref}
-                                id="image"
-                                onChange={imageOnChange}
-                                className="hidden"
-                            />
-
-                            {/* Profile Name and Phone Number */}
-                            <div className="w-full space-y-4">
-                                <div className="flex flex-col sm:flex-row sm:space-x-4">
-                                    <div className="w-full sm:w-1/2">
-                                        <input
-                                            type="text"
-                                            id="userName"
-                                            onChange={onChangeInput}
-                                            className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                            value={formData.userName}
+                                    ) : (
+                                        <img
+                                            src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
+                                            alt="Default Profile"
+                                            className="w-52 h-52 rounded-full mb-8 cursor-pointer"
+                                            onClick={handleImageUpload}
                                         />
+                                    )}
+                                </div>
+
+                                <input
+                                    type="file"
+                                    ref={ref}
+                                    id="image"
+                                    onChange={imageOnChange}
+                                    className="hidden"
+                                />
+
+                                {/* Profile Name and Phone Number */}
+                                <div className="w-full space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:space-x-4">
+                                        <div className="w-full sm:w-1/2">
+                                            <input
+                                                type="text"
+                                                id="userName"
+                                                onChange={onChangeInput}
+                                                className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                                                value={formData.userName}
+                                            />
+                                        </div>
+                                        <div className="w-full sm:w-1/2">
+                                            <input
+                                                type="text"
+                                                id="mobileNo"
+                                                onChange={onChangeInput}
+                                                className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                                                value={formData.mobileNo}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full sm:w-1/2">
+                                    <div>
                                         <input
                                             type="text"
-                                            id="mobileNo"
-                                            onChange={onChangeInput}
                                             className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                            value={formData.mobileNo}
+                                            defaultValue={user.email}
+                                            readOnly
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <input
-                                        type="text"
-                                        className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                        defaultValue={user.email}
-                                        readOnly
-                                    />
-                                </div>
-                            </div>
 
-                            {/* Save Button */}
-                            <div className="mt-10">
-                                <button className="px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg">
-                                    Save
-                                </button>
-                            </div>
-                        </form>
+                                {/* Save Button */}
+                                <div className="mt-10">
+                                    <button className="px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
 
@@ -340,7 +349,6 @@ const UserProfile: React.FC = () => {
             </div>
             {modalType === "changePassword" && <ChangePasswordModalUser setModal={setModal} />}
             {modalType === "newPassword" && <UserResetPassword setModal={setModal} />}
-            <ToastContainer position="bottom-right" />
         </>
     );
 };

@@ -1,5 +1,5 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
-import { IUpdateProfile, SignUp } from "../Interfaces/User/SignUpInterface";
+import { ISlotFetch, IUpdateProfile, SignUp } from "../Interfaces/User/SignUpInterface";
 import { ISignIn } from "../Interfaces/User/SignUpInterface";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import { messages } from "../Constants/Messages";
@@ -17,6 +17,7 @@ import { IResponse } from "./AdminServices";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 import mongoose from "mongoose";
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
+import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -55,7 +56,8 @@ class UserService implements IUserService {
     constructor(
         private userRepository: IUserRepository,
         private otpRepository: IOtpRepository,
-        private addressRepository: IAddressRepository
+        private addressRepository: IAddressRepository,
+        private scheduleRepository: IScheduleRepository
     ) {}
 
     /**
@@ -757,7 +759,7 @@ class UserService implements IUserService {
             };
         }
     }
-
+    // get address associated with user
     async getAddress(addressId: string): Promise<IResponse> {
         try {
             const address = await this.addressRepository.fetchAddress(addressId);
@@ -783,7 +785,7 @@ class UserService implements IUserService {
             };
         }
     }
-
+    //update address
     async editAddress(address: IAddAddress, id: string): Promise<IResponse> {
         try {
             const updatedStatus = await this.addressRepository.updateAddress(address, id);
@@ -805,6 +807,33 @@ class UserService implements IUserService {
             return {
                 success: false,
                 message: "Failed to update address",
+                data: null,
+            };
+        }
+    }
+
+    //get all slots based on time location date and service
+    async getSlots(data: ISlotFetch): Promise<IResponse> {
+        try {
+            const slots = await this.scheduleRepository.findSlots(data);
+
+            return slots.success
+                ? {
+                      success: true,
+                      message: "Slots fetched successfully",
+                      data: slots.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to fetch slots",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
+            return {
+                success: false,
+                message: "Error in fetching slots",
                 data: null,
             };
         }

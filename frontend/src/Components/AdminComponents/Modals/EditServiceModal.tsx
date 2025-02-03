@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { useState } from "react";
 import { editService, getService } from "../../../Api/AdminApis";
 
@@ -139,7 +139,6 @@ const EditServiceModal: React.FC<AddServiceProps> = ({ closeModal, id, refresh }
                     </button>
                 </form>
             </div>
-            <ToastContainer position="bottom-right" />
         </div>
     );
 };

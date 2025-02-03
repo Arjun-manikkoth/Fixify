@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import LandingPage from "./Pages/Common/LandingPage";
 import ProviderHomePage from "./Pages/Provider/ProviderHomePage";
 import UserProfilePage from "./Pages/User/UserHomePage";
@@ -15,6 +16,7 @@ import AdminApprovalDetailsPage from "./Pages/Admin/AdminApprovalDetailsPage";
 import AdminServicesPage from "./Pages/Admin/AdminServicesPage";
 import UserAddressPage from "./Pages/User/UserAddressPage";
 import ProviderSlotsPage from "./Pages/Provider/ProviderSlots";
+import UserSlotPage from "./Pages/User/UserSlots";
 
 const App: FC = () => {
     return (
@@ -31,6 +33,9 @@ const App: FC = () => {
 
                         {/*user addresses*/}
                         <Route path="/users/addresses" Component={UserAddressPage} />
+
+                        {/*user slots listing*/}
+                        <Route path="/users/slots" Component={UserSlotPage} />
                     </Route>
 
                     {/*provider protected component wrapper*/}
@@ -60,6 +65,7 @@ const App: FC = () => {
                     </Route>
                 </Routes>
             </Router>
+            <ToastContainer position="bottom-right" />
         </div>
     );
 };

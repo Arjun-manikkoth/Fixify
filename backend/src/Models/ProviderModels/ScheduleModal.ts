@@ -1,14 +1,15 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface ILocation {
-    latitude: number;
-    longitude: number;
+    geo: { type: "Point"; coordinates: [number, number] }; // GeoJSON format
+    address: ILocationDetails;
+}
+export interface ILocationDetails {
     city: string;
     state: string;
     pincode: string;
     street: string;
 }
-
 export interface ISlot {
     time: string;
     status: "available" | "booked" | "blocked";
@@ -17,7 +18,7 @@ export interface ISlot {
 export interface ISchedule extends Document {
     technician_id: ObjectId;
     location: ILocation;
-    date: string;
+    date: Date;
     slots: ISlot[];
     is_active: boolean;
 }
@@ -30,23 +31,38 @@ const scheduleSchema: Schema = new Schema(
             required: true,
         },
         location: {
-            latitude: { type: Number, required: true },
-            longitude: { type: Number, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            pincode: { type: String, required: true },
-            street: {
-                type: String,
-                required: true,
+            address: {
+                city: { type: String, required: true },
+                state: { type: String, required: true },
+                pincode: { type: String, required: true },
+                street: {
+                    type: String,
+                    required: true,
+                },
+            },
+
+            geo: {
+                type: { type: String, default: "Point" },
+                coordinates: {
+                    type: [Number],
+                    required: true,
+                    validate: {
+                        validator: function (coords: number[]) {
+                            return coords.length === 2;
+                        },
+                        message:
+                            "Coordinates must be an array of exactly two numbers [longitude, latitude].",
+                    },
+                },
             },
         },
-        date: { type: String, required: true },
+        date: { type: Date, required: true },
         slots: [
             {
                 time: { type: String, required: true },
                 status: {
                     type: String,
-                    enum: ["available", "booked", "blocked"],
+                    enum: ["available", "booked"],
                     default: "available",
                 },
             },
@@ -65,6 +81,8 @@ const scheduleSchema: Schema = new Schema(
     },
     { timestamps: true }
 );
+
+scheduleSchema.index({ "location.geo": "2dsphere" });
 
 const ScheduleModel = mongoose.model<ISchedule>("schedule", scheduleSchema);
 

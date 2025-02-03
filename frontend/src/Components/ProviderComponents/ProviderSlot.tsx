@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import MapModal from "../CommonComponents/Modals/MapComponent";
+import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import { createScheduleApi, getScheduleApi } from "../../Api/ProviderApis";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
-import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
 
 // Function to generate the next 7 days (handles month transitions)
@@ -28,6 +28,7 @@ interface ILocation {
     pincode: string;
     street: string | undefined;
 }
+
 interface ISlots {
     time: string;
     status: string;
@@ -63,11 +64,15 @@ const Slots: React.FC = () => {
         if (!selectedDate) return;
 
         setLoading(true);
-
+        setLoading(true);
         getScheduleApi(provider.id, selectedDate).then((res) => {
             if (res.data) {
                 setSlots(res.data.slots);
-                setLocation(res.data.location);
+                setLocation({
+                    lat: res.data.location.geo.coordinates[0],
+                    long: res.data.location.geo.coordinates[1],
+                    ...res.data.location.address,
+                });
             } else {
                 setSlots(null);
                 setLocation({
@@ -81,6 +86,8 @@ const Slots: React.FC = () => {
             }
             setLoading(false);
         });
+
+        setLoading(false);
     }, [selectedDate, forceFetch]);
 
     const onLocationSelect = (
@@ -180,7 +187,9 @@ const Slots: React.FC = () => {
                         Available Slots for {new Date(selectedDate).toDateString()}
                     </h3>
                     <div className="flex flex-col gap-4">
-                        {slots ? (
+                        {isLoading ? (
+                            <LoadingSpinner />
+                        ) : slots && slots.length > 0 ? (
                             slots.map((slot) => (
                                 <div
                                     key={slot.time}
@@ -199,7 +208,6 @@ const Slots: React.FC = () => {
                 </div>
             )}
 
-            <ToastContainer position="bottom-right" />
             {map && <MapModal onClose={() => setMap(false)} onLocationSelect={onLocationSelect} />}
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MapModal from "./MapComponent";
 import { getAddressApi, updateAddressApi } from "../../../Api/UserApis";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 interface IAddAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -233,7 +233,6 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddr
                 </div>
                 )
             </div>{" "}
-            <ToastContainer position="bottom-right" />
         </>
     );
 };

@@ -12,6 +12,24 @@ interface ISignUpResponse {
     name?: string;
     phone?: string;
 }
+
+export interface IRegion {
+    latittude: number;
+    longittude: number;
+    city: string;
+    state: string;
+    street: string | undefined;
+    pincode: string;
+}
+
+export interface ICheckSlot {
+    service_id: string;
+    latitude: number;
+    longitude: number;
+    date: string;
+    time: string;
+}
+
 //api sends sign in data to the server
 const signInApi = async (formData: SignIn) => {
     try {
@@ -438,6 +456,35 @@ const updateAddressApi = async (
     }
 };
 
+//api to get slots based on the selected location,service,date,time
+
+const checkAvailabilityApi = async (data: ICheckSlot) => {
+    try {
+        const response = await axiosUser.get(`${userRoutes.slots}`, {
+            params: {
+                service_id: data.service_id,
+                lat: data.latitude,
+                long: data.longitude,
+                date: data.date,
+                time: data.time,
+            },
+        });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -459,4 +506,5 @@ export {
     deleteAddressApi,
     getAddressApi,
     updateAddressApi,
+    checkAvailabilityApi,
 };

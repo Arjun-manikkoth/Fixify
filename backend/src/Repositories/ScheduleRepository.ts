@@ -1,7 +1,7 @@
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import { IAddress } from "../Interfaces/Provider/SignIn";
 import Schedule, { ISchedule } from "../Models/ProviderModels/ScheduleModal";
-import { Schema } from "mongoose";
+import { ISlotFetch } from "../Interfaces/User/SignUpInterface";
 import mongoose from "mongoose";
 import { IResponse } from "../Services/AdminServices";
 
@@ -11,12 +11,12 @@ class ScheduleRepository implements IScheduleRepository {
         try {
             const schedule = new Schedule({
                 technician_id: new mongoose.Types.ObjectId(id),
-                "location.latitude": address.latitude,
-                "location.longitude": address.longitude,
-                "location.city": address.city,
-                "location.state": address.state,
-                "location.pincode": address.pincode,
-                "location.street": address.street,
+                "location.geo.type": "Point",
+                "location.geo.coordinates": [address.longitude, address.latitude],
+                "location.address.city": address.city,
+                "location.address.state": address.state,
+                "location.address.pincode": address.pincode,
+                "location.address.street": address.street,
                 date: date,
                 slots: [
                     {
@@ -88,6 +88,91 @@ class ScheduleRepository implements IScheduleRepository {
             }
         } catch (error: any) {
             console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+    //finds slots with selected date time location and service
+    async findSlots(data: ISlotFetch): Promise<IResponse> {
+        try {
+            const { date, lat: latitude, long: longitude, service_id } = data;
+
+            const radiusInMeters = 10 * 1000; // 10 km = 10,000 meters
+
+            // Use the aggregation pipeline to filter available slots and get technician details
+            const schedules = await Schedule.aggregate([
+                {
+                    $geoNear: {
+                        near: {
+                            type: "Point",
+                            coordinates: [longitude, latitude],
+                        },
+                        distanceField: "distance",
+                        spherical: true,
+                        maxDistance: radiusInMeters,
+                    },
+                },
+                {
+                    $match: {
+                        date: new Date(date),
+                        is_active: true,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "providers",
+                        localField: "technician_id",
+                        foreignField: "_id",
+                        as: "technician",
+                    },
+                },
+                {
+                    $unwind: "$technician",
+                },
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "technician.service_id",
+                        foreignField: "_id",
+                        as: "service",
+                    },
+                },
+                {
+                    $unwind: "$service",
+                },
+                {
+                    $match: {
+                        "technician.service_id": new mongoose.Types.ObjectId(service_id),
+                    },
+                },
+                {
+                    $project: {
+                        technician: 1,
+                        date: 1,
+                        distance: { $divide: ["$distance", 1000] }, // Convert distance to km
+                        slots: {
+                            $filter: {
+                                input: "$slots",
+                                as: "slot",
+                                cond: { $eq: ["$$slot.status", "available"] },
+                            },
+                        },
+                        location: 1,
+                        service: 1, // Include service details in the output
+                    },
+                },
+            ]);
+
+            return {
+                success: true,
+                message: "Fetched schedules successfully",
+                data: schedules,
+            };
+        } catch (error: any) {
+            console.error(error.message);
             return {
                 success: false,
                 message: "Internal server error",

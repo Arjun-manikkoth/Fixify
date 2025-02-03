@@ -37,3 +37,11 @@ export interface IAddAddress {
     landmark: string;
     houseName: string;
 }
+
+export interface ISlotFetch {
+    service_id: string;
+    lat: number;
+    long: number;
+    date: string;
+    time: string;
+}

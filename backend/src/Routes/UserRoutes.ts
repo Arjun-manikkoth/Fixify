@@ -7,11 +7,18 @@ import UserController from "../Controllers/UserController";
 import UserRepository from "../Repositories/UserRepository";
 import OtpRepository from "../Repositories/OtpRepository";
 import AddressRepository from "../Repositories/AddressRepository";
+import ScheduleRepository from "../Repositories/ScheduleRepository";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const otpRepository = new OtpRepository(); // Initialize repository instance
 const addressRepository = new AddressRepository(); //creates an instance of address repository
-const userService = new UserServices(userRepository, otpRepository, addressRepository); // Dependency injection of repository into service
+const scheduleRepository = new ScheduleRepository(); // creates anb instance of scheduel repository
+const userService = new UserServices(
+    userRepository,
+    otpRepository,
+    addressRepository,
+    scheduleRepository
+); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
 // Initialize user router instance
@@ -111,6 +118,11 @@ userRoute.get("/address/:id", (req, res) => {
 // Route for fetching user address data
 userRoute.patch("/edit_address/:id", (req, res) => {
     userController.updateAddress(req, res);
+});
+
+// Route for listing provider slots
+userRoute.get("/slots", (req, res) => {
+    userController.fetchSlots(req, res);
 });
 
 export default userRoute;
