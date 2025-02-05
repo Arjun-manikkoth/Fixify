@@ -1,16 +1,24 @@
 import React, { useState } from "react";
 import MapModal from "./MapComponent";
 import { addAddressApi } from "../../../Api/UserApis";
+import { IAddress } from "../../UserComponents/Modals/UserChooseAddress";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../Redux/Store";
 import { toast } from "react-toastify";
 
 interface IAddAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
-    refreshAddress: React.Dispatch<React.SetStateAction<number>>;
+    refreshAddress?: React.Dispatch<React.SetStateAction<number>>;
+    updateAddresses?: React.Dispatch<React.SetStateAction<IAddress[]>>;
+    type: string;
 }
 
-const AddAddress: React.FC<IAddAddressProps> = ({ closeModal, refreshAddress }) => {
+const AddAddress: React.FC<IAddAddressProps> = ({
+    closeModal,
+    refreshAddress,
+    type,
+    updateAddresses,
+}) => {
     const [address, setAddress] = useState({
         houseName: "",
         landmark: "",
@@ -20,7 +28,7 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal, refreshAddress }) 
         state: "",
         pincode: "",
     });
-    console.log("add address modal rendered");
+
     //show map
     const [showMap, setShowMap] = useState<boolean>(false);
 
@@ -59,21 +67,40 @@ const AddAddress: React.FC<IAddAddressProps> = ({ closeModal, refreshAddress }) 
         e.preventDefault();
 
         if (user?.id) {
-            addAddressApi(address, user?.id)
-                .then((response) => {
-                    if (response.success) {
-                        toast.success(response.message);
-                        refreshAddress((prev) => prev + 1);
-                        setTimeout(() => {
-                            closeModal(false);
-                        }, 3000);
-                    } else {
-                        toast.error(response.message);
-                    }
-                })
-                .catch((response) => {
-                    toast.error(response?.error || "Error occured");
-                });
+            if (type === "Permanent") {
+                addAddressApi(address, user?.id)
+                    .then((response) => {
+                        if (response.success) {
+                            toast.success(response.message);
+                            //refreshs address with the newly added address
+                            if (refreshAddress) refreshAddress((prev) => prev + 1);
+                            //updates the addresslist with newly added address
+                            if (updateAddresses)
+                                updateAddresses((prev) => [
+                                    ...prev,
+                                    {
+                                        id: "",
+                                        ...address,
+                                    },
+                                ]);
+                            //delay to close the modal
+                            setTimeout(() => {
+                                closeModal(false);
+                            }, 3000);
+                        } else {
+                            toast.error(response.message);
+                        }
+                    })
+                    .catch((response) => {
+                        toast.error(response?.error || "Error occured");
+                    });
+            } else {
+                if (updateAddresses) updateAddresses((prev) => [...prev, { id: "", ...address }]);
+                toast.success("Address added successfully");
+                setTimeout(() => {
+                    closeModal(false);
+                }, 3000);
+            }
         }
     };
 

@@ -125,4 +125,9 @@ userRoute.get("/slots", (req, res) => {
     userController.fetchSlots(req, res);
 });
 
+// Route for listing provider slots
+userRoute.patch("/slots", (req, res) => {
+    userController.requestSlots(req, res);
+});
+
 export default userRoute;

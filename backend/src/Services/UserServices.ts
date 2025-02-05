@@ -15,7 +15,7 @@ import { IUser } from "../Models/UserModels/UserModel";
 import { IAddAddress } from "../Interfaces/User/SignUpInterface";
 import { IResponse } from "./AdminServices";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
-import mongoose from "mongoose";
+import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 
@@ -834,6 +834,33 @@ class UserService implements IUserService {
             return {
                 success: false,
                 message: "Error in fetching slots",
+                data: null,
+            };
+        }
+    }
+
+    //add a booking request to a slot
+    async requestBooking(bookingData: IBookingRequestData): Promise<IResponse> {
+        try {
+            const slots = await this.scheduleRepository.bookingRequestAdd(bookingData);
+
+            return slots.success
+                ? {
+                      success: true,
+                      message: slots.message,
+                      data: slots.data,
+                  }
+                : {
+                      success: false,
+                      message: slots.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
+            return {
+                success: false,
+                message: "Error in booking slots",
                 data: null,
             };
         }

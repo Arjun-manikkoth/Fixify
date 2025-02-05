@@ -171,7 +171,11 @@ const AddressPage: React.FC = () => {
             </div>
 
             {showAddAddress && (
-                <AddAddressModal closeModal={setShowAddAddress} refreshAddress={setRefresh} />
+                <AddAddressModal
+                    closeModal={setShowAddAddress}
+                    refreshAddress={setRefresh}
+                    type="Permanent"
+                />
             )}
             {showEditAddress && (
                 <UpdateAddressModal

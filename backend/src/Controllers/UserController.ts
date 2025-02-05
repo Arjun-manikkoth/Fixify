@@ -1,8 +1,5 @@
-import { access } from "fs";
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
-import { messages } from "../Constants/Messages";
-import { ISlotFetch } from "../Interfaces/User/SignUpInterface";
 
 class UserController {
     constructor(private UserService: IUserService) {}
@@ -704,11 +701,65 @@ class UserController {
                 });
             }
         } catch (error: any) {
-            console.error("Error in createAddress:", error.message);
+            console.error("Error in fetching slots:", error.message);
 
             res.status(500).json({
                 success: false,
                 message: "Internal server error.",
+            });
+        }
+    }
+
+    //adds booking request to book slots
+
+    async requestSlots(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.UserService.requestBooking(req.body.data);
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            }
+
+            switch (response.message) {
+                case "Booking request exists":
+                    res.status(409).json({
+                        success: false,
+                        message: response.message,
+                        data: null,
+                    });
+                    break;
+                case "Failed to add booking request":
+                    res.status(500).json({
+                        success: false,
+                        message: response.message,
+                        data: null,
+                    });
+                    break;
+                case "Internal server error":
+                    res.status(500).json({
+                        success: false,
+                        message: response.message,
+                        data: null,
+                    });
+                    break;
+                default:
+                    res.status(400).json({
+                        success: false,
+                        message: response.message,
+                        data: null,
+                    });
+            }
+        } catch (error: any) {
+            console.error("Error in requestSlots:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
             });
         }
     }

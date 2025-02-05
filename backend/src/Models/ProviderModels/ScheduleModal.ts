@@ -15,14 +15,31 @@ export interface ISlot {
     status: "available" | "booked" | "blocked";
 }
 
+export interface IRequests {
+    description: string;
+    status: string;
+    user_id: ObjectId;
+    address: IAddress;
+    time: string;
+}
+
 export interface ISchedule extends Document {
     technician_id: ObjectId;
     location: ILocation;
     date: Date;
     slots: ISlot[];
+    requests: IRequests;
     is_active: boolean;
 }
-
+interface IAddress {
+    house_name: string;
+    landmark: string;
+    city: string;
+    state: string;
+    pincode: string;
+    latitude: number;
+    longitude: number;
+}
 const scheduleSchema: Schema = new Schema(
     {
         technician_id: {
@@ -70,8 +87,22 @@ const scheduleSchema: Schema = new Schema(
         requests: [
             {
                 description: { type: String, required: true },
-                status: { type: String, required: true },
+                status: {
+                    type: String,
+                    enum: ["pending", "booked", "cancelled"],
+                    default: "pending",
+                },
                 user_id: { type: Schema.Types.ObjectId, required: true },
+                address: {
+                    house_name: String,
+                    landmark: String,
+                    city: String,
+                    state: String,
+                    pincode: String,
+                    latitude: Number,
+                    longitude: Number,
+                },
+                time: { type: String },
             },
         ],
         is_active: {

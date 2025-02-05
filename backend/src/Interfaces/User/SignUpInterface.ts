@@ -45,3 +45,21 @@ export interface ISlotFetch {
     date: string;
     time: string;
 }
+
+export interface Address {
+    houseName: string;
+    landmark: string;
+    city: string;
+    state: string;
+    pincode: string;
+    latitude: number;
+    longitude: number;
+}
+
+export interface IBookingRequestData {
+    user_id: string;
+    description: string;
+    address: Address;
+    slot_id: string;
+    time: string;
+}

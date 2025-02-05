@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import MapModal from "../CommonComponents/Modals/MapComponent";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
+import ChooseAddress, { IAddress } from "./Modals/UserChooseAddress";
+import BookingRequest from "./Modals/UserBookingRequest";
 import { toast } from "react-toastify";
 import { getServices } from "../../Api/ProviderApis";
 import { checkAvailabilityApi } from "../../Api/UserApis";
-import { FaStar, FaLocationArrow, FaTimes, FaClock } from "react-icons/fa";
+import { FaStar, FaLocationArrow, FaClock } from "react-icons/fa";
 
 interface IServiceData {
     _id: string;
@@ -29,33 +30,42 @@ interface ISlotData {
     distance: number;
 }
 
-export interface IFormData {
+export interface IQueryData {
     service_id: string;
-    latitude: number;
-    longitude: number;
     date: string;
     time: string;
 }
+interface IFormData extends IQueryData, IAddress {}
 
-export interface IDisplayLocation {
-    city: string;
-    state: string;
-    street: string | undefined;
-    pincode: string;
+export interface ISelectedSlot {
+    slot_id: string;
+    time: string;
 }
+interface IBookingRequest {}
 
-const ProviderFinder = () => {
+const ProviderFinder: React.FC = () => {
     const [formData, setFormData] = useState<IFormData>({
         service_id: "",
-        latitude: 0,
-        longitude: 0,
         date: "",
         time: "",
+        city: "",
+        houseName: "",
+        landmark: "",
+        latitude: 0,
+        longitude: 0,
+        pincode: "",
+        state: "",
     });
+
     const [services, setServices] = useState<IServiceData[]>([]);
-    const [showMap, setShowMap] = useState<boolean>(false);
+    const [showRequestModal, setRequestModal] = useState<boolean>(false);
+    const [chooseAddress, setChooseAddress] = useState<boolean>(false);
+    const [selectedSlot, setSelectedSlot] = useState<ISelectedSlot>({
+        slot_id: "",
+        time: "",
+    });
+    const [chosenAddress, setChosenAddress] = useState<IAddress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [location, setLocation] = useState<IDisplayLocation | null>(null);
     const [slotData, setSlotData] = useState<ISlotData[] | null>(null);
 
     useEffect(() => {
@@ -68,6 +78,21 @@ const ProviderFinder = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
+    };
+
+    const handleSelectedAddress = (
+        houseName: string,
+        landmark: string,
+        city: string,
+        state: string,
+        pincode: string,
+        latitude: number,
+        longitude: number
+    ) => {
+        setChosenAddress({ houseName, landmark, city, state, pincode, latitude, longitude });
+        setFormData((prev) => {
+            return { ...prev, houseName, landmark, city, state, pincode, latitude, longitude };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -87,7 +112,13 @@ const ProviderFinder = () => {
 
         setLoading(true);
         try {
-            const res = await checkAvailabilityApi(formData);
+            const res = await checkAvailabilityApi({
+                service_id: formData.service_id,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                date: formData.date,
+                time: formData.time,
+            });
             setSlotData(res.data);
         } catch (error: any) {
             toast.error(error.message || "Failed to fetch slots");
@@ -96,21 +127,9 @@ const ProviderFinder = () => {
         }
     };
 
-    const handleLocationSelect = (
-        lat: number,
-        lng: number,
-        city: string,
-        state: string,
-        pincode: string,
-        street?: string | undefined
-    ) => {
-        setFormData((prev) => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng,
-        }));
-        setLocation({ city, state, street, pincode });
-        setShowMap(false);
+    const handleBookingRequest = (id: string, time: string) => {
+        setRequestModal(true);
+        setSelectedSlot({ slot_id: id, time: time });
     };
 
     return (
@@ -162,13 +181,11 @@ const ProviderFinder = () => {
                     <button
                         type="button"
                         className="bg-gray-100 border text-gray-700 py-2 rounded-md"
-                        onClick={() => setShowMap(true)}
+                        onClick={() => setChooseAddress(true)}
                     >
-                        {location
-                            ? `${location.street ? location.street + ", " : ""}${location.city}, ${
-                                  location.state
-                              }`
-                            : "Choose Location on Map"}
+                        {chosenAddress
+                            ? `${chosenAddress.houseName ? chosenAddress.landmark : ""}`
+                            : "Choose an address"}
                     </button>
                     <button className="bg-blue-600 text-white px-6 py-2 rounded w-full hover:bg-blue-700 transition duration-200">
                         {loading ? "Fetching Slots..." : "Find Slots 🔍"}
@@ -227,21 +244,34 @@ const ProviderFinder = () => {
 
                             {/* Request Button */}
                             <div className="w-full sm:w-auto lg:w-1/4 text-center sm:text-left mt-4 ps-4 sm:mt-0">
-                                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-200 ease-in-out">
+                                <button
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-200 ease-in-out"
+                                    onClick={() => handleBookingRequest(slot._id, formData.time)}
+                                >
                                     Request Booking
                                 </button>
                             </div>
                         </div>
                     ))
+                ) : loading ? (
+                    <LoadingSpinner />
                 ) : (
                     <p className="text-center">No slots found matching this selection</p>
                 )}
             </div>
 
-            {showMap && (
-                <MapModal
-                    onClose={() => setShowMap(false)}
-                    onLocationSelect={handleLocationSelect}
+            {showRequestModal && (
+                <BookingRequest
+                    closeModal={setRequestModal}
+                    address={chosenAddress}
+                    slotDetails={selectedSlot}
+                />
+            )}
+
+            {chooseAddress && (
+                <ChooseAddress
+                    closeAddressModal={setChooseAddress}
+                    setFinalAddress={handleSelectedAddress}
                 />
             )}
         </div>

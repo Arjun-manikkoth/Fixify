@@ -22,6 +22,23 @@ export interface IRegion {
     pincode: string;
 }
 
+export interface ILocation {
+    houseName: string;
+    landmark: string;
+    latitude: number;
+    longitude: number;
+    city: string;
+    state: string;
+    pincode: string;
+}
+
+export interface ISlotRequest {
+    slot_id: string;
+    time: string;
+    user_id: string;
+    description: string;
+    address: ILocation;
+}
 export interface ICheckSlot {
     service_id: string;
     latitude: number;
@@ -485,6 +502,26 @@ const checkAvailabilityApi = async (data: ICheckSlot) => {
     }
 };
 
+//api to send request to book slots
+const bookingRequestApi = async (data: ISlotRequest) => {
+    try {
+        const response = await axiosUser.patch(`${userRoutes.slots}`, { data });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -507,4 +544,5 @@ export {
     getAddressApi,
     updateAddressApi,
     checkAvailabilityApi,
+    bookingRequestApi,
 };

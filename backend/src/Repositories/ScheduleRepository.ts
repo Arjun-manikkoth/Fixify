@@ -4,6 +4,8 @@ import Schedule, { ISchedule } from "../Models/ProviderModels/ScheduleModal";
 import { ISlotFetch } from "../Interfaces/User/SignUpInterface";
 import mongoose from "mongoose";
 import { IResponse } from "../Services/AdminServices";
+import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
+import { messages } from "../Constants/Messages";
 
 class ScheduleRepository implements IScheduleRepository {
     //find create a schedule
@@ -178,6 +180,58 @@ class ScheduleRepository implements IScheduleRepository {
                 message: "Internal server error",
                 data: null,
             };
+        }
+    }
+    //adds booking request
+    async bookingRequestAdd(bookingData: IBookingRequestData): Promise<IResponse> {
+        try {
+            //checks for duplicate requests
+            const exists = await this.findBookingRequest(bookingData.user_id);
+            console.log(exists);
+            if (exists.success) {
+                return { success: false, message: exists.message, data: null };
+            }
+
+            const scheduleData = await Schedule.updateOne(
+                { _id: new mongoose.Types.ObjectId(bookingData.slot_id) },
+                {
+                    $addToSet: {
+                        requests: {
+                            description: bookingData.description,
+                            user_id: new mongoose.Types.ObjectId(bookingData.user_id),
+                            address: bookingData.address,
+                        },
+                    },
+                }
+            );
+            console.log(scheduleData, "schedule data");
+
+            return scheduleData
+                ? {
+                      success: true,
+                      message: "Booking request added successfully",
+                      data: scheduleData,
+                  }
+                : { success: false, message: "Failed to add booking request", data: null };
+        } catch (error: any) {
+            console.error("Error in bookingRequestAdd:", error.message);
+            return { success: false, message: "Internal server error", data: null };
+        }
+    }
+
+    // Checks for duplicate bookings
+    async findBookingRequest(user_id: string): Promise<IResponse> {
+        try {
+            const requestExists = await Schedule.exists({
+                "requests.user_id": new mongoose.Types.ObjectId(user_id),
+            });
+
+            return requestExists
+                ? { success: true, message: "Booking request exists", data: null }
+                : { success: false, message: "Booking request doesn't exist", data: null };
+        } catch (error: any) {
+            console.error("Error in findBookingRequest:", error.message);
+            return { success: false, message: "Internal server error", data: null };
         }
     }
 }
