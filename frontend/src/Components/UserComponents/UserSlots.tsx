@@ -41,7 +41,6 @@ export interface ISelectedSlot {
     slot_id: string;
     time: string;
 }
-interface IBookingRequest {}
 
 const ProviderFinder: React.FC = () => {
     const [formData, setFormData] = useState<IFormData>({

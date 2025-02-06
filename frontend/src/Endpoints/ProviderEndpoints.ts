@@ -15,5 +15,6 @@ const providerRoutes = {
     forgot_otp_verify: "/forgot_otp_verify",
     reset_password: "/reset_password",
     schedule: "/schedule",
+    booking_request: "/booking_requests",
 };
 export default providerRoutes;

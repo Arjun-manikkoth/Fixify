@@ -17,6 +17,7 @@ import AdminServicesPage from "./Pages/Admin/AdminServicesPage";
 import UserAddressPage from "./Pages/User/UserAddressPage";
 import ProviderSlotsPage from "./Pages/Provider/ProviderSlots";
 import UserSlotPage from "./Pages/User/UserSlots";
+import ProviderBookingRequestPage from "./Pages/Provider/ProviderRequest";
 
 const App: FC = () => {
     return (
@@ -44,6 +45,11 @@ const App: FC = () => {
                         <Route path="/providers/profile" Component={ProviderHomePage} />
                         {/*provider slots*/}
                         <Route path="/providers/slots" Component={ProviderSlotsPage} />
+                        {/*provider slot booking request page*/}
+                        <Route
+                            path="/providers/slots_requests"
+                            Component={ProviderBookingRequestPage}
+                        />
                     </Route>
 
                     {/*admin sign in page*/}

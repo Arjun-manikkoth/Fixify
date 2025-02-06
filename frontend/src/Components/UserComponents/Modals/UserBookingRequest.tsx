@@ -67,6 +67,7 @@ const BookingRequest: React.FC<BookingRequestProps> = ({ slotDetails, closeModal
                             id="description"
                             name="description"
                             rows={4}
+                            maxLength={60}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Describe the work to be done..."
                             value={description}

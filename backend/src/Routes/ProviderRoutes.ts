@@ -127,4 +127,9 @@ providerRoute.get("/schedule", (req, res) => {
     providerController.getSchedule(req, res);
 });
 
+// Route for fetching the booking requests
+providerRoute.get("/booking_requests", (req, res) => {
+    providerController.getBookingRequests(req, res);
+});
+
 export default providerRoute;

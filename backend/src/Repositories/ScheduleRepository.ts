@@ -186,8 +186,8 @@ class ScheduleRepository implements IScheduleRepository {
     async bookingRequestAdd(bookingData: IBookingRequestData): Promise<IResponse> {
         try {
             //checks for duplicate requests
-            const exists = await this.findBookingRequest(bookingData.user_id);
-            console.log(exists);
+            const exists = await this.findBookingRequest(bookingData.user_id, bookingData.slot_id);
+
             if (exists.success) {
                 return { success: false, message: exists.message, data: null };
             }
@@ -199,12 +199,20 @@ class ScheduleRepository implements IScheduleRepository {
                         requests: {
                             description: bookingData.description,
                             user_id: new mongoose.Types.ObjectId(bookingData.user_id),
-                            address: bookingData.address,
+                            address: {
+                                house_name: bookingData.address.houseName,
+                                landmark: bookingData.address.landmark,
+                                city: bookingData.address.city,
+                                state: bookingData.address.state,
+                                pincode: bookingData.address.pincode,
+                                latitude: bookingData.address.latitude,
+                                longitude: bookingData.address.longitude,
+                            },
+                            time: bookingData.time,
                         },
                     },
                 }
             );
-            console.log(scheduleData, "schedule data");
 
             return scheduleData
                 ? {
@@ -220,9 +228,10 @@ class ScheduleRepository implements IScheduleRepository {
     }
 
     // Checks for duplicate bookings
-    async findBookingRequest(user_id: string): Promise<IResponse> {
+    async findBookingRequest(user_id: string, slot_id: string): Promise<IResponse> {
         try {
             const requestExists = await Schedule.exists({
+                _id: new mongoose.Types.ObjectId(slot_id),
                 "requests.user_id": new mongoose.Types.ObjectId(user_id),
             });
 
@@ -232,6 +241,78 @@ class ScheduleRepository implements IScheduleRepository {
         } catch (error: any) {
             console.error("Error in findBookingRequest:", error.message);
             return { success: false, message: "Internal server error", data: null };
+        }
+    }
+
+    //finds all the slot requests
+    async findAllRequests(provider_id: string): Promise<IResponse> {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const schedules = await Schedule.aggregate([
+                {
+                    $match: {
+                        technician_id: new mongoose.Types.ObjectId(provider_id),
+                        date: { $gte: today },
+                        "requests.0": { $exists: true },
+                        "requests.status": { $nin: ["cancelled", "booked"] },
+                    },
+                },
+                {
+                    $unwind: "$requests", // Deconstruct requests array to process each separately
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "requests.user_id",
+                        foreignField: "_id",
+                        as: "customerDetails",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$customerDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $project: {
+                        _id: "$requests._id",
+                        customerName: "$customerDetails.name", // Fetch user's name
+                        customer_id: "$customerDetails._id",
+                        description: "$requests.description",
+                        date: "$date",
+                        time: "$requests.time",
+                        status: "$requests.status",
+                        location: {
+                            city: "$requests.address.city",
+                            state: "$requests.address.state",
+                            pincode: "$requests.address.pincode",
+                            landmark: "$requests.address.landmark",
+                            houseName: "$requests.address.house_name",
+                        },
+                    },
+                },
+            ]);
+            return schedules
+                ? {
+                      success: true,
+                      message: "Booking requests retrieved successfully",
+                      data: schedules,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to retrieve booking requests",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
         }
     }
 }

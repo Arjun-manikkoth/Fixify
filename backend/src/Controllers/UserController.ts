@@ -183,13 +183,12 @@ class UserController {
     // function which validates the refresh token and sends an access token if required
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
-            console.log("call reached at controller refresh token");
             const token = req.cookies.refreshToken;
 
             if (!token) {
                 //if the cookie is deleted or expired
 
-                res.status(401).json({ success: false, message: "Token missing" });
+                res.status(401).json({ success: false, message: "Refresh Token missing" });
             } else {
                 //checks  the validity of refresh token and returns access token
                 const response = await this.UserService.refreshTokenCheck(token);
@@ -711,7 +710,6 @@ class UserController {
     }
 
     //adds booking request to book slots
-
     async requestSlots(req: Request, res: Response): Promise<void> {
         try {
             const response = await this.UserService.requestBooking(req.body.data);
@@ -764,4 +762,5 @@ class UserController {
         }
     }
 }
+
 export default UserController;

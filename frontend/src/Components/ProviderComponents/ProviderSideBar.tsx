@@ -4,7 +4,7 @@ import { clearProvider } from "../../Redux/ProviderSlice";
 import { logoutProvider } from "../../Api/ProviderApis";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
+import { FiBell } from "react-icons/fi";
 const ProviderSidebar: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ const ProviderSidebar: React.FC = () => {
     };
 
     return (
-        <aside className="w-72 h-screen  text-black fixed top-0 left-0">
+        <aside className="w-72 h-screen  text-black fixed top-0 left-0 ">
             <div className="p-6">
                 <img src="/FixifyLogo.png" alt="Fixify Logo" className="h-12 mx-auto" />
             </div>
@@ -47,14 +47,17 @@ const ProviderSidebar: React.FC = () => {
                         <FiCalendar className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Slots</span>
                     </li>
+                    <li
+                        className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
+                        onClick={() => handleNavigation("/providers/slots_requests")}
+                    >
+                        <FiBell className="text-xl text-black" />
+                        <span className="text-black text-lg font-semibold">Requests</span>
+                    </li>
 
                     <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
                         <FiMessageCircle className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Conversations</span>
-                    </li>
-                    <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
-                        <FiMapPin className="text-xl text-black" />
-                        <span className="text-black text-lg font-semibold">Addresses</span>
                     </li>
 
                     <li

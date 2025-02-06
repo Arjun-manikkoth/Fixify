@@ -788,6 +788,32 @@ class ProviderService implements IProviderService {
             };
         }
     }
+
+    //get all requests
+    async getAllRequests(provider_id: string): Promise<IResponse> {
+        try {
+            const requests = await this.scheduleRepository.findAllRequests(provider_id);
+
+            return requests.success
+                ? {
+                      success: true,
+                      message: requests.message,
+                      data: requests.data,
+                  }
+                : {
+                      success: false,
+                      message: requests.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default ProviderService;

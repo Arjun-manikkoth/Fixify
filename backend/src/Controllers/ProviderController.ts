@@ -205,7 +205,7 @@ class ProviderController {
             if (!token) {
                 //if the cookie is deleted or expired
 
-                res.status(401).json({ success: false, message: "Token missing" });
+                res.status(401).json({ success: false, message: "Refresh Token missing" });
             } else {
                 //checks  the validity of refresh token and returns access token
                 const response = await this.providerService.refreshTokenCheck(token);
@@ -562,6 +562,31 @@ class ProviderController {
                 res.status(schedule.message === "Resource not found" ? 404 : 500).json({
                     success: false,
                     message: schedule.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.log(error.message);
+        }
+    }
+
+    //get all booking requests
+    async getBookingRequests(req: Request, res: Response): Promise<void> {
+        try {
+            const requestData = await this.providerService.getAllRequests(req.query.id as string);
+
+            if (requestData.success) {
+                res.status(200).json({
+                    success: true,
+                    message: requestData.message,
+                    data: requestData.data,
+                });
+            } else {
+                res.status(
+                    requestData.message === "Failed to retrieve booking requests" ? 404 : 500
+                ).json({
+                    success: false,
+                    message: requestData.message,
                     data: null,
                 });
             }
