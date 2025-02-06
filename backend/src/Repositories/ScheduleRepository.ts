@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { IResponse } from "../Services/AdminServices";
 import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
 import { messages } from "../Constants/Messages";
+import { request } from "http";
 
 class ScheduleRepository implements IScheduleRepository {
     //find create a schedule
@@ -304,6 +305,61 @@ class ScheduleRepository implements IScheduleRepository {
                 : {
                       success: false,
                       message: "Failed to retrieve booking requests",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+    //update the booking request status
+    async updateBookingRequestStatus(request_id: string, status: string): Promise<boolean> {
+        try {
+            const requestStatus = await Schedule.updateOne(
+                {
+                    "requests._id": new mongoose.Types.ObjectId(request_id),
+                },
+                { $set: { "requests.$.status": status } }
+            );
+            return requestStatus.modifiedCount > 0;
+        } catch (error: any) {
+            console.log(error.message);
+            return false;
+        }
+    }
+    //get booking request lookuped with technician collection with request id
+    async getBookingRequest(id: string): Promise<IResponse> {
+        try {
+            const request = await Schedule.aggregate([
+                {
+                    $match: { "requests._id": new mongoose.Types.ObjectId(id) }, // Find the schedule with the request
+                },
+                {
+                    $lookup: {
+                        from: "providers",
+                        localField: "technician_id",
+                        foreignField: "_id",
+                        as: "technician",
+                    },
+                },
+                {
+                    $unwind: "$technician",
+                },
+            ]);
+
+            return request
+                ? {
+                      success: true,
+                      message: "Fetched request successfully",
+                      data: request,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to fetch request",
                       data: null,
                   };
         } catch (error: any) {

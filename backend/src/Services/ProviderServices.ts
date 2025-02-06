@@ -20,6 +20,9 @@ import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterface";
 import { IAddress } from "../Interfaces/Provider/SignIn";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
+import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
+import { request } from "http";
+
 interface IResponse {
     success: boolean;
     message: string;
@@ -65,7 +68,8 @@ class ProviderService implements IProviderService {
         private otpRepository: IOtpRepository,
         private serviceRepository: IServiceRepository,
         private approvalRepository: IApprovalRepository,
-        private scheduleRepository: IScheduleRepository
+        private scheduleRepository: IScheduleRepository,
+        private bookingRepository: IBookingRepository
     ) {}
     //get all services
     async getServices(): Promise<IServices[] | null> {
@@ -807,6 +811,68 @@ class ProviderService implements IProviderService {
                   };
         } catch (error: any) {
             console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+    //confirms or cancels the booking requests
+    async changeBookingRequestStatus(request_id: string, status: string): Promise<IResponse> {
+        try {
+            let updateStatus: boolean | null = null;
+
+            if (status === "booked") {
+                const requestData = await this.scheduleRepository.getBookingRequest(request_id);
+
+                if (!requestData.success || !requestData.data || requestData.data.length === 0) {
+                    return {
+                        success: false,
+                        message: "Booking request not found",
+                        data: null,
+                    };
+                }
+
+                const bookingStatus = await this.bookingRepository.createBooking(
+                    requestData.data[0],
+                    request_id
+                );
+
+                if (!bookingStatus) {
+                    return {
+                        success: false,
+                        message: "Failed to create booking",
+                        data: null,
+                    };
+                }
+
+                updateStatus = await this.scheduleRepository.updateBookingRequestStatus(
+                    request_id,
+                    "booked"
+                );
+            } else {
+                updateStatus = await this.scheduleRepository.updateBookingRequestStatus(
+                    request_id,
+                    status
+                );
+            }
+
+            if (!updateStatus) {
+                return {
+                    success: false,
+                    message: "Failed to update booking status",
+                    data: null,
+                };
+            }
+
+            return {
+                success: true,
+                message: `Booking completed successfully`,
+                data: null,
+            };
+        } catch (error: any) {
+            console.error("Error in changeBookingRequestStatus:", error.message);
             return {
                 success: false,
                 message: "Internal server error",

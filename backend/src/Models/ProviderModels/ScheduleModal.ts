@@ -16,6 +16,7 @@ export interface ISlot {
 }
 
 export interface IRequests {
+    _id: ObjectId;
     description: string;
     status: string;
     user_id: ObjectId;
@@ -28,7 +29,7 @@ export interface ISchedule extends Document {
     location: ILocation;
     date: Date;
     slots: ISlot[];
-    requests: IRequests;
+    requests: IRequests[];
     is_active: boolean;
 }
 interface IAddress {

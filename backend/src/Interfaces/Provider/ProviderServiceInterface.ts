@@ -28,5 +28,6 @@ interface IProviderService {
     addSchedule(id: string, date: string, address: IAddress): Promise<IResponse>;
     getSchedule(id: string, date: string): Promise<IResponse>;
     getAllRequests(provider_id: string): Promise<IResponse>;
+    changeBookingRequestStatus(request_id: string, status: string): Promise<IResponse>;
 }
 export default IProviderService;

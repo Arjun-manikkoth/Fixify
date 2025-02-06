@@ -82,7 +82,6 @@ class UserRepository implements IUserRepository {
     //update user profile
     async updateUserWithId(data: IUpdateProfile): Promise<Partial<IUser | null>> {
         try {
-            console.log("reached repo ");
             interface Profile {
                 name?: string;
                 email?: string;

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
-import { bookingRequestListApi } from "../../Api/ProviderApis";
+import { bookingRequestListApi, bookingRequestStatusApi } from "../../Api/ProviderApis";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
 import { toast } from "react-toastify";
 
 // Interfaces for the request and location details
 interface IBookingRequest {
-    request_id: string;
+    _id: string;
     customerName: string;
     description: string;
     date: string;
@@ -28,6 +28,7 @@ export interface ILocation {
 const SlotRequests: React.FC = () => {
     const [bookingRequests, setBookingRequests] = useState<IBookingRequest[]>([]);
     const [isLoading, setLoading] = useState<boolean>(false);
+    const [forceRender, setForceRender] = useState<number>(0);
     const provider = useSelector((state: RootState) => state.provider);
 
     useEffect(() => {
@@ -40,11 +41,17 @@ const SlotRequests: React.FC = () => {
             }
             setLoading(false);
         });
-    }, [provider.id]);
+    }, [provider.id, forceRender]);
 
     const handleUpdateStatus = (id: string, status: string) => {
-        toast.success("handle update status ");
-        // This can be implemented later for status updates
+        bookingRequestStatusApi(id, status).then((res) => {
+            if (res.success) {
+                toast.success("Updated successfully");
+                setTimeout(() => {
+                    setForceRender((prev) => prev + 1);
+                }, 2000);
+            }
+        });
     };
 
     return (
@@ -59,7 +66,7 @@ const SlotRequests: React.FC = () => {
                 <div className="flex flex-col gap-6">
                     {bookingRequests.map((request) => (
                         <div
-                            key={request.request_id}
+                            key={request._id}
                             className="flex justify-between items-center bg-white shadow-md rounded-lg p-6 w-full hover:shadow-lg transition-all"
                         >
                             <div className="flex-1">
@@ -98,7 +105,7 @@ const SlotRequests: React.FC = () => {
                             </div>
                             <div className="flex gap-3 ml-4">
                                 <button
-                                    onClick={() => handleUpdateStatus(request.request_id, "booked")}
+                                    onClick={() => handleUpdateStatus(request._id, "booked")}
                                     className={`px-4 py-2 rounded-lg ${
                                         request.status === "booked" ? "bg-green-500" : "bg-blue-500"
                                     } text-white text-sm font-semibold`}
@@ -106,9 +113,7 @@ const SlotRequests: React.FC = () => {
                                     {request.status === "booked" ? "Booked" : "Accept"}
                                 </button>
                                 <button
-                                    onClick={() =>
-                                        handleUpdateStatus(request.request_id, "cancelled")
-                                    }
+                                    onClick={() => handleUpdateStatus(request._id, "cancelled")}
                                     className={`px-4 py-2 rounded-lg ${
                                         request.status === "Declined" ? "bg-red-500" : "bg-gray-500"
                                     } text-white text-sm font-semibold`}

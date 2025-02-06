@@ -9,6 +9,8 @@ interface IScheduleRepository {
     bookingRequestAdd(bookingData: IBookingRequestData): Promise<IResponse>;
     findBookingRequest(user_id: string, slot_id: string): Promise<IResponse>;
     findAllRequests(provider_id: string): Promise<IResponse>;
+    updateBookingRequestStatus(request_id: string, statusL: string): Promise<boolean>;
+    getBookingRequest(id: string): Promise<IResponse>;
 }
 
 export default IScheduleRepository;

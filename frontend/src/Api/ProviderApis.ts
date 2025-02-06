@@ -389,11 +389,34 @@ const getScheduleApi = async (id: string | null, date: string) => {
     }
 };
 
-//api tolist all booking requests
+//api to list all booking requests
 const bookingRequestListApi = async (id: string | null) => {
     try {
         const response = await axiosProvider.get(`${providerRoutes.booking_request}`, {
             params: { id },
+        });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
+//api to change booking requests status
+const bookingRequestStatusApi = async (id: string | null, status: string) => {
+    try {
+        const response = await axiosProvider.patch(`${providerRoutes.booking_request}`, {
+            id,
+            status,
         });
 
         return {
@@ -431,4 +454,5 @@ export {
     createScheduleApi,
     getScheduleApi,
     bookingRequestListApi,
+    bookingRequestStatusApi,
 };

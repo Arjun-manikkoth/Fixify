@@ -9,19 +9,22 @@ import OtpRepository from "../Repositories/OtpRepository";
 import ServiceRepository from "../Repositories/ServiceRepository";
 import ApprovalRepository from "../Repositories/ApprovalRepository";
 import ScheduleRepository from "../Repositories/ScheduleRepository";
+import BookingRepository from "../Repositories/BookingRepository";
 
 const providerRepository = new ProviderRepository(); // Initialise repository instance
 const otpRepository = new OtpRepository(); // Initialise otp repository instance
 const serviceRepository = new ServiceRepository(); //initialise service repository
 const approvalRepository = new ApprovalRepository(); //initialise approval repository
-const scheduleRepository = new ScheduleRepository();
+const scheduleRepository = new ScheduleRepository(); //initialise schedule repository
+const bookingRepository = new BookingRepository(); //initialise booking repository
 
 const providerService = new ProviderService(
     providerRepository,
     otpRepository,
     serviceRepository,
     approvalRepository,
-    scheduleRepository
+    scheduleRepository,
+    bookingRepository
 );
 
 // Dependency injection of repository into service
@@ -130,6 +133,11 @@ providerRoute.get("/schedule", (req, res) => {
 // Route for fetching the booking requests
 providerRoute.get("/booking_requests", (req, res) => {
     providerController.getBookingRequests(req, res);
+});
+
+// Route for fetching the booking requests
+providerRoute.patch("/booking_requests", (req, res) => {
+    providerController.updateBookingRequestStatus(req, res);
 });
 
 export default providerRoute;

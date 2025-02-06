@@ -594,5 +594,46 @@ class ProviderController {
             console.log(error.message);
         }
     }
+
+    //change the booking requests status
+    async updateBookingRequestStatus(req: Request, res: Response): Promise<void> {
+        try {
+            const { id, status } = req.body;
+
+            if (!id || !status) {
+                res.status(400).json({
+                    success: false,
+                    message: "Booking request ID and status are required",
+                    data: null,
+                });
+                return;
+            }
+
+            const requestData = await this.providerService.changeBookingRequestStatus(id, status);
+
+            if (!requestData.success) {
+                const statusCode = requestData.message === "Booking request not found" ? 404 : 500;
+                res.status(statusCode).json({
+                    success: false,
+                    message: requestData.message,
+                    data: null,
+                });
+                return;
+            }
+
+            res.status(200).json({
+                success: true,
+                message: requestData.message,
+                data: requestData.data,
+            });
+        } catch (error: any) {
+            console.error("Error in updateBookingRequestStatus:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
 }
 export default ProviderController;
