@@ -522,9 +522,9 @@ const bookingRequestApi = async (data: ISlotRequest) => {
 };
 
 //api get bookings
-const fetchBookingsApi = async (id: string) => {
+const fetchBookingsApi = async (id: string, page: number) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.bookings}`, { params: { id } });
+        const response = await axiosUser.get(`${userRoutes.bookings}`, { params: { id, page } });
 
         return {
             success: true,

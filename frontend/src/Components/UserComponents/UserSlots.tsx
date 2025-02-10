@@ -66,6 +66,8 @@ const ProviderFinder: React.FC = () => {
     const [chosenAddress, setChosenAddress] = useState<IAddress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [slotData, setSlotData] = useState<ISlotData[] | null>(null);
+    const [page, setPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
 
     useEffect(() => {
         getServices()

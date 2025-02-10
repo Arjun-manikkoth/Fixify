@@ -29,7 +29,7 @@ interface IUserService {
     editAddress(address: IAddAddress, id: string): Promise<IResponse>;
     getSlots(data: ISlotFetch): Promise<IResponse>;
     requestBooking(bookingData: IBookingRequestData): Promise<IResponse>;
-    fetchBookings(id: string): Promise<IResponse>;
+    fetchBookings(id: string, page: number): Promise<IResponse>;
     fetchBookingDetail(id: string): Promise<IResponse>;
 }
 export default IUserService;

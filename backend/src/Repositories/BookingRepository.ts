@@ -31,14 +31,14 @@ class BookingRepository implements IBookingRepository {
     }
 
     //find all bookings related to user
-    async getBookingsWithUserId(id: string): Promise<IResponse> {
+    async getBookingsWithUserId(id: string, page: number): Promise<IResponse> {
         try {
+            const limit = 8;
+            const skip = (page - 1) * limit;
+
             const bookings = await Booking.aggregate([
-                {
-                    $match: {
-                        user_id: new mongoose.Types.ObjectId(id),
-                    },
-                },
+                { $match: { user_id: new mongoose.Types.ObjectId(id) } },
+
                 {
                     $lookup: {
                         from: "users",
@@ -47,10 +47,7 @@ class BookingRepository implements IBookingRepository {
                         as: "user",
                     },
                 },
-
-                {
-                    $unwind: "$user",
-                },
+                { $unwind: "$user" },
 
                 {
                     $lookup: {
@@ -60,9 +57,7 @@ class BookingRepository implements IBookingRepository {
                         as: "provider",
                     },
                 },
-                {
-                    $unwind: "$provider",
-                },
+                { $unwind: "$provider" },
 
                 {
                     $lookup: {
@@ -72,9 +67,8 @@ class BookingRepository implements IBookingRepository {
                         as: "service",
                     },
                 },
-                {
-                    $unwind: "$service",
-                },
+                { $unwind: "$service" },
+
                 {
                     $project: {
                         "user._id": 1,
@@ -98,17 +92,28 @@ class BookingRepository implements IBookingRepository {
                         status: 1,
                     },
                 },
-                {
-                    $sort: {
-                        date: -1,
-                    },
-                },
+
+                { $sort: { date: -1 } }, // Sort by latest bookings
+
+                { $skip: skip }, // Skip previous documents
+                { $limit: limit }, // Limit results per page
             ]);
+
+            const totalBookings = await Booking.countDocuments({
+                user_id: new mongoose.Types.ObjectId(id),
+            });
 
             return {
                 success: true,
                 message: "Fetched booking details successfully",
-                data: bookings,
+                data: {
+                    bookings,
+                    pagination: {
+                        totalBookings,
+                        currentPage: page,
+                        totalPages: Math.ceil(totalBookings / limit),
+                    },
+                },
             };
         } catch (error: any) {
             console.log(error.message);
@@ -119,6 +124,7 @@ class BookingRepository implements IBookingRepository {
             };
         }
     }
+
     //find booking details with id
     async getBookingDetails(id: string): Promise<IResponse> {
         try {

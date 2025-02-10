@@ -765,7 +765,10 @@ class UserController {
     //fetch all bookings for user with id
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
-            const response = await this.UserService.fetchBookings(req.query.id as string);
+            const response = await this.UserService.fetchBookings(
+                req.query.id as string,
+                Number(req.query.page)
+            );
 
             if (response.success) {
                 res.status(200).json({

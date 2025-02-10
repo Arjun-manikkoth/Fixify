@@ -867,10 +867,11 @@ class UserService implements IUserService {
             };
         }
     }
+
     //fetch all booking details
-    async fetchBookings(id: string): Promise<IResponse> {
+    async fetchBookings(id: string, page: number): Promise<IResponse> {
         try {
-            const bookingStatus = await this.bookingRepository.getBookingsWithUserId(id);
+            const bookingStatus = await this.bookingRepository.getBookingsWithUserId(id, page);
 
             return bookingStatus.success
                 ? {
