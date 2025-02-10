@@ -18,5 +18,7 @@ const userRoutes = {
     edit_address: "/edit_address",
     delete_address: "/addresses",
     slots: "slots",
+    bookings: "bookings",
+    booking_details: "booking_details",
 };
 export default userRoutes;

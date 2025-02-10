@@ -18,6 +18,7 @@ import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
 import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
+import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -57,7 +58,8 @@ class UserService implements IUserService {
         private userRepository: IUserRepository,
         private otpRepository: IOtpRepository,
         private addressRepository: IAddressRepository,
-        private scheduleRepository: IScheduleRepository
+        private scheduleRepository: IScheduleRepository,
+        private bookingRepository: IBookingRepository
     ) {}
 
     /**
@@ -861,6 +863,56 @@ class UserService implements IUserService {
             return {
                 success: false,
                 message: "Error in booking slots",
+                data: null,
+            };
+        }
+    }
+    //fetch all booking details
+    async fetchBookings(id: string): Promise<IResponse> {
+        try {
+            const bookingStatus = await this.bookingRepository.getBookingsWithUserId(id);
+
+            return bookingStatus.success
+                ? {
+                      success: true,
+                      message: bookingStatus.message,
+                      data: bookingStatus.data,
+                  }
+                : {
+                      success: false,
+                      message: bookingStatus.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.messaege);
+            return {
+                success: false,
+                message: "Failed to fetch bookings",
+                data: null,
+            };
+        }
+    }
+
+    async fetchBookingDetail(id: string): Promise<IResponse> {
+        try {
+            const response = await this.bookingRepository.getBookingDetails(id);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: response.message,
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: response.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch booking details",
                 data: null,
             };
         }

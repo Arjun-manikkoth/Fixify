@@ -167,11 +167,14 @@ const ProviderFinder: React.FC = () => {
                             Select Time
                         </option>
                         {Array.from({ length: 12 }, (_, i) => {
+                            const today = new Date();
                             const hour = i + 9;
                             const period = hour >= 12 ? "PM" : "AM";
                             const formattedHour = ((hour - 1) % 12) + 1;
+
+                            const timeISO = new Date(today.setHours(hour, 0, 0, 0)).toISOString();
                             return (
-                                <option key={hour} value={`${formattedHour}:00 ${period}`}>
+                                <option key={hour} value={timeISO}>
                                     {formattedHour}:00 {period}
                                 </option>
                             );

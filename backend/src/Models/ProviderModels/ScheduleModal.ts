@@ -21,7 +21,7 @@ export interface IRequests {
     status: string;
     user_id: ObjectId;
     address: IAddress;
-    time: string;
+    time: Date;
 }
 
 export interface ISchedule extends Document {
@@ -77,7 +77,7 @@ const scheduleSchema: Schema = new Schema(
         date: { type: Date, required: true },
         slots: [
             {
-                time: { type: String, required: true },
+                time: { type: Date, required: true },
                 status: {
                     type: String,
                     enum: ["available", "booked"],
@@ -103,7 +103,7 @@ const scheduleSchema: Schema = new Schema(
                     latitude: Number,
                     longitude: Number,
                 },
-                time: { type: String },
+                time: { type: Date },
             },
         ],
         is_active: {

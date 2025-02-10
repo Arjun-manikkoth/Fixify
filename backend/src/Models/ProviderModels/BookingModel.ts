@@ -17,7 +17,7 @@ export interface IBooking extends Document {
     provider_id: Schema.Types.ObjectId;
     service_id: Schema.Types.ObjectId;
     user_address: UserAddress;
-    time: string;
+    time: Date;
     date: Date;
     status: string;
     description: string;
@@ -48,7 +48,7 @@ const BookingSchema = new Schema<IBooking>(
             latitude: { type: Number, required: true },
             longitude: { type: Number, required: true },
         },
-        time: { type: String, required: true },
+        time: { type: Date, required: true },
         date: { type: Date, required: true },
         status: {
             type: String,

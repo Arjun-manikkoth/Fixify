@@ -26,6 +26,7 @@ const BookingRequest: React.FC<BookingRequestProps> = ({ slotDetails, closeModal
             return;
         }
         const descriptionFormatted = description.trim();
+
         if (user.id && address) {
             bookingRequestApi({
                 user_id: user.id,

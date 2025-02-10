@@ -474,7 +474,6 @@ const updateAddressApi = async (
 };
 
 //api to get slots based on the selected location,service,date,time
-
 const checkAvailabilityApi = async (data: ICheckSlot) => {
     try {
         const response = await axiosUser.get(`${userRoutes.slots}`, {
@@ -522,6 +521,46 @@ const bookingRequestApi = async (data: ISlotRequest) => {
     }
 };
 
+//api get bookings
+const fetchBookingsApi = async (id: string) => {
+    try {
+        const response = await axiosUser.get(`${userRoutes.bookings}`, { params: { id } });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
+//api get booking details
+const fetchBookingDetailsApi = async (id: string) => {
+    try {
+        const response = await axiosUser.get(`${userRoutes.booking_details}`, { params: { id } });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -545,4 +584,6 @@ export {
     updateAddressApi,
     checkAvailabilityApi,
     bookingRequestApi,
+    fetchBookingsApi,
+    fetchBookingDetailsApi,
 };

@@ -8,16 +8,19 @@ import UserRepository from "../Repositories/UserRepository";
 import OtpRepository from "../Repositories/OtpRepository";
 import AddressRepository from "../Repositories/AddressRepository";
 import ScheduleRepository from "../Repositories/ScheduleRepository";
+import BookingRepository from "../Repositories/BookingRepository";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const otpRepository = new OtpRepository(); // Initialize repository instance
 const addressRepository = new AddressRepository(); //creates an instance of address repository
-const scheduleRepository = new ScheduleRepository(); // creates anb instance of scheduel repository
+const scheduleRepository = new ScheduleRepository(); // creates anb instance of schedule repository
+const bookingRepository = new BookingRepository(); // creates anb instance of scheduel repository
 const userService = new UserServices(
     userRepository,
     otpRepository,
     addressRepository,
-    scheduleRepository
+    scheduleRepository,
+    bookingRepository
 ); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
@@ -125,9 +128,19 @@ userRoute.get("/slots", (req, res) => {
     userController.fetchSlots(req, res);
 });
 
-// Route for listing provider slots
+// Route for listing provider slots requests
 userRoute.patch("/slots", (req, res) => {
     userController.requestSlots(req, res);
+});
+
+// Route for listing bookings
+userRoute.get("/bookings", (req, res) => {
+    userController.getBookings(req, res);
+});
+
+// Route for booking detail
+userRoute.get("/booking_details", (req, res) => {
+    userController.getBookingDetails(req, res);
 });
 
 export default userRoute;

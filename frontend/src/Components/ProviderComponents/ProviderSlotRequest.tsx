@@ -78,12 +78,14 @@ const SlotRequests: React.FC = () => {
                                     Note : {request.description}
                                 </p>
                                 <div>
-                                    <p className="text-sm text-gray-500 ">
+                                    <p className="text-sm text-gray-500">
                                         Time:{" "}
                                         <span className="font-semibold text-purple-600">
-                                            {request.time}
+                                            {new Intl.DateTimeFormat("en-US", {
+                                                timeStyle: "short",
+                                            }).format(new Date(request.time))}
                                         </span>
-                                    </p>{" "}
+                                    </p>
                                     {/* Highlighted time */}
                                     <p className="text-sm text-gray-500 ">
                                         Date:{" "}

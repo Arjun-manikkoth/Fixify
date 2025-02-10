@@ -838,7 +838,8 @@ class ProviderService implements IProviderService {
                     requestData.data[0],
                     request_id
                 );
-
+                console.log(requestData.data[0].requests, "requestData");
+                await this.scheduleRepository.changeTimeSlotStatus(request_id);
                 if (!bookingStatus) {
                     return {
                         success: false,

@@ -195,7 +195,21 @@ const Slots: React.FC = () => {
                                     key={slot.time}
                                     className="flex justify-between items-center p-3 bg-white shadow-md rounded-lg"
                                 >
-                                    <span className="text-md text-gray-700">Time: {slot.time}</span>
+                                    <span className="text-md text-gray-700">
+                                        Time:{" "}
+                                        {`${new Date(slot.time).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            hour12: true,
+                                        })} - ${new Date(
+                                            new Date(slot.time).getTime() + 60 * 60 * 1000
+                                        ).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            hour12: true,
+                                        })}`}
+                                    </span>
+
                                     <button className={`px-4 py-2 rounded-lg`}>
                                         {slot.status}
                                     </button>
