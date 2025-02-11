@@ -303,6 +303,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     isOpen={requestModalOpen}
                     onClose={() => setRequestModalOpen(false)}
                     onPaymentSubmit={handlePaymentSubmit}
+                    handleRefresh={handleReRender}
                 />
             </div>
         </div>

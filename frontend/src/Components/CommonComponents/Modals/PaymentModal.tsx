@@ -6,6 +6,7 @@ interface PaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
     onPaymentSubmit: (paymentData: PaymentData) => void;
+    handleRefresh: () => void;
 }
 
 interface PaymentData {
@@ -13,7 +14,12 @@ interface PaymentData {
     method: string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onPaymentSubmit }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({
+    isOpen,
+    onClose,
+    onPaymentSubmit,
+    handleRefresh,
+}) => {
     const [amount, setAmount] = useState<string>("");
     const [method, setMethod] = useState<string>("by cash");
 
@@ -26,6 +32,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onPaymentS
         }
         onPaymentSubmit({ amount: parseFloat(amount), method });
         toast.success("Payment request initiated!");
+        setTimeout(() => {
+            handleRefresh();
+        }, 2000);
         onClose();
     };
 
