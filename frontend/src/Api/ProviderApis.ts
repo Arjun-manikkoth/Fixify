@@ -478,6 +478,30 @@ const fetchBookingDetailsApi = async (id: string) => {
     }
 };
 
+//api to initiate payment request
+const paymentRequestApi = async (id: string, amount: number, method: string) => {
+    try {
+        const response = await axiosProvider.post(`${providerRoutes.payments}`, {
+            id,
+            amount,
+            method,
+        });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -501,4 +525,5 @@ export {
     bookingRequestStatusApi,
     fetchBookingsApi,
     fetchBookingDetailsApi,
+    paymentRequestApi,
 };

@@ -1,7 +1,7 @@
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import Booking from "../Models/ProviderModels/BookingModel";
 import { IFilteredSchedule } from "../Interfaces/Booking/IBooking";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import { IResponse } from "../Services/AdminServices";
 
 class BookingRepository implements IBookingRepository {
@@ -266,6 +266,20 @@ class BookingRepository implements IBookingRepository {
                     $unwind: "$service",
                 },
                 {
+                    $lookup: {
+                        from: "payments",
+                        localField: "payment_id",
+                        foreignField: "_id",
+                        as: "payment",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$payment",
+                        preserveNullAndEmptyArrays: true, // Prevents removal of bookings without payments
+                    },
+                },
+                {
                     $project: {
                         "user._id": 1,
                         "user.url": 1,
@@ -288,6 +302,10 @@ class BookingRepository implements IBookingRepository {
                         date: 1,
                         time: 1,
                         status: 1,
+                        "payment.amount": 1,
+                        "payment.payment_status": 1,
+                        "payment.payment_mode": 1,
+                        "payment.payment_date": 1,
                     },
                 },
             ]);
@@ -304,6 +322,23 @@ class BookingRepository implements IBookingRepository {
                 message: "Internal server error",
                 data: null,
             };
+        }
+    }
+
+    //update the booking document with payment id
+    async updateBookingWithPaymentId(booking_id: string, payment_id: string): Promise<boolean> {
+        try {
+            const status = await Booking.updateOne(
+                {
+                    _id: new mongoose.Types.ObjectId(booking_id),
+                },
+                { $set: { payment_id: payment_id } }
+            );
+
+            return status.modifiedCount > 0 ? true : false;
+        } catch (error: any) {
+            console.log(error.message);
+            return false;
         }
     }
 }

@@ -22,6 +22,7 @@ import { IAddress } from "../Interfaces/Provider/SignIn";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import { request } from "http";
+import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 
 interface IResponse {
     success: boolean;
@@ -69,7 +70,8 @@ class ProviderService implements IProviderService {
         private serviceRepository: IServiceRepository,
         private approvalRepository: IApprovalRepository,
         private scheduleRepository: IScheduleRepository,
-        private bookingRepository: IBookingRepository
+        private bookingRepository: IBookingRepository,
+        private paymentRepository: IPaymentRepository
     ) {}
     //get all services
     async getServices(): Promise<IServices[] | null> {
@@ -929,6 +931,43 @@ class ProviderService implements IProviderService {
             return {
                 success: false,
                 message: "Failed to fetch booking details",
+                data: null,
+            };
+        }
+    }
+    // creates a payment document with amount and mode for payment from user side
+    async intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse> {
+        try {
+            const response = await this.paymentRepository.savePayment(amount, method);
+
+            if (!response.data) {
+                return {
+                    success: true,
+                    message: response.message,
+                    data: null,
+                };
+            }
+            const status = await this.bookingRepository.updateBookingWithPaymentId(
+                id,
+                response.data._id
+            );
+
+            return status
+                ? {
+                      success: true,
+                      message: response.message,
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to update booking with payment ID",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to initiate payment request",
                 data: null,
             };
         }

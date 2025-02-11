@@ -18,5 +18,6 @@ const providerRoutes = {
     booking_request: "/booking_requests",
     bookings: "bookings",
     booking_details: "/booking_details",
+    payments: "/payments",
 };
 export default providerRoutes;

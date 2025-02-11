@@ -695,5 +695,38 @@ class ProviderController {
             });
         }
     }
+
+    //create payment request for the work
+    async createPaymentRequest(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.providerService.intiatePaymentRequest(
+                req.body.id,
+                req.body.amount,
+                req.body.method
+            );
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in creating payment request:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
 }
 export default ProviderController;
