@@ -36,6 +36,7 @@ const BookingRequest: React.FC<BookingRequestProps> = ({ slotDetails, closeModal
             }).then((res) => {
                 if (res.success) {
                     closeModal(false);
+                    toast.success("Booking request sent");
                     setDescription("");
                 } else {
                     toast.error(res.message);

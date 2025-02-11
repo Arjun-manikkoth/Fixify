@@ -581,6 +581,26 @@ const stripePaymentApi = async (id: string, amount: number) => {
     }
 };
 
+//cancel booking
+const cancelBookingApi = async (id: string, time: string) => {
+    try {
+        const response = await axiosUser.patch(`${userRoutes.cancel_booking}`, { id, time });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -607,4 +627,5 @@ export {
     fetchBookingsApi,
     fetchBookingDetailsApi,
     stripePaymentApi,
+    cancelBookingApi,
 };

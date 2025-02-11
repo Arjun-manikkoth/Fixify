@@ -327,17 +327,11 @@ class ScheduleRepository implements IScheduleRepository {
                 },
             ]);
 
-            return schedules.length
-                ? {
-                      success: true,
-                      message: "Booking requests retrieved successfully",
-                      data: schedules,
-                  }
-                : {
-                      success: false,
-                      message: "No available booking requests",
-                      data: null,
-                  };
+            return {
+                success: true,
+                message: "Booking requests retrieved successfully",
+                data: schedules,
+            };
         } catch (error: any) {
             console.log(error.message);
             return {

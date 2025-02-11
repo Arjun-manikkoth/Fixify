@@ -6,7 +6,7 @@ import PaymentModal from "./Modals/PaymentModal";
 import { paymentRequestApi } from "../../Api/ProviderApis";
 import { toast } from "react-toastify";
 import PaymentFormModal from "./Modals/PaymentFormModal";
-import { stripePaymentApi } from "../../Api/UserApis";
+import { stripePaymentApi, cancelBookingApi } from "../../Api/UserApis";
 
 interface IBookingDetail {
     _id: string;
@@ -105,11 +105,11 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const handlePaymentModal = () => {
         setStripeForm(true);
     };
-
+    //handle force refresh
     const handleReRender = () => {
         setForceRender((prev) => prev + 1);
     };
-
+    //checks the current time is 3 hour before the slot time
     const isMoreThanTwoHoursAway = (slotTime: string | Date) => {
         const currentTime = new Date();
         const bookingTime = new Date(slotTime);
@@ -117,6 +117,15 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
         const timeDifference = (bookingTime.getTime() - currentTime.getTime()) / (1000 * 60 * 60);
 
         return timeDifference > 3;
+    };
+    //cancel booking
+    const handleCancelBooking = (id: string, time: string) => {
+        cancelBookingApi(id, time).then((response) => {
+            if (response.success) {
+                toast.success(response.message);
+                handleReRender();
+            } else toast.error(response.message);
+        });
     };
 
     return (
@@ -127,7 +136,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                 {/* Booking Details */}
                 <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-11">
                     <h3 className="text-xl font-semibold text-gray-700 mb-8">Service details</h3>
-                    <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700">
+                    <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700 ">
                         <p>
                             <strong>Date:</strong>{" "}
                             {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -156,7 +165,10 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     {role === "user" &&
                         booking.payment?.payment_status !== "completed" &&
                         isMoreThanTwoHoursAway(booking.time) && (
-                            <button className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">
+                            <button
+                                className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                                onClick={() => handleCancelBooking(booking._id, booking.time)}
+                            >
                                 Cancel Booking
                             </button>
                         )}
@@ -167,8 +179,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     <h3 className="text-xl font-semibold text-gray-800 mb-8">
                         {role === "user" ? "Professional Details" : "Customer Details"}
                     </h3>
-                    <div className="flex flex-col sm:flex-row sm:justify-between items-center gap-4">
-                        <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-center  gap-4">
+                        <div className="flex items-center gap-4 ">
                             <img
                                 src={role === "user" ? booking.provider.url : booking.user.url}
                                 alt="Technician"
@@ -211,9 +223,9 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
 
                 {/* Location Details */}
                 <div className="bg-gray-50 p-4 my-8 rounded-lg shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-700">Location Details</h3>
-                    <div className="flex justify-between items-center mt-3">
-                        <p className="text-sm text-gray-600">
+                    <h3 className="text-lg font-semibold text-gray-700 ">Location Details</h3>
+                    <div className="flex justify-between items-center mt-3  pe-8">
+                        <p className="text-md text-gray-600">
                             {booking.user_address.house_name}, {booking.user_address.landmark},{" "}
                             {booking.user_address.city}, {booking.user_address.state},{" "}
                             {booking.user_address.pincode}
