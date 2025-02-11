@@ -125,6 +125,101 @@ class BookingRepository implements IBookingRepository {
         }
     }
 
+    //find all bookings related to provider
+    async getBookingsWithProviderId(id: string, page: number): Promise<IResponse> {
+        try {
+            const limit = 8;
+            const skip = (page - 1) * limit;
+
+            const bookings = await Booking.aggregate([
+                { $match: { provider_id: new mongoose.Types.ObjectId(id) } },
+
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "user_id",
+                        foreignField: "_id",
+                        as: "user",
+                    },
+                },
+                { $unwind: "$user" },
+
+                {
+                    $lookup: {
+                        from: "providers",
+                        localField: "provider_id",
+                        foreignField: "_id",
+                        as: "provider",
+                    },
+                },
+                { $unwind: "$provider" },
+
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "service_id",
+                        foreignField: "_id",
+                        as: "service",
+                    },
+                },
+                { $unwind: "$service" },
+
+                {
+                    $project: {
+                        "user._id": 1,
+                        "user.url": 1,
+                        "user.name": 1,
+                        "user.email": 1,
+                        "user.mobile_no": 1,
+                        "user.is_blocked": 1,
+                        "provider._id": 1,
+                        "provider.name": 1,
+                        "provider.email": 1,
+                        "provider.url": 1,
+                        "provider.mobile_no": 1,
+                        "provider.is_blocked": 1,
+                        "service._id": 1,
+                        "service.name": 1,
+                        "service.description": 1,
+                        _id: 1,
+                        date: 1,
+                        time: 1,
+                        status: 1,
+                    },
+                },
+
+                { $sort: { date: -1 } }, // Sort by latest bookings
+
+                { $skip: skip }, // Skip previous documents
+                { $limit: limit }, // Limit results per page
+            ]);
+
+            const totalBookings = await Booking.countDocuments({
+                provider_id: new mongoose.Types.ObjectId(id),
+            });
+
+            return {
+                success: true,
+                message: "Fetched booking details successfully",
+                data: {
+                    bookings,
+                    pagination: {
+                        totalBookings,
+                        currentPage: page,
+                        totalPages: Math.ceil(totalBookings / limit),
+                    },
+                },
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
     //find booking details with id
     async getBookingDetails(id: string): Promise<IResponse> {
         try {

@@ -881,6 +881,58 @@ class ProviderService implements IProviderService {
             };
         }
     }
+
+    //fetch all booking details
+    async fetchBookings(id: string, page: number): Promise<IResponse> {
+        try {
+            const bookingStatus = await this.bookingRepository.getBookingsWithProviderId(id, page);
+
+            return bookingStatus.success
+                ? {
+                      success: true,
+                      message: bookingStatus.message,
+                      data: bookingStatus.data,
+                  }
+                : {
+                      success: false,
+                      message: bookingStatus.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.messaege);
+            return {
+                success: false,
+                message: "Failed to fetch bookings",
+                data: null,
+            };
+        }
+    }
+
+    //fetch booking details
+    async fetchBookingDetail(id: string): Promise<IResponse> {
+        try {
+            const response = await this.bookingRepository.getBookingDetails(id);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: response.message,
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: response.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch booking details",
+                data: null,
+            };
+        }
+    }
 }
 
 export default ProviderService;

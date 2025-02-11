@@ -868,7 +868,7 @@ class UserService implements IUserService {
         }
     }
 
-    //fetch all booking details
+    //fetch all booking
     async fetchBookings(id: string, page: number): Promise<IResponse> {
         try {
             const bookingStatus = await this.bookingRepository.getBookingsWithUserId(id, page);
@@ -893,7 +893,7 @@ class UserService implements IUserService {
             };
         }
     }
-
+    //fetch booking details
     async fetchBookingDetail(id: string): Promise<IResponse> {
         try {
             const response = await this.bookingRepository.getBookingDetails(id);

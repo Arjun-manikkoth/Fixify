@@ -27,7 +27,9 @@ interface IProviderService {
     verifyPassword(id: string, password: string): Promise<IResponse>;
     addSchedule(id: string, date: string, address: IAddress): Promise<IResponse>;
     getSchedule(id: string, date: string): Promise<IResponse>;
+    fetchBookings(id: string, page: number): Promise<IResponse>;
     getAllRequests(provider_id: string): Promise<IResponse>;
     changeBookingRequestStatus(request_id: string, status: string): Promise<IResponse>;
+    fetchBookingDetail(id: string): Promise<IResponse>;
 }
 export default IProviderService;

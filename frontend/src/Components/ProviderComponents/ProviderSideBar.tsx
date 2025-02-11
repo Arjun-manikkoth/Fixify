@@ -36,7 +36,10 @@ const ProviderSidebar: React.FC = () => {
                         <FiUser className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold"> My Profile</span>
                     </li>
-                    <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
+                    <li
+                        className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
+                        onClick={() => handleNavigation("/providers/bookings")}
+                    >
                         <FiBook className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Bookings</span>
                     </li>

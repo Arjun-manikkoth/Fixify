@@ -1,7 +1,7 @@
 import React from "react";
 import UserHeader from "../../Components/UserComponents/UserHeader";
 import UserSidebar from "../../Components/UserComponents/UserSidebar";
-import UserBookingDetails from "../../Components/UserComponents/UserBookingDetail";
+import UserBookingDetail from "../../Components/UserComponents/UserBookingDetail";
 
 const BookingDetailsPage: React.FC = () => {
     return (
@@ -10,7 +10,7 @@ const BookingDetailsPage: React.FC = () => {
                 <UserSidebar />
                 <div className="flex-1 ml-72">
                     <UserHeader />
-                    <UserBookingDetails />
+                    <UserBookingDetail />
                 </div>
             </div>
         </>

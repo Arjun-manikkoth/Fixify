@@ -20,7 +20,6 @@ class ProviderController {
     }
 
     // sign up and sends the corresponding success code
-
     async signUp(req: Request, res: Response): Promise<void> {
         try {
             const provider = await this.providerService.createProvider(req.body); //this function is called to check and save data to the db
@@ -631,6 +630,67 @@ class ProviderController {
             res.status(500).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
+            });
+        }
+    }
+
+    //fetch all bookings for provider with id
+    async getBookings(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.providerService.fetchBookings(
+                req.query.id as string,
+                Number(req.query.page)
+            );
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking details:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
+
+    //fetch bookings details for user
+    async getBookingDetails(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.providerService.fetchBookingDetail(req.query.id as string);
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking details:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
                 data: null,
             });
         }

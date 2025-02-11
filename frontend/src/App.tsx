@@ -20,6 +20,8 @@ import UserSlotPage from "./Pages/User/UserSlots";
 import ProviderBookingRequestPage from "./Pages/Provider/ProviderRequest";
 import UserBookingsPage from "./Pages/User/UserBookingsPage";
 import UserBookingDetailsPage from "./Pages/User/UserBooingDetailsPage";
+import ProviderBookingsPage from "./Pages/Provider/ProviderBookings";
+import ProviderBookingDetailPage from "./Pages/Provider/ProviderBookingDetails";
 
 const App: FC = () => {
     return (
@@ -57,6 +59,14 @@ const App: FC = () => {
                         <Route
                             path="/providers/slots_requests"
                             Component={ProviderBookingRequestPage}
+                        />
+                        {/*provider bookings listing*/}
+                        <Route path="/providers/bookings" Component={ProviderBookingsPage} />
+
+                        {/*provider bookings details*/}
+                        <Route
+                            path="/providers/bookings/:id"
+                            Component={ProviderBookingDetailPage}
                         />
                     </Route>
 

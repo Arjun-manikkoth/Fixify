@@ -140,4 +140,14 @@ providerRoute.patch("/booking_requests", (req, res) => {
     providerController.updateBookingRequestStatus(req, res);
 });
 
+// Route for listing bookings
+providerRoute.get("/bookings", (req, res) => {
+    providerController.getBookings(req, res);
+});
+
+// Route for booking detail
+providerRoute.get("/booking_details", (req, res) => {
+    providerController.getBookingDetails(req, res);
+});
+
 export default providerRoute;

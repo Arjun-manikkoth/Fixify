@@ -16,5 +16,7 @@ const providerRoutes = {
     reset_password: "/reset_password",
     schedule: "/schedule",
     booking_request: "/booking_requests",
+    bookings: "bookings",
+    booking_details: "/booking_details",
 };
 export default providerRoutes;
