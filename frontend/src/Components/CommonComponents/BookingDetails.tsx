@@ -5,6 +5,8 @@ import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import PaymentModal from "./Modals/PaymentModal";
 import { paymentRequestApi } from "../../Api/ProviderApis";
 import { toast } from "react-toastify";
+import PaymentFormModal from "./Modals/PaymentFormModal";
+import { stripePaymentApi } from "../../Api/UserApis";
 
 interface IBookingDetail {
     _id: string;
@@ -58,10 +60,12 @@ interface IBookingDetailProps {
 const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi }) => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [booking, setBooking] = useState<IBookingDetail | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    const [booking, setBooking] = useState<IBookingDetail | null>(null);
+    const [showStripeForm, setStripeForm] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [requestModalOpen, setRequestModalOpen] = useState<boolean>(false);
+    const [forceRender, setForceRender] = useState<number>(0);
     useEffect(() => {
         if (!id) return;
         setLoading(true);
@@ -75,10 +79,10 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
             })
             .catch((error) => console.error("Error fetching booking details:", error))
             .finally(() => setLoading(false));
-    }, [id]);
+    }, [id, forceRender]);
 
     const handlePaymentSubmit = (paymentData: { amount: number; method: string }) => {
-        if (booking)
+        if (booking) {
             paymentRequestApi(booking._id, paymentData.amount, paymentData.method).then(
                 (response) => {
                     console.log("response", paymentData);
@@ -87,12 +91,33 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     }
                 }
             );
+        }
     };
 
     if (loading) return <LoadingSpinner />;
     if (!booking) return <p className="text-center text-gray-600">Booking not found.</p>;
 
     const googleMapsUrl = `https://www.google.com/maps?q=${booking.user_address.latitude},${booking.user_address.longitude}`;
+
+    const closeStripeModal = () => {
+        setStripeForm(false);
+    };
+    const handlePaymentModal = () => {
+        setStripeForm(true);
+    };
+
+    const handleReRender = () => {
+        setForceRender((prev) => prev + 1);
+    };
+
+    const isMoreThanTwoHoursAway = (slotTime: string | Date) => {
+        const currentTime = new Date();
+        const bookingTime = new Date(slotTime);
+
+        const timeDifference = (bookingTime.getTime() - currentTime.getTime()) / (1000 * 60 * 60);
+
+        return timeDifference > 3;
+    };
 
     return (
         <div className="p-6 flex justify-center">
@@ -128,11 +153,13 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     </div>
 
                     {/* Cancel Button Inside Booking Details */}
-                    {role === "user" && (
-                        <button className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">
-                            Cancel Booking
-                        </button>
-                    )}
+                    {role === "user" &&
+                        booking.payment?.payment_status !== "completed" &&
+                        isMoreThanTwoHoursAway(booking.time) && (
+                            <button className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">
+                                Cancel Booking
+                            </button>
+                        )}
                 </div>
 
                 {/* Professional/user Details */}
@@ -207,50 +234,74 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
 
                 <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-11">
                     <h3 className="text-xl font-semibold text-gray-700 mb-8">Payment details</h3>
-
-                    {booking.payment && (
-                        <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700">
-                            <p>
-                                <strong>Payment Date : </strong>
-                                <strong>Date :</strong>{" "}
-                                {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-                                    new Date(booking.payment.payment_date)
-                                )}
-                                ,
-                                {new Intl.DateTimeFormat("en-US", {
-                                    timeStyle: "short",
-                                }).format(new Date(booking.payment.payment_date))}{" "}
-                            </p>
-                            <p>
-                                <strong>Amount : </strong>
-                                {booking.payment.amount}{" "}
-                            </p>
-                            <p>
-                                <strong>Payment Status : </strong>
-                                {booking.payment.payment_status} {""}
-                            </p>
-                            <p>
-                                <strong>Payment Mode : </strong>
-                                {booking.payment.payment_mode}
-                                {""}
-                            </p>
-                        </div>
+                    {role === "user" && !booking.payment && (
+                        <p className="text-center">Waiting for technician payment request</p>
                     )}
-
+                    {booking.payment && (
+                        <>
+                            <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700">
+                                <p>
+                                    <strong>Payment Date : </strong>
+                                    <strong>Date :</strong>{" "}
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        dateStyle: "medium",
+                                    }).format(new Date(booking.payment.payment_date))}
+                                    ,
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        timeStyle: "short",
+                                    }).format(new Date(booking.payment.payment_date))}{" "}
+                                </p>
+                                <p>
+                                    <strong>Amount : </strong>
+                                    {booking.payment.amount}{" "}
+                                </p>
+                                <p>
+                                    <strong>Payment Status : </strong>
+                                    {booking.payment.payment_status} {""}
+                                </p>
+                                <p>
+                                    <strong>Payment Mode : </strong>
+                                    {booking.payment.payment_mode}
+                                    {""}
+                                </p>
+                            </div>
+                            {booking.payment.payment_mode === "online" &&
+                                booking.payment.payment_status != "completed" && (
+                                    <button
+                                        className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
+                                        onClick={handlePaymentModal}
+                                    >
+                                        Pay Now
+                                    </button>
+                                )}
+                        </>
+                    )}
                     {/*Request payment button Inside Booking Details */}
                     {role === "provider" && !booking.payment && (
                         <button
                             className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => setRequestModalOpen(true)}
                         >
                             Request Payment
                         </button>
                     )}
                 </div>
+
+                {booking?.payment && (
+                    <PaymentFormModal
+                        isOpen={showStripeForm}
+                        onClose={closeStripeModal}
+                        amount={booking.payment.amount}
+                        payment_id={booking.payment._id}
+                        paymentApi={stripePaymentApi}
+                        handleRefresh={handleReRender}
+                    />
+                )}
+
                 {/* Payment Modal */}
                 <PaymentModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    isOpen={requestModalOpen}
+                    onClose={() => setRequestModalOpen(false)}
                     onPaymentSubmit={handlePaymentSubmit}
                 />
             </div>

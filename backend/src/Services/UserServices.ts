@@ -19,6 +19,8 @@ import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
+import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
+import { createPaymentIntent } from "../Utils/stripeService";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -59,7 +61,8 @@ class UserService implements IUserService {
         private otpRepository: IOtpRepository,
         private addressRepository: IAddressRepository,
         private scheduleRepository: IScheduleRepository,
-        private bookingRepository: IBookingRepository
+        private bookingRepository: IBookingRepository,
+        private paymentRepository: IPaymentRepository
     ) {}
 
     /**
@@ -914,6 +917,45 @@ class UserService implements IUserService {
             return {
                 success: false,
                 message: "Failed to fetch booking details",
+                data: null,
+            };
+        }
+    }
+    //updates payment status to complete and adds site fee
+    async processOnlinePayment(payment_id: string, amount: number): Promise<IResponse> {
+        try {
+            const response = await createPaymentIntent(amount);
+
+            if (!response.success || !response.clientSecret) {
+                return {
+                    success: false,
+                    message: response.message || "Failed to create payment intent",
+                    data: null,
+                };
+            }
+
+            const site_fee = Math.floor((amount * 10) / 100);
+
+            const status = await this.paymentRepository.updatePaymentStatus(payment_id, site_fee);
+
+            if (!status) {
+                return {
+                    success: false,
+                    message: "Failed to update payment status",
+                    data: null,
+                };
+            }
+
+            return {
+                success: true,
+                message: "Payment status updated successfully",
+                data: response,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to update payment status",
                 data: null,
             };
         }

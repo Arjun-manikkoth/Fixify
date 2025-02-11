@@ -561,6 +561,26 @@ const fetchBookingDetailsApi = async (id: string) => {
     }
 };
 
+//stripe payment api
+const stripePaymentApi = async (id: string, amount: number) => {
+    try {
+        const response = await axiosUser.post(`${userRoutes.create_payment}`, { id, amount });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -586,4 +606,5 @@ export {
     bookingRequestApi,
     fetchBookingsApi,
     fetchBookingDetailsApi,
+    stripePaymentApi,
 };

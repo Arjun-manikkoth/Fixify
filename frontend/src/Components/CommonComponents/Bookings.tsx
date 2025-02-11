@@ -117,10 +117,6 @@ const Bookings: React.FC<IProps> = ({ role, bookingsApi }) => {
                                             dateStyle: "medium",
                                         }).format(new Date(booking.date))}
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-500">
-                                        <FaLocationArrow className="text-blue-500" />
-                                        {booking.location}
-                                    </div>
                                 </div>
 
                                 {/* Booking Status & Action */}

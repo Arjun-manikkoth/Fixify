@@ -9,18 +9,21 @@ import OtpRepository from "../Repositories/OtpRepository";
 import AddressRepository from "../Repositories/AddressRepository";
 import ScheduleRepository from "../Repositories/ScheduleRepository";
 import BookingRepository from "../Repositories/BookingRepository";
+import PaymentRepository from "../Repositories/PaymentRepository";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const otpRepository = new OtpRepository(); // Initialize repository instance
 const addressRepository = new AddressRepository(); //creates an instance of address repository
-const scheduleRepository = new ScheduleRepository(); // creates anb instance of schedule repository
-const bookingRepository = new BookingRepository(); // creates anb instance of scheduel repository
+const scheduleRepository = new ScheduleRepository(); // creates an instance of schedule repository
+const bookingRepository = new BookingRepository(); // creates an instance of booking repository
+const paymentRepository = new PaymentRepository(); // creates and instance of payment repository
 const userService = new UserServices(
     userRepository,
     otpRepository,
     addressRepository,
     scheduleRepository,
-    bookingRepository
+    bookingRepository,
+    paymentRepository
 ); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
@@ -141,6 +144,11 @@ userRoute.get("/bookings", (req, res) => {
 // Route for booking detail
 userRoute.get("/booking_details", (req, res) => {
     userController.getBookingDetails(req, res);
+});
+
+// Route for booking detail
+userRoute.post("/create-payment-intent", (req, res) => {
+    userController.createStripePayment(req, res);
 });
 
 export default userRoute;

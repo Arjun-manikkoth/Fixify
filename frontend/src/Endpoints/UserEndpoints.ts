@@ -20,5 +20,6 @@ const userRoutes = {
     slots: "slots",
     bookings: "bookings",
     booking_details: "booking_details",
+    create_payment: "/create-payment-intent",
 };
 export default userRoutes;

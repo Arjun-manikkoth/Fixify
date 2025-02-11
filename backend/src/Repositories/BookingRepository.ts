@@ -302,6 +302,7 @@ class BookingRepository implements IBookingRepository {
                         date: 1,
                         time: 1,
                         status: 1,
+                        "payment._id": 1,
                         "payment.amount": 1,
                         "payment.payment_status": 1,
                         "payment.payment_mode": 1,
