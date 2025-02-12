@@ -22,5 +22,6 @@ const userRoutes = {
     booking_details: "booking_details",
     create_payment: "/create-payment-intent",
     cancel_booking: "/cancel_booking",
+    chats: "/chats",
 };
 export default userRoutes;

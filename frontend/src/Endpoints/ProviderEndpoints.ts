@@ -19,5 +19,6 @@ const providerRoutes = {
     bookings: "bookings",
     booking_details: "/booking_details",
     payments: "/payments",
+    chats: "/chats",
 };
 export default providerRoutes;

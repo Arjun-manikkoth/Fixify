@@ -58,11 +58,6 @@ const ProviderSidebar: React.FC = () => {
                         <span className="text-black text-lg font-semibold">Requests</span>
                     </li>
 
-                    <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
-                        <FiMessageCircle className="text-xl text-black" />
-                        <span className="text-black text-lg font-semibold">Conversations</span>
-                    </li>
-
                     <li
                         onClick={handleLogout}
                         className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"

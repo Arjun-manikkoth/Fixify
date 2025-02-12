@@ -47,10 +47,7 @@ const UserSidebar: React.FC = () => {
                         <FiSearch className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Find Service</span>
                     </li>
-                    <li className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4">
-                        <FiMessageCircle className="text-xl text-black" />
-                        <span className="text-black text-lg font-semibold">Conversations</span>
-                    </li>
+
                     <li
                         className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
                         onClick={() => handleNavigation("/users/addresses")}

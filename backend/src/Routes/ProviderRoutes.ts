@@ -11,6 +11,7 @@ import ApprovalRepository from "../Repositories/ApprovalRepository";
 import ScheduleRepository from "../Repositories/ScheduleRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
+import ChatRepository from "../Repositories/ChatRepository";
 
 const providerRepository = new ProviderRepository(); // Initialise repository instance
 const otpRepository = new OtpRepository(); // Initialise otp repository instance
@@ -19,6 +20,7 @@ const approvalRepository = new ApprovalRepository(); //initialise approval repos
 const scheduleRepository = new ScheduleRepository(); //initialise schedule repository
 const bookingRepository = new BookingRepository(); //initialise booking repository
 const paymentRepository = new PaymentRepository(); //initialise payment repository
+const chatRepository = new ChatRepository(); //initialise payment repository
 
 const providerService = new ProviderService(
     providerRepository,
@@ -27,7 +29,8 @@ const providerService = new ProviderService(
     approvalRepository,
     scheduleRepository,
     bookingRepository,
-    paymentRepository
+    paymentRepository,
+    chatRepository
 );
 
 // Dependency injection of repository into service
@@ -158,4 +161,8 @@ providerRoute.post("/payments", (req, res) => {
     providerController.createPaymentRequest(req, res);
 });
 
+// Route for fetching chats
+providerRoute.get("/chats", (req, res) => {
+    providerController.fetchChat(req, res);
+});
 export default providerRoute;

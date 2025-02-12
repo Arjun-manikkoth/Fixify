@@ -10,6 +10,7 @@ import AddressRepository from "../Repositories/AddressRepository";
 import ScheduleRepository from "../Repositories/ScheduleRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
+import ChatRepository from "../Repositories/ChatRepository";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const otpRepository = new OtpRepository(); // Initialize repository instance
@@ -17,13 +18,15 @@ const addressRepository = new AddressRepository(); //creates an instance of addr
 const scheduleRepository = new ScheduleRepository(); // creates an instance of schedule repository
 const bookingRepository = new BookingRepository(); // creates an instance of booking repository
 const paymentRepository = new PaymentRepository(); // creates and instance of payment repository
+const chatRepository = new ChatRepository(); // creates and instance of chat repository
 const userService = new UserServices(
     userRepository,
     otpRepository,
     addressRepository,
     scheduleRepository,
     bookingRepository,
-    paymentRepository
+    paymentRepository,
+    chatRepository
 ); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
@@ -154,6 +157,11 @@ userRoute.post("/create-payment-intent", (req, res) => {
 // Route for cancel booking
 userRoute.patch("/cancel_booking", (req, res) => {
     userController.cancelBooking(req, res);
+});
+
+// Route for fetching chats
+userRoute.get("/chats", (req, res) => {
+    userController.fetchChat(req, res);
 });
 
 export default userRoute;

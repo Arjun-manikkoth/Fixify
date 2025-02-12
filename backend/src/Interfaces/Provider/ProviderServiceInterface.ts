@@ -32,5 +32,6 @@ interface IProviderService {
     changeBookingRequestStatus(request_id: string, status: string): Promise<IResponse>;
     fetchBookingDetail(id: string): Promise<IResponse>;
     intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse>;
+    fetchChat(room_id: string): Promise<IResponse>;
 }
 export default IProviderService;

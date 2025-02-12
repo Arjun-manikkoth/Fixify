@@ -502,6 +502,26 @@ const paymentRequestApi = async (id: string, amount: number, method: string) => 
     }
 };
 
+//get chatting history
+const getChatsApi = async (id: string) => {
+    try {
+        const response = await axiosProvider.get(`${providerRoutes.chats}`, { params: { id } });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -526,4 +546,5 @@ export {
     fetchBookingsApi,
     fetchBookingDetailsApi,
     paymentRequestApi,
+    getChatsApi,
 };

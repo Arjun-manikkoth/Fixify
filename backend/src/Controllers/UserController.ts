@@ -883,6 +883,34 @@ class UserController {
             });
         }
     }
+
+    //fetch chat data
+    async fetchChat(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.UserService.fetchChat(req.query.id as string);
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(500).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching chat details:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
 }
 
 export default UserController;

@@ -21,8 +21,8 @@ import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterf
 import { IAddress } from "../Interfaces/Provider/SignIn";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
-import { request } from "http";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
+import IChatRepository from "../Interfaces/Chat/IChatRepository";
 
 interface IResponse {
     success: boolean;
@@ -71,7 +71,8 @@ class ProviderService implements IProviderService {
         private approvalRepository: IApprovalRepository,
         private scheduleRepository: IScheduleRepository,
         private bookingRepository: IBookingRepository,
-        private paymentRepository: IPaymentRepository
+        private paymentRepository: IPaymentRepository,
+        private chatRepository: IChatRepository
     ) {}
     //get all services
     async getServices(): Promise<IServices[] | null> {
@@ -968,6 +969,31 @@ class ProviderService implements IProviderService {
             return {
                 success: false,
                 message: "Failed to initiate payment request",
+                data: null,
+            };
+        }
+    }
+
+    //get all chat data
+    async fetchChat(room_id: string): Promise<IResponse> {
+        try {
+            const chatResponse = await this.chatRepository.fetchChats(room_id);
+
+            return chatResponse.success
+                ? {
+                      success: true,
+                      message: chatResponse.message,
+                      data: chatResponse.data,
+                  }
+                : {
+                      success: false,
+                      message: chatResponse.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            return {
+                success: false,
+                message: "Internal server error",
                 data: null,
             };
         }

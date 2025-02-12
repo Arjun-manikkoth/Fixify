@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaCommentDots, FaMapMarkerAlt } from "react-icons/fa";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import PaymentModal from "./Modals/PaymentModal";
-import { paymentRequestApi } from "../../Api/ProviderApis";
+import { getChatsApi as getProviderChats, paymentRequestApi } from "../../Api/ProviderApis";
+import { getChatsApi as getUserChats } from "../../Api/UserApis";
 import { toast } from "react-toastify";
 import PaymentFormModal from "./Modals/PaymentFormModal";
+import ChatModal from "./Modals/ChatModal";
 import { stripePaymentApi, cancelBookingApi } from "../../Api/UserApis";
 
 interface IBookingDetail {
@@ -66,6 +68,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const [loading, setLoading] = useState<boolean>(true);
     const [requestModalOpen, setRequestModalOpen] = useState<boolean>(false);
     const [forceRender, setForceRender] = useState<number>(0);
+    const [showChat, setShowChat] = useState<boolean>(false);
+
     useEffect(() => {
         if (!id) return;
         setLoading(true);
@@ -102,6 +106,11 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const closeStripeModal = () => {
         setStripeForm(false);
     };
+
+    const closeChatModal = () => {
+        setShowChat(false);
+    };
+
     const handlePaymentModal = () => {
         setStripeForm(true);
     };
@@ -206,15 +215,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         </div>
 
                         <button
-                            onClick={() =>
-                                navigate(
-                                    `/chat/${
-                                        role === "provider"
-                                            ? booking.provider._id
-                                            : booking.user._id
-                                    }`
-                                )
-                            }
+                            onClick={() => setShowChat(true)}
                             className="flex items-center gap-2 bg-blue-500 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition transform hover:scale-105"
                         >
                             <FaCommentDots className="text-md" /> Chat Now
@@ -299,7 +300,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         </button>
                     )}
                 </div>
-
+                {/* Payment confirmation Modal */}
                 {booking?.payment && (
                     <PaymentFormModal
                         isOpen={showStripeForm}
@@ -311,13 +312,24 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     />
                 )}
 
-                {/* Payment Modal */}
+                {/* Payment request Modal */}
                 <PaymentModal
                     isOpen={requestModalOpen}
                     onClose={() => setRequestModalOpen(false)}
                     onPaymentSubmit={handlePaymentSubmit}
                     handleRefresh={handleReRender}
                 />
+                {/* Chat Modal */}
+                {showChat && (
+                    <ChatModal
+                        senderId={role === "user" ? booking.user._id : booking.provider._id}
+                        receiverId={role === "user" ? booking.provider._id : booking.user._id}
+                        name={role === "user" ? booking.provider.name : booking.user.name}
+                        getChatsApi={role === "user" ? getUserChats : getProviderChats}
+                        isOpen={showChat}
+                        onClose={closeChatModal}
+                    />
+                )}
             </div>
         </div>
     );

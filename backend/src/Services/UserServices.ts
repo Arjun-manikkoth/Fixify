@@ -21,6 +21,7 @@ import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterf
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import { createPaymentIntent } from "../Utils/stripeService";
+import IChatRepository from "../Interfaces/Chat/IChatRepository";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -62,7 +63,8 @@ class UserService implements IUserService {
         private addressRepository: IAddressRepository,
         private scheduleRepository: IScheduleRepository,
         private bookingRepository: IBookingRepository,
-        private paymentRepository: IPaymentRepository
+        private paymentRepository: IPaymentRepository,
+        private chatRepository: IChatRepository
     ) {}
 
     /**
@@ -991,6 +993,30 @@ class UserService implements IUserService {
             };
         } catch (error: any) {
             console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+    //get all chat data
+    async fetchChat(room_id: string): Promise<IResponse> {
+        try {
+            const chatResponse = await this.chatRepository.fetchChats(room_id);
+
+            return chatResponse.success
+                ? {
+                      success: true,
+                      message: chatResponse.message,
+                      data: chatResponse.data,
+                  }
+                : {
+                      success: false,
+                      message: chatResponse.message,
+                      data: null,
+                  };
+        } catch (error: any) {
             return {
                 success: false,
                 message: "Internal server error",
