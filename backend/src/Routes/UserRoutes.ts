@@ -151,4 +151,9 @@ userRoute.post("/create-payment-intent", (req, res) => {
     userController.createStripePayment(req, res);
 });
 
+// Route for cancel booking
+userRoute.patch("/cancel_booking", (req, res) => {
+    userController.cancelBooking(req, res);
+});
+
 export default userRoute;

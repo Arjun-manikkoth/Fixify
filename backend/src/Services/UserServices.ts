@@ -960,6 +960,44 @@ class UserService implements IUserService {
             };
         }
     }
+
+    //checks the time is 3 hours before the slot time
+    async cancelBooking(booking_id: string): Promise<IResponse> {
+        try {
+            const booking = await this.bookingRepository.getBookingById(booking_id);
+            if (!booking.success) {
+                return { success: false, message: "Booking not found", data: null };
+            }
+
+            const slotTime = new Date(booking.data.time);
+            const currentTime = new Date();
+
+            // Check if current time is at least 3 hours before the slot time
+            const threeHoursBeforeSlot = new Date(slotTime.getTime() - 3 * 60 * 60 * 1000);
+
+            if (currentTime > threeHoursBeforeSlot) {
+                return {
+                    success: false,
+                    message: "Cannot cancel booking less than 3 hours before the slot time",
+                    data: null,
+                };
+            }
+
+            const updatedBooking = await this.bookingRepository.cancelBookingStatus(booking_id);
+            return {
+                success: true,
+                message: "Booking cancelled successfully",
+                data: updatedBooking,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default UserService;

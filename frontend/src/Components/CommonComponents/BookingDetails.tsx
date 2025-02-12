@@ -119,8 +119,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
         return timeDifference > 3;
     };
     //cancel booking
-    const handleCancelBooking = (id: string, time: string) => {
-        cancelBookingApi(id, time).then((response) => {
+    const handleCancelBooking = (id: string) => {
+        cancelBookingApi(id).then((response) => {
             if (response.success) {
                 toast.success(response.message);
                 handleReRender();
@@ -163,11 +163,12 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
 
                     {/* Cancel Button Inside Booking Details */}
                     {role === "user" &&
+                        booking.status !== "cancelled" &&
                         booking.payment?.payment_status !== "completed" &&
                         isMoreThanTwoHoursAway(booking.time) && (
                             <button
                                 className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
-                                onClick={() => handleCancelBooking(booking._id, booking.time)}
+                                onClick={() => handleCancelBooking(booking._id)}
                             >
                                 Cancel Booking
                             </button>

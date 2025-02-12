@@ -582,9 +582,9 @@ const stripePaymentApi = async (id: string, amount: number) => {
 };
 
 //cancel booking
-const cancelBookingApi = async (id: string, time: string) => {
+const cancelBookingApi = async (id: string) => {
     try {
-        const response = await axiosUser.patch(`${userRoutes.cancel_booking}`, { id, time });
+        const response = await axiosUser.patch(`${userRoutes.cancel_booking}`, { id });
 
         return {
             success: true,

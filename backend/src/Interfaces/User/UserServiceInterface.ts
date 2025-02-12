@@ -32,5 +32,6 @@ interface IUserService {
     fetchBookings(id: string, page: number): Promise<IResponse>;
     fetchBookingDetail(id: string): Promise<IResponse>;
     processOnlinePayment(payment_id: string, amount: number): Promise<IResponse>;
+    cancelBooking(booking_id: string): Promise<IResponse>;
 }
 export default IUserService;

@@ -7,5 +7,7 @@ interface IBookingRepository {
     getBookingsWithProviderId(id: string, page: number): Promise<IResponse>;
     getBookingDetails(id: string): Promise<IResponse>;
     updateBookingWithPaymentId(booking_id: string, payment_id: string): Promise<boolean>;
+    getBookingById(booking_id: string): Promise<IResponse>;
+    cancelBookingStatus(booking_id: string): Promise<boolean>;
 }
 export default IBookingRepository;

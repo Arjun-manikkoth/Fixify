@@ -342,5 +342,43 @@ class BookingRepository implements IBookingRepository {
             return false;
         }
     }
+    //get booking document
+    async getBookingById(booking_id: string): Promise<IResponse> {
+        try {
+            const booking = await Booking.findOne({ _id: new mongoose.Types.ObjectId(booking_id) });
+            return booking
+                ? {
+                      success: true,
+                      message: "Fetched booking details successfully",
+                      data: booking,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to fetch booking details",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    //change booking status to cancelled
+    async cancelBookingStatus(booking_id: string): Promise<boolean> {
+        try {
+            const updatedStatus = await Booking.updateOne(
+                { _id: new mongoose.Types.ObjectId(booking_id) },
+                { $set: { status: "cancelled" } }
+            );
+            return updatedStatus.modifiedCount > 0 ? true : false;
+        } catch (error: any) {
+            console.log(error.message);
+            return false;
+        }
+    }
 }
 export default BookingRepository;

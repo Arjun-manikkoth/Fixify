@@ -854,6 +854,35 @@ class UserController {
             });
         }
     }
+
+    //cancel booking based on the time
+    async cancelBooking(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.UserService.cancelBooking(req.body.id);
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking details:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
 }
 
 export default UserController;
