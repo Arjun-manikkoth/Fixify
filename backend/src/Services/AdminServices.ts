@@ -242,23 +242,31 @@ class AdminService implements IAdminService {
     async approvalStatusChange(id: string, status: string): Promise<Boolean> {
         try {
             const updatedData = await this.approvalRepository.updateApprovalStatus(id, status);
-
-            if (updatedData?.status === "Approved" && updatedData?.provider_id) {
+            if (updatedData?.provider_id) {
                 const providerData = await this.providerRepository.getProviderById(
                     updatedData.provider_id
                 );
-                if (providerData) {
-                    if (updatedData?.service_id) {
-                        await this.providerRepository.updateProviderServiceApproval(
-                            providerData._id,
-                            updatedData.service_id
+
+                if (updatedData?.status === "Approved") {
+                    if (providerData) {
+                        if (updatedData?.service_id) {
+                            await this.providerRepository.updateProviderServiceApproval(
+                                providerData._id,
+                                updatedData.service_id
+                            );
+                        }
+                        await sentMail(
+                            providerData.email,
+                            "Approval Mail",
+                            `<p>Your request has been successfully approved! You can start working with Fixify.</p>`
                         );
                     }
-                    const mail = await sentMail(
+                } else if (providerData) {
+                    await sentMail(
                         providerData.email,
-                        "Approval Mail",
-                        `<p>Your request has been successfully approved!. You can start working with Fixify.</p>`
-                    ); //utility function sends the email to the provider
+                        "Rejection Mail",
+                        `<p>Unfortunately, your request has been rejected due to a lack of experience/lack of work perfection. Please contact support for further details.</p>`
+                    );
                 }
             }
 
