@@ -84,7 +84,6 @@ class UserRepository implements IUserRepository {
         try {
             interface Profile {
                 name?: string;
-                email?: string;
                 url?: string;
                 mobile_no?: string;
             }

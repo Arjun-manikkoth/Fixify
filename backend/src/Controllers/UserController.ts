@@ -8,6 +8,19 @@ class UserController {
 
     async signUp(req: Request, res: Response): Promise<void> {
         try {
+            if (
+                !req.body.data.email ||
+                !req.body.data.password ||
+                !req.body.data.userName ||
+                !req.body.data.mobileNo
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,password,username,mobile no are required feilds",
+                });
+                return;
+            }
+
             const user = await this.UserService.createUser(req.body); //this function is called to check and save data to the db
 
             if (user?.success === true) {
@@ -31,6 +44,14 @@ class UserController {
     // login if account exists and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.data.email || !req.body.data.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,password are required feilds",
+                });
+                return;
+            }
+
             const response = await this.UserService.authenticateUser(req.body); //this function checks and verify the credentials
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
@@ -63,7 +84,6 @@ class UserController {
                         url: response.url,
                     });
             } else {
-                console.log(response?.message);
                 // Error handling based on  error messages
                 switch (response?.message) {
                     case "Account doesnot exist":
@@ -103,6 +123,13 @@ class UserController {
     //verifies the otp associated with the mail id for account verification
     async otpVerify(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.otp) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,otp are required feilds",
+                });
+                return;
+            }
             const otpStatus = await this.UserService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
             // Check the OTP verification status
@@ -138,6 +165,13 @@ class UserController {
 
     async otpResend(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email is a required feild",
+                });
+                return;
+            }
             const status = await this.UserService.otpResend(req.body.email); // resends otps via mail
 
             if (status) {
@@ -189,26 +223,26 @@ class UserController {
                 //if the cookie is deleted or expired
 
                 res.status(401).json({ success: false, message: "Refresh Token missing" });
+                return;
+            }
+            //checks  the validity of refresh token and returns access token
+            const response = await this.UserService.refreshTokenCheck(token);
+
+            if (response.accessToken) {
+                //sends the token via cookie for successfull refresh token
+
+                res.status(200)
+                    .cookie("accessToken", response.accessToken, {
+                        httpOnly: true,
+                        secure: false,
+                        // sameSite: 'none',
+                        maxAge: process.env.MAX_AGE_ACCESS_COOKIE
+                            ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
+                            : 15 * 60 * 1000, // 15 minutes
+                    })
+                    .json({ success: true, message: "Access token sent successfully" });
             } else {
-                //checks  the validity of refresh token and returns access token
-                const response = await this.UserService.refreshTokenCheck(token);
-
-                if (response.accessToken) {
-                    //sends the token via cookie for successfull refresh token
-
-                    res.status(200)
-                        .cookie("accessToken", response.accessToken, {
-                            httpOnly: true,
-                            secure: false,
-                            // sameSite: 'none',
-                            maxAge: process.env.MAX_AGE_ACCESS_COOKIE
-                                ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
-                                : 15 * 60 * 1000, // 15 minutes
-                        })
-                        .json({ success: true, message: "Access token sent successfully" });
-                } else {
-                    res.status(401).json({ success: true, message: response.message });
-                }
+                res.status(401).json({ success: true, message: response.message });
             }
         } catch (error: any) {
             console.error(error.message);
@@ -220,6 +254,13 @@ class UserController {
     //sign and sign in with google
     async googleAuth(req: Request, res: Response) {
         try {
+            if (!req.query.code) {
+                res.status(400).json({
+                    success: false,
+                    message: "Google signin code is required feild",
+                });
+                return;
+            }
             const { code } = req.query;
 
             const response = await this.UserService.googleAuth(code as string);
@@ -282,7 +323,14 @@ class UserController {
     //update user profile data
     async updateProfile(req: Request, res: Response) {
         try {
-            console.log(req.body);
+            if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Name,mobile no and id are required feilds",
+                });
+                return;
+            }
+
             const status = await this.UserService.editProfile(req.body);
             if (status) {
                 res.status(200).json({
@@ -306,6 +354,13 @@ class UserController {
     //fetches and send the user profile data
     async getUser(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                });
+                return;
+            }
             const status = await this.UserService.getUserData(req.query.id as string);
 
             if (status) {
@@ -331,6 +386,13 @@ class UserController {
     // Checks email and sends OTP for verifying email for forgot password
     async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email is a required feild",
+                });
+                return;
+            }
             const status = await this.UserService.forgotPasswordVerify(req.body.email);
 
             if (status.message === "Mail sent successfully") {
@@ -371,6 +433,13 @@ class UserController {
     //verifies the otp associated with the mail id for forgot password
     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.otp) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email and otp are a required feilds",
+                });
+                return;
+            }
             const otpStatus = await this.UserService.passworOtpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
             // Check the OTP verification status
@@ -405,6 +474,14 @@ class UserController {
     //updates with new password
     async resetPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email and password are a required feilds",
+                });
+                return;
+            }
+
             const response = await this.UserService.changePassword(
                 req.body.email as string,
                 req.body.password as string
@@ -436,6 +513,13 @@ class UserController {
     //confirm the old password
     async confirmPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and password are a required feilds",
+                });
+                return;
+            }
             const response = await this.UserService.verifyPassword(
                 req.params.id as string,
                 req.body.password as string
@@ -672,6 +756,21 @@ class UserController {
     //fetch all available slots based on location
     async fetchSlots(req: Request, res: Response): Promise<void> {
         try {
+            if (
+                !req.query.service_id ||
+                !req.query.lat ||
+                !req.query.long ||
+                !req.query.date ||
+                !req.query.time
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: "Service Id,location ,date and time are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.UserService.getSlots({
                 service_id: req.query.service_id as string,
                 lat: parseFloat(req.query.lat as string),
@@ -712,6 +811,20 @@ class UserController {
     //adds booking request to book slots
     async requestSlots(req: Request, res: Response): Promise<void> {
         try {
+            if (
+                !req.body.data.user_id ||
+                !req.body.data.slot_id ||
+                !req.body.data.time ||
+                !req.body.data.address ||
+                !req.body.data.description
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: "User id,slot id,time,address,description are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.UserService.requestBooking(req.body.data);
 
             if (response.success) {
@@ -765,6 +878,15 @@ class UserController {
     //fetch all bookings for user with id
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id || !req.query.page) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and page no are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.UserService.fetchBookings(
                 req.query.id as string,
                 Number(req.query.page)
@@ -797,6 +919,15 @@ class UserController {
     //fetch bookings details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.UserService.fetchBookingDetail(req.query.id as string);
 
             if (response.success) {
@@ -826,6 +957,14 @@ class UserController {
     //logic to handle payment intent
     async createStripePayment(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.id || !req.body.amount) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and amount are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.UserService.processOnlinePayment(
                 req.body.id,
                 req.body.amount
@@ -858,6 +997,14 @@ class UserController {
     //cancel booking based on the time
     async cancelBooking(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.UserService.cancelBooking(req.body.id);
 
             if (response.success) {
@@ -887,6 +1034,15 @@ class UserController {
     //fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Room id is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.UserService.fetchChat(req.query.id as string);
 
             if (response.success) {

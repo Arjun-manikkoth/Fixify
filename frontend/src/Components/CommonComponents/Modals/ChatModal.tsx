@@ -104,11 +104,6 @@ const ChatModal: React.FC<ChatModalProps> = ({
                                 }`}
                             >
                                 {msg.message}
-                                <span className="text-xs opacity-70 block text-right mt-1">
-                                    {new Intl.DateTimeFormat("en-US", {
-                                        timeStyle: "short",
-                                    }).format(new Date(msg.timestamp))}
-                                </span>
                             </div>
                         </div>
                     ))}
