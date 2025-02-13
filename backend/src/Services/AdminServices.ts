@@ -19,6 +19,7 @@ import IApprovalRepository from "../Interfaces/Approval/ApprovalRepositoryInterf
 import IServiceRepository from "../Interfaces/Service/IServiceRepository";
 import { IPaginatedServices } from "../Interfaces/Service/IServices";
 import { IAddService } from "../Interfaces/Admin/SignInInterface";
+import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -49,7 +50,8 @@ class AdminService implements IAdminService {
         private userRepository: IUserRepository,
         private providerRepository: IProviderRepository,
         private approvalRepository: IApprovalRepository,
-        private serviceRepository: IServiceRepository
+        private serviceRepository: IServiceRepository,
+        private bookingRepository: IBookingRepository
     ) {}
 
     //authenticates admin by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
@@ -363,6 +365,32 @@ class AdminService implements IAdminService {
             return {
                 success: false,
                 message: "Failed to update service",
+                data: null,
+            };
+        }
+    }
+
+    //fetches all bookings
+    async fetchBookings(page: number): Promise<IResponse> {
+        try {
+            const bookingStatus = await this.bookingRepository.getAllBookings(page);
+
+            return bookingStatus.success
+                ? {
+                      success: true,
+                      message: bookingStatus.message,
+                      data: bookingStatus.data,
+                  }
+                : {
+                      success: false,
+                      message: bookingStatus.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.messaege);
+            return {
+                success: false,
+                message: "Failed to fetch bookings",
                 data: null,
             };
         }

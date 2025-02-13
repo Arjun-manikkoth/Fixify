@@ -607,5 +607,43 @@ class AdminController {
             });
         }
     }
+
+    //fetch all bookings for admin
+    async getBookings(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.query.page) {
+                res.status(400).json({
+                    success: false,
+                    message: "Page number is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.AdminService.fetchBookings(Number(req.query.page));
+
+            if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+                return;
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking data:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
 }
 export default AdminController;

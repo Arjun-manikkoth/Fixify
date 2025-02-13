@@ -380,5 +380,123 @@ class BookingRepository implements IBookingRepository {
             return false;
         }
     }
+
+    //finds all bookings
+    async getAllBookings(page: number, limit: number = 10): Promise<IResponse> {
+        try {
+            const skip = (page - 1) * limit;
+
+            const bookings = await Booking.aggregate([
+                // Lookup user details
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "user_id",
+                        foreignField: "_id",
+                        as: "user",
+                    },
+                },
+                { $unwind: "$user" },
+
+                // Lookup provider details
+                {
+                    $lookup: {
+                        from: "providers",
+                        localField: "provider_id",
+                        foreignField: "_id",
+                        as: "provider",
+                    },
+                },
+                { $unwind: "$provider" },
+
+                // Lookup service details
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "service_id",
+                        foreignField: "_id",
+                        as: "service",
+                    },
+                },
+                { $unwind: "$service" },
+
+                // Lookup payment details (optional)
+                {
+                    $lookup: {
+                        from: "payments",
+                        localField: "payment_id",
+                        foreignField: "_id",
+                        as: "payment",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$payment",
+                        preserveNullAndEmptyArrays: true, // Keeps bookings even if payment is missing
+                    },
+                },
+
+                // Select only required fields
+                {
+                    $project: {
+                        _id: 1,
+                        date: 1,
+                        time: 1,
+                        status: 1,
+                        user_address: 1,
+                        description: 1,
+                        "user._id": 1,
+                        "user.url": 1,
+                        "user.name": 1,
+                        "user.email": 1,
+                        "user.mobile_no": 1,
+                        "user.is_blocked": 1,
+                        "provider._id": 1,
+                        "provider.name": 1,
+                        "provider.email": 1,
+                        "provider.url": 1,
+                        "provider.mobile_no": 1,
+                        "provider.is_blocked": 1,
+                        "service._id": 1,
+                        "service.name": 1,
+                        "service.description": 1,
+                        "payment._id": 1,
+                        "payment.amount": 1,
+                        "payment.payment_status": 1,
+                        "payment.payment_mode": 1,
+                        "payment.payment_date": 1,
+                        "payment.site_fee": 1,
+                    },
+                },
+
+                // Pagination
+                { $skip: skip },
+                { $limit: limit },
+            ]);
+
+            // Get total count for pagination info
+            const totalBookings = await Booking.countDocuments();
+
+            return {
+                success: true,
+                message: "Fetched booking details successfully",
+                data: {
+                    bookings,
+                    pagination: {
+                        currentPage: page,
+                        totalPages: Math.ceil(totalBookings / limit),
+                        totalBookings,
+                    },
+                },
+            };
+        } catch (error: any) {
+            console.error("Error fetching bookings:", error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 export default BookingRepository;

@@ -22,6 +22,7 @@ import UserBookingsPage from "./Pages/User/UserBookingsPage";
 import UserBookingDetailsPage from "./Pages/User/UserBooingDetailsPage";
 import ProviderBookingsPage from "./Pages/Provider/ProviderBookings";
 import ProviderBookingDetailPage from "./Pages/Provider/ProviderBookingDetails";
+import AdminBookingsPage from "./Pages/Admin/AdminBookingsPage";
 
 const App: FC = () => {
     return (
@@ -77,6 +78,7 @@ const App: FC = () => {
                         <Route path="/admins/users" Component={AdminUsersPage} />
                         <Route path="/admins/providers" Component={AdminProvidersPage} />
                         <Route path="/admins/approvals" Component={AdminApprovalsPage} />
+                        <Route path="/admins/bookings" Component={AdminBookingsPage} />
                         <Route
                             path="/admins/approval_details/:id"
                             Component={AdminApprovalDetailsPage}
