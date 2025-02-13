@@ -64,7 +64,7 @@ const AdminBookings: React.FC = () => {
     };
 
     return (
-        <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-5xl mx-auto">
+        <div className="p-6 pt-24 px-12">
             <h2 className="text-3xl font-semibold text-gray-800 mb-12">All Bookings</h2>
             {loading ? (
                 <LoadingSpinner />
