@@ -235,7 +235,10 @@ const ProviderFinder: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-2 ms-3 text-sm text-gray-600">
                                     <FaClock className="text-brandBlue" />
-                                    {formData.time}
+
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        timeStyle: "short",
+                                    }).format(new Date(formData.time))}
                                 </div>
                             </div>
 
