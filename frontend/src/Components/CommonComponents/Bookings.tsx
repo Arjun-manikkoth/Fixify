@@ -88,11 +88,19 @@ const Bookings: React.FC<IProps> = ({ role, bookingsApi }) => {
                             >
                                 {/* Person Info (User or Provider) */}
                                 <div className="flex items-center gap-4 w-full sm:w-1/3 mb-4 sm:mb-0">
-                                    <img
-                                        src={person?.url || "/default-profile.jpg"}
-                                        alt={person?.name}
-                                        className="w-16 h-16 rounded-full object-cover shadow-md border-2 border-blue-500"
-                                    />
+                                    {person.url ? (
+                                        <img
+                                            src={person?.url || "/default-profile.jpg"}
+                                            alt={person?.name}
+                                            className="w-16 h-16 rounded-full object-cover shadow-md border-2 border-blue-500"
+                                        />
+                                    ) : (
+                                        <img
+                                            src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
+                                            alt="Default Profile"
+                                            className="w-16 h-16 rounded-full object-cover shadow-md border-2 border-blue-500"
+                                        />
+                                    )}
                                     <div className="flex flex-col">
                                         <h3 className="text-lg font-semibold text-gray-800">
                                             {person?.name}

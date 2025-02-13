@@ -191,12 +191,20 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     </h3>
                     <div className="flex flex-col sm:flex-row sm:justify-between items-center  gap-4">
                         <div className="flex items-center gap-4 ">
-                            <img
-                                src={role === "user" ? booking.provider.url : booking.user.url}
-                                alt="Technician"
-                                referrerPolicy="no-referrer"
-                                className="w-20 h-20 rounded-full shadow-md border border-gray-300"
-                            />
+                            {booking.user.url || booking.provider.url ? (
+                                <img
+                                    src={role === "user" ? booking.provider.url : booking.user.url}
+                                    alt="Technician"
+                                    referrerPolicy="no-referrer"
+                                    className="w-20 h-20 rounded-full shadow-md border border-gray-300"
+                                />
+                            ) : (
+                                <img
+                                    src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
+                                    alt="Default Profile"
+                                    className="w-20 h-20 rounded-full shadow-md border border-gray-300"
+                                />
+                            )}
                             <div>
                                 <h4 className="text-xl font-semibold text-gray-900">
                                     {role === "user" ? booking.provider.name : booking.user.name}
