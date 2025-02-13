@@ -110,6 +110,11 @@ const ProviderFinder: React.FC = () => {
             errors.forEach((err, index) => setTimeout(() => toast.error(err), index * 100));
             return;
         }
+        console.log(new Date(), new Date(formData.date));
+        if (new Date(formData.date) < new Date()) {
+            toast.error("Choose a valid date");
+            return;
+        }
 
         setLoading(true);
         try {
