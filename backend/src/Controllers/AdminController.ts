@@ -7,6 +7,14 @@ class AdminController {
     // login and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email and Password are required feilds",
+                });
+                return;
+            }
+
             const response = await this.AdminService.authenticateAdmin(req.body); //this function checks and verify the credentials
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
@@ -128,6 +136,14 @@ class AdminController {
     //list users in the admin side based on the selections
     async getUsers(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.page || !req.query.filter) {
+                res.status(400).json({
+                    success: false,
+                    message: "Page,filter are required feilds",
+                });
+                return;
+            }
+
             const status = await this.AdminService.getUsersList(
                 req.query.search as string,
                 req.query.page as string,
@@ -156,6 +172,13 @@ class AdminController {
     //block user
     async blockUser(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                });
+                return;
+            }
             const status = await this.AdminService.userBlock(req.query.id as string);
             if (status) {
                 res.status(200).json({
@@ -178,6 +201,13 @@ class AdminController {
     //block user
     async unBlockUser(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                });
+                return;
+            }
             const status = await this.AdminService.userUnBlock(req.query.id as string);
             if (status) {
                 res.status(200).json({
@@ -200,6 +230,15 @@ class AdminController {
     //list providers in the admin side based on the selections
     async getProviders(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.page || !req.query.filter) {
+                res.status(400).json({
+                    success: false,
+                    message: "search,page,filter are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
             const status = await this.AdminService.getProvidersList(
                 req.query.search as string,
                 req.query.page as string,
@@ -228,6 +267,14 @@ class AdminController {
     //list approval request in the admin side based on the page no
     async getApprovals(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.page) {
+                res.status(400).json({
+                    success: false,
+                    message: "Page is a required feild",
+                    data: null,
+                });
+                return;
+            }
             const status = await this.AdminService.getApprovalsList(req.query.page as string);
             if (status) {
                 res.status(200).json({
@@ -252,6 +299,14 @@ class AdminController {
     //block provider
     async blockProvider(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
             const status = await this.AdminService.providerBlock(req.query.id as string);
             if (status) {
                 res.status(200).json({
@@ -274,6 +329,14 @@ class AdminController {
     //unblock provider
     async unBlockProvider(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
             const status = await this.AdminService.providerUnBlock(req.query.id as string);
             if (status) {
                 res.status(200).json({
@@ -296,6 +359,14 @@ class AdminController {
     //get approval details with id
     async approvalDetails(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
             const status = await this.AdminService.getApprovalDetails(req.params.id as string);
             if (status) {
                 res.status(200).json({
@@ -320,6 +391,14 @@ class AdminController {
     //update approval detail status
     async approvalStatusUpdate(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id || !req.params.status) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and status are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const status = await this.AdminService.approvalStatusChange(
                 req.params.id as string,
                 req.params.status as string
@@ -347,6 +426,14 @@ class AdminController {
     //get all services
     async getAllServices(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.page || !req.query.filter) {
+                res.status(400).json({
+                    success: false,
+                    message: "search,page,filter are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const services = await this.AdminService.getServices(
                 req.query.search as string,
                 req.query.page as string,
@@ -370,6 +457,14 @@ class AdminController {
     // update the service status to list or unlist
     async changeServiceStatus(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id || !req.body.status) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and status are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.AdminService.changeServiceStatus(
                 req.body.status,
                 req.params.id
@@ -399,9 +494,16 @@ class AdminController {
     // add new service
     async addService(req: Request, res: Response): Promise<void> {
         try {
-            console.log("");
+            if (!req.body.data.serviceName || !req.body.data.description) {
+                res.status(400).json({
+                    success: false,
+                    message: "Service name and description are required feilds",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.AdminService.createService(req.body.data);
-            console.log("response", response);
+
             if (response.success) {
                 res.status(200).json({
                     success: true,
@@ -428,6 +530,15 @@ class AdminController {
     // get service
     async getService(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.AdminService.getServiceDetails(req.params.id);
 
             if (response) {
@@ -455,6 +566,15 @@ class AdminController {
     // update  service
     async updateService(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.data.serviceName || !req.body.data.description || !req.params.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Service name,description and id are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.AdminService.updateService(
                 req.params.id as string,
                 req.body.data

@@ -115,6 +115,7 @@ const ProviderFinder: React.FC = () => {
             toast.error("Choose a valid date");
             return;
         }
+
         if (new Date().getTime() > new Date(formData.time).getTime()) {
             toast.error("Choose a valid time");
             return;
