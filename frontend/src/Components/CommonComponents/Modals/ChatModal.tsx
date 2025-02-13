@@ -17,7 +17,7 @@ interface Message {
     sender: string;
     receiver: string;
     message: string;
-    timestamp?: string;
+    timestamp: string;
 }
 
 const ChatModal: React.FC<ChatModalProps> = ({
@@ -97,13 +97,18 @@ const ChatModal: React.FC<ChatModalProps> = ({
                             }`}
                         >
                             <div
-                                className={`max-w-[75%] p-2 rounded-lg text-md shadow ${
+                                className={`max-w-[75%] p-2 rounded-lg text-md shadow relative ${
                                     msg.sender === senderId
-                                        ? "bg-blue-500 text-white self-end"
+                                        ? "bg-blue-500 text-white self-end ps-4"
                                         : "bg-gray-200 text-gray-800 self-start"
                                 }`}
                             >
                                 {msg.message}
+                                <span className="text-xs opacity-70 block text-right mt-1">
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        timeStyle: "short",
+                                    }).format(new Date(msg.timestamp))}
+                                </span>
                             </div>
                         </div>
                     ))}
