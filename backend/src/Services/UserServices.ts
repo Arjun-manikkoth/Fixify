@@ -475,6 +475,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //user edit profile to db
     async editProfile(data: IUpdateProfile): Promise<Partial<IUser | null>> {
         try {
@@ -504,6 +505,7 @@ class UserService implements IUserService {
             return null;
         }
     }
+
     //verifies email for sending otp for forgot password
     async forgotPasswordVerify(email: string): Promise<IResponse> {
         try {
@@ -621,6 +623,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     // verifies the old password
     async verifyPassword(id: string, password: string): Promise<IResponse> {
         try {
@@ -655,6 +658,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //limits and checks for duplicate addresses and creates one
     async createAddress(address: IAddAddress): Promise<IResponse> {
         try {
@@ -766,6 +770,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     // get address associated with user
     async getAddress(addressId: string): Promise<IResponse> {
         try {
@@ -792,6 +797,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //update address
     async editAddress(address: IAddAddress, id: string): Promise<IResponse> {
         try {
@@ -898,6 +904,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //fetch booking details
     async fetchBookingDetail(id: string): Promise<IResponse> {
         try {
@@ -923,6 +930,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //updates payment status to complete and adds site fee
     async processOnlinePayment(payment_id: string, amount: number): Promise<IResponse> {
         try {
@@ -1000,6 +1008,7 @@ class UserService implements IUserService {
             };
         }
     }
+
     //get all chat data
     async fetchChat(room_id: string): Promise<IResponse> {
         try {

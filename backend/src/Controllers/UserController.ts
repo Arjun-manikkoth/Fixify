@@ -8,12 +8,7 @@ class UserController {
 
     async signUp(req: Request, res: Response): Promise<void> {
         try {
-            if (
-                !req.body.data.email ||
-                !req.body.data.password ||
-                !req.body.data.userName ||
-                !req.body.data.mobileNo
-            ) {
+            if (!req.body.email || !req.body.password || !req.body.userName || !req.body.mobileNo) {
                 res.status(400).json({
                     success: false,
                     message: "Email,password,username,mobile no are required feilds",
@@ -44,7 +39,7 @@ class UserController {
     // login if account exists and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.body.data.email || !req.body.data.password) {
+            if (!req.body.email || !req.body.password) {
                 res.status(400).json({
                     success: false,
                     message: "Email,password are required feilds",

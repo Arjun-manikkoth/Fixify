@@ -288,7 +288,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                 </p>
                             </div>
                             {booking.payment.payment_mode === "online" &&
-                                booking.payment.payment_status != "completed" && (
+                                role === "user" &&
+                                booking.payment.payment_status !== "completed" && (
                                     <button
                                         className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
                                         onClick={handlePaymentModal}
