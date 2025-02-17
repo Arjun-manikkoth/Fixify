@@ -193,7 +193,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         <div className="flex items-center gap-4 ">
                             {booking.user.url || booking.provider.url ? (
                                 <img
-                                    src={role === "user" ? booking.provider.url : booking.user.url}
+                                    src={role === "user" ? booking.user.url : booking.provider.url}
                                     alt="Technician"
                                     referrerPolicy="no-referrer"
                                     className="w-20 h-20 rounded-full shadow-md border border-gray-300"
