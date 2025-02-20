@@ -1,5 +1,5 @@
 import React from "react";
-import { FiUser, FiBook, FiMessageCircle, FiMapPin, FiLogOut, FiSearch } from "react-icons/fi";
+import { FiUser, FiBook, FiMapPin, FiLogOut, FiSearch } from "react-icons/fi";
 import { clearUser } from "../../Redux/UserSlice";
 import { logoutUser } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";

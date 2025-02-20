@@ -11,6 +11,8 @@ import ScheduleRepository from "../Repositories/ScheduleRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ChatRepository from "../Repositories/ChatRepository";
+import ReviewRepository from "../Repositories/ReviewRepository";
+import { upload } from "../Utils/Multer";
 
 const userRepository = new UserRepository(); // Initialize repository instance
 const otpRepository = new OtpRepository(); // Initialize repository instance
@@ -19,6 +21,7 @@ const scheduleRepository = new ScheduleRepository(); // creates an instance of s
 const bookingRepository = new BookingRepository(); // creates an instance of booking repository
 const paymentRepository = new PaymentRepository(); // creates and instance of payment repository
 const chatRepository = new ChatRepository(); // creates and instance of chat repository
+const reviewRepository = new ReviewRepository(); // creates and instance of review repository
 const userService = new UserServices(
     userRepository,
     otpRepository,
@@ -26,7 +29,8 @@ const userService = new UserServices(
     scheduleRepository,
     bookingRepository,
     paymentRepository,
-    chatRepository
+    chatRepository,
+    reviewRepository
 ); // Dependency injection of repository into service
 const userController = new UserController(userService); // Dependency injection of service into controller
 
@@ -162,6 +166,11 @@ userRoute.patch("/cancel_booking", (req, res) => {
 // Route for fetching chats
 userRoute.get("/chats", (req, res) => {
     userController.fetchChat(req, res);
+});
+
+// Route for adding review
+userRoute.post("/reviews", upload.array("images", 3), (req, res) => {
+    userController.addReview(req, res);
 });
 
 export default userRoute;

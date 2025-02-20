@@ -621,6 +621,46 @@ const getChatsApi = async (id: string) => {
     }
 };
 
+//add review for booking
+const reviewApi = async (review: {
+    rating: number;
+    review: string;
+    description: string;
+    provider_id: string;
+    booking_id: string;
+    images: File[];
+}) => {
+    try {
+        // Convert to FormData
+        const formData = new FormData();
+        formData.append("rating", review.rating.toString());
+        formData.append("review", review.review);
+        formData.append("provider_id", review.provider_id);
+        formData.append("booking_id", review.booking_id);
+        formData.append("description", review.description);
+
+        // Append images as files
+        review.images.forEach((image) => {
+            formData.append("images", image);
+        });
+
+        const response = await axiosUser.post(`${userRoutes.reviews}`, formData);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -649,4 +689,5 @@ export {
     stripePaymentApi,
     cancelBookingApi,
     getChatsApi,
+    reviewApi,
 };

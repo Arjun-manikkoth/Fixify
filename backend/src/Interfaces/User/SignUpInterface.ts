@@ -63,3 +63,11 @@ export interface IBookingRequestData {
     slot_id: string;
     time: string;
 }
+
+export interface IReviewData {
+    booking_id: string;
+    provider_id: string;
+    rating: number;
+    review: string;
+    description: string;
+}

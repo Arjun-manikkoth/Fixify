@@ -10,5 +10,6 @@ interface IBookingRepository {
     getBookingById(booking_id: string): Promise<IResponse>;
     cancelBookingStatus(booking_id: string): Promise<boolean>;
     getAllBookings(page: number): Promise<IResponse>;
+    updateReviewDetails(review_id: string, booking_id: string): Promise<IResponse>;
 }
 export default IBookingRepository;

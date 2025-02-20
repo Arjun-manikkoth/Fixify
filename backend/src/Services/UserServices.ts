@@ -15,13 +15,15 @@ import { IUser } from "../Models/UserModels/UserModel";
 import { IAddAddress } from "../Interfaces/User/SignUpInterface";
 import { IResponse } from "./AdminServices";
 import IOtpRepository from "../Interfaces/Otp/OtpRepositoryInterface";
-import { IBookingRequestData } from "../Interfaces/User/SignUpInterface";
+import { IBookingRequestData, IReviewData } from "../Interfaces/User/SignUpInterface";
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import { createPaymentIntent } from "../Utils/stripeService";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
+import IReviewRepository from "../Interfaces/Review/IReviewRepository";
+import { uploadImages } from "../Utils/Cloudinary";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -64,7 +66,8 @@ class UserService implements IUserService {
         private scheduleRepository: IScheduleRepository,
         private bookingRepository: IBookingRepository,
         private paymentRepository: IPaymentRepository,
-        private chatRepository: IChatRepository
+        private chatRepository: IChatRepository,
+        private reviewRepository: IReviewRepository
     ) {}
 
     /**
@@ -1026,6 +1029,63 @@ class UserService implements IUserService {
                       data: null,
                   };
         } catch (error: any) {
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    // checks and creates review for a completed booking
+    async processReviewCreation(
+        reviewData: IReviewData,
+        reviewImages: Express.Multer.File[]
+    ): Promise<IResponse> {
+        try {
+            const image_urls = await uploadImages(reviewImages);
+            if (image_urls.length === 0) {
+                return {
+                    success: false,
+                    message: "Failed to store image",
+                    data: null,
+                };
+            }
+            const duplicateExists = await this.reviewRepository.duplicateReviewExists(
+                reviewData.booking_id
+            );
+            if (duplicateExists.success) {
+                return {
+                    success: false,
+                    message: "Review added already",
+                    data: null,
+                };
+            }
+
+            const response = await this.reviewRepository.saveReview(reviewData, image_urls);
+
+            if (response.success) {
+                const updateStatus = await this.bookingRepository.updateReviewDetails(
+                    response.data._id,
+                    reviewData.booking_id
+                );
+
+                if (!updateStatus.success) {
+                    return {
+                        success: updateStatus.success,
+                        message: updateStatus.message,
+                        data: null,
+                    };
+                }
+            }
+
+            return {
+                success: response.success,
+                message: response.message,
+                data: null,
+            };
+        } catch (error: any) {
+            console.log(error.message);
             return {
                 success: false,
                 message: "Internal server error",

@@ -22,6 +22,7 @@ export interface IBooking extends Document {
     status: string;
     description: string;
     payment_id: Schema.Types.ObjectId;
+    review_id: Schema.Types.ObjectId;
 }
 
 // Define the schema
@@ -58,6 +59,7 @@ const BookingSchema = new Schema<IBooking>(
         },
         description: { type: String, required: true },
         payment_id: { type: Schema.Types.ObjectId },
+        review_id: { type: Schema.Types.ObjectId },
     },
     { timestamps: true }
 );

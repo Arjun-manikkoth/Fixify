@@ -280,6 +280,21 @@ class BookingRepository implements IBookingRepository {
                     },
                 },
                 {
+                    $lookup: {
+                        from: "reviews",
+                        localField: "review_id",
+                        foreignField: "_id",
+                        as: "review",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$review",
+                        preserveNullAndEmptyArrays: true, // Prevents removal of bookings without reviews
+                    },
+                },
+
+                {
                     $project: {
                         "user._id": 1,
                         "user.url": 1,
@@ -307,6 +322,7 @@ class BookingRepository implements IBookingRepository {
                         "payment.payment_status": 1,
                         "payment.payment_mode": 1,
                         "payment.payment_date": 1,
+                        review: 1,
                     },
                 },
             ]);
@@ -491,6 +507,26 @@ class BookingRepository implements IBookingRepository {
             };
         } catch (error: any) {
             console.error("Error fetching bookings:", error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+    //update review id to booking document
+    async updateReviewDetails(review_id: string, booking_id: string): Promise<IResponse> {
+        try {
+            const updatedBookings = await Booking.updateOne(
+                { _id: new mongoose.Types.ObjectId(booking_id) },
+                { $set: { review_id: new mongoose.Types.ObjectId(review_id) } }
+            );
+
+            return updatedBookings.modifiedCount > 0
+                ? { success: true, message: "Updated review details successfully", data: null }
+                : { success: false, message: "Failed to update review id", data: null };
+        } catch (error: any) {
+            console.log(error.message);
             return {
                 success: false,
                 message: "Internal server error",

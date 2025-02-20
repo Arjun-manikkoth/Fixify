@@ -6,7 +6,7 @@ import { ObjectId } from "mongoose";
 import { ISignInResponse, IRefreshTokenResponse } from "../../Services/UserServices";
 import { IUser } from "../../Models/UserModels/UserModel";
 import { IResponse } from "../../Services/AdminServices";
-import { IAddAddress } from "./SignUpInterface";
+import { IAddAddress, IReviewData } from "./SignUpInterface";
 
 interface IUserService {
     createUser(userData: SignUp): Promise<ISignUpResponse | null>;
@@ -34,5 +34,9 @@ interface IUserService {
     processOnlinePayment(payment_id: string, amount: number): Promise<IResponse>;
     cancelBooking(booking_id: string): Promise<IResponse>;
     fetchChat(room_id: string): Promise<IResponse>;
+    processReviewCreation(
+        reviewData: IReviewData,
+        reviewImages: Express.Multer.File[]
+    ): Promise<IResponse>;
 }
 export default IUserService;

@@ -1048,13 +1048,76 @@ class UserController {
                 });
             } else {
                 res.status(500).json({
-                    success: true,
+                    success: false,
                     message: response.message,
                     data: response.data,
                 });
             }
         } catch (error: any) {
             console.error("Error in fetching chat details:", error.message);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
+
+    //add review to bookings
+    async addReview(req: Request, res: Response): Promise<void> {
+        try {
+            if (
+                !req.body.rating ||
+                !req.body.review ||
+                !req.body.description ||
+                !req.files ||
+                !req.body.booking_id ||
+                !req.body.provider_id
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: "Ratings,review, description and images are required fields",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.UserService.processReviewCreation(
+                req.body,
+                req.files as Express.Multer.File[]
+            );
+            console.log(response, "response at controller ");
+
+            if (response.message === "Review added already") {
+                res.status(409).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+                return;
+            } else if (response.message === "Failed to store image") {
+                res.status(500).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+                return;
+            } else if (response.success) {
+                res.status(200).json({
+                    success: true,
+                    message: "Review added successfully",
+                    data: response.data,
+                });
+                return;
+            }
+
+            res.status(400).json({
+                success: false,
+                message: "Failed to add review",
+                data: null,
+            });
+        } catch (error: any) {
+            console.error("Error in fetching booking details:", error.message);
             res.status(500).json({
                 success: false,
                 message: "Internal server error.",

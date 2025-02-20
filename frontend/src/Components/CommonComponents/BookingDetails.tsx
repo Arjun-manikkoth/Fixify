@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import PaymentFormModal from "./Modals/PaymentFormModal";
 import ChatModal from "./Modals/ChatModal";
 import { stripePaymentApi, cancelBookingApi } from "../../Api/UserApis";
+import Ratings from "./Modals/Ratings";
+import { FaStar } from "react-icons/fa";
 
 interface IBookingDetail {
     _id: string;
@@ -52,6 +54,13 @@ interface IBookingDetail {
         payment_mode: string;
         payment_date: string;
     };
+    review: {
+        _id: string;
+        rating: number;
+        title: string;
+        description: string;
+        images: string[];
+    };
 }
 
 interface IBookingDetailProps {
@@ -69,6 +78,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const [requestModalOpen, setRequestModalOpen] = useState<boolean>(false);
     const [forceRender, setForceRender] = useState<number>(0);
     const [showChat, setShowChat] = useState<boolean>(false);
+    const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
 
     useEffect(() => {
         if (!id) return;
@@ -299,6 +309,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                 )}
                         </>
                     )}
+
                     {/*Request payment button Inside Booking Details */}
                     {role === "provider" && !booking.payment && (
                         <button
@@ -308,7 +319,51 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                             Request Payment
                         </button>
                     )}
+                    {/*show add review button*/}
+                    {role === "user" && booking.payment?.payment_status && !booking.review && (
+                        <button
+                            className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
+                            onClick={() => setShowReviewForm(true)}
+                        >
+                            Add Review
+                        </button>
+                    )}
                 </div>
+                {/* Review Details */}
+                {booking.review && (
+                    <div className=" text-gray-700 p-6 rounded-lg shadow-md mb-11">
+                        <h3 className="text-2xl font-bold text-gray-800 mb-8">Customer Review</h3>
+                        <div className="flex items-center gap-3 mb-4 bg-white p-3 rounded-lg shadow-sm">
+                            <span className="text-lg font-medium text-gray-800">
+                                {booking.review.title}
+                            </span>
+                            <span className="text-xl font-semibold text-yellow-500 flex items-center gap-1">
+                                {booking.review.rating}
+                                {Array.from({ length: booking.review.rating }).map((_, i) => (
+                                    <FaStar key={i} className="text-yellow-500" />
+                                ))}
+                            </span>
+                        </div>
+                        <p className="text-gray-600 text-md mb-4">{booking.review.description}</p>
+                        {booking.review.images.length > 0 && (
+                            <div className="mt-4">
+                                <h4 className="text-lg font-semibold text-gray-700 mb-2">
+                                    Images:
+                                </h4>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {booking.review.images.map((img, index) => (
+                                        <img
+                                            key={index}
+                                            src={img}
+                                            alt={`Review ${index}`}
+                                            className="w-full h-28 object-cover rounded-lg border border-gray-300 shadow-sm"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
                 {/* Payment confirmation Modal */}
                 {booking?.payment && (
                     <PaymentFormModal
@@ -337,6 +392,14 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         getChatsApi={role === "user" ? getUserChats : getProviderChats}
                         isOpen={showChat}
                         onClose={closeChatModal}
+                    />
+                )}
+                {showReviewForm && (
+                    <Ratings
+                        booking_id={booking._id}
+                        provider_id={booking.provider._id}
+                        closeModal={setShowReviewForm}
+                        handleRefresh={handleReRender}
                     />
                 )}
             </div>
