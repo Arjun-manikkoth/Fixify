@@ -383,12 +383,12 @@ class BookingRepository implements IBookingRepository {
         }
     }
 
-    //change booking status to cancelled
-    async cancelBookingStatus(booking_id: string): Promise<boolean> {
+    //change booking status to cancelled or complete
+    async updateBookingStatus(booking_id: string, status: string): Promise<boolean> {
         try {
             const updatedStatus = await Booking.updateOne(
                 { _id: new mongoose.Types.ObjectId(booking_id) },
-                { $set: { status: "cancelled" } }
+                { $set: { status: status } }
             );
             return updatedStatus.modifiedCount > 0 ? true : false;
         } catch (error: any) {

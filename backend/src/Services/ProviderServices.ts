@@ -841,7 +841,7 @@ class ProviderService implements IProviderService {
                     requestData.data[0],
                     request_id
                 );
-                console.log(requestData.data[0].requests, "requestData");
+
                 await this.scheduleRepository.changeTimeSlotStatus(request_id);
                 if (!bookingStatus) {
                     return {
@@ -936,6 +936,7 @@ class ProviderService implements IProviderService {
             };
         }
     }
+
     // creates a payment document with amount and mode for payment from user side
     async intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse> {
         try {
@@ -943,15 +944,28 @@ class ProviderService implements IProviderService {
 
             if (!response.data) {
                 return {
-                    success: true,
+                    success: false,
                     message: response.message,
                     data: null,
                 };
             }
+
             const status = await this.bookingRepository.updateBookingWithPaymentId(
                 id,
                 response.data._id
             );
+
+            const updatedBooking = await this.bookingRepository.updateBookingStatus(
+                id,
+                "completed"
+            );
+            if (!updatedBooking) {
+                return {
+                    success: false,
+                    message: "Failed to update booking status",
+                    data: null,
+                };
+            }
 
             return status
                 ? {

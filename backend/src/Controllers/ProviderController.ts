@@ -713,7 +713,7 @@ class ProviderController {
                 });
                 return;
             } else {
-                res.status(400).json({
+                res.status(500).json({
                     success: false,
                     message: response.message,
                     data: null,

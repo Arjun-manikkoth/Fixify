@@ -4,6 +4,7 @@ import { IResponse } from "../Services/AdminServices";
 import mongoose from "mongoose";
 
 class PaymentRepository implements IPaymentRepository {
+    //creates payment request and handle cod payment
     async savePayment(amount: number, method: string): Promise<IResponse> {
         try {
             const payment_status = method === "by cash" ? "completed" : "pending";

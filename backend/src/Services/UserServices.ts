@@ -996,7 +996,10 @@ class UserService implements IUserService {
                 };
             }
 
-            const updatedBooking = await this.bookingRepository.cancelBookingStatus(booking_id);
+            const updatedBooking = await this.bookingRepository.updateBookingStatus(
+                booking_id,
+                "cancelled"
+            );
             return {
                 success: true,
                 message: "Booking cancelled successfully",
