@@ -1,6 +1,7 @@
 import React from "react";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import LoadingSpinner from "../LoadingSpinner";
 
 //reset password form state interface
 interface IResetPassword {
@@ -34,7 +35,9 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
         password: "",
         confirmPassword: "",
     });
-    console.log("reset password modal");
+
+    const [loading, setLoading] = useState<boolean>(false);
+
     //form data input updation
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -84,6 +87,7 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
             }
             if (isValid) {
                 const email = localStorage.getItem(emailType) || "";
+                setLoading(true);
                 const response = await submitPassword(email, formData.password); // calls backend api with email and password
                 if (response.success === true) {
                     console.log(response);
@@ -96,6 +100,7 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
                 } else {
                     toast.error(response.message);
                 }
+                setLoading(false);
             }
         } catch (error: any) {
             console.log(error.message);
@@ -103,12 +108,7 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
     };
 
     return (
-        <div
-            className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
-            onClick={() => {
-                //    props.closeModal();
-            }}
-        >
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60">
             <div
                 className="bg-white pt-8 pb-14 px-10  rounded-lg shadow-lg w-full max-w-sm"
                 onClick={(e) => e.stopPropagation()}
@@ -139,9 +139,14 @@ const ResetPasswordModal: React.FC<IResetPasswordProps> = ({
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={loading}
+                        className={`w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Confirm Password
+                        {loading ? <LoadingSpinner /> : "Confirm Password"}
                     </button>
                 </form>
             </div>

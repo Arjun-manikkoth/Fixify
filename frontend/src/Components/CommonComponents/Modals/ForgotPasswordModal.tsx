@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface ISendMailResponse {
     success: boolean;
@@ -22,6 +23,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 }) => {
     const [email, setEmail] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,6 +38,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             isValid = false;
         }
         if (isValid) {
+            setLoading(true);
             sendMail(email)
                 .then((response) => {
                     if (response.success) {
@@ -49,13 +52,14 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     } else {
                         toast.error(response.message);
                     }
+                    setLoading(false);
                 })
                 .catch(() => {
                     console.log("error occured at forgot password");
                 });
         }
     };
-
+    console.log(loading, "loading");
     return (
         <div
             className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
@@ -90,9 +94,14 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg font-medium rounded-lg shadow-md hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150"
+                        disabled={loading}
+                        className={`w-full py-3 bg-brandBlue text-white text-lg font-medium rounded-lg shadow-md hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150  ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Send Email
+                        {loading ? <LoadingSpinner /> : "Send Email"}
                     </button>
                 </form>
             </div>

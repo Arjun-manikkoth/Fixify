@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import GoogleAuthWrapper from "../GoogleOAuthWrapper";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface SignInProps {
     title: string;
@@ -55,6 +56,7 @@ const SignInModal: React.FC<SignInProps> = ({
         email: "",
         password: "",
     });
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [inputType, setInputType] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -94,11 +96,14 @@ const SignInModal: React.FC<SignInProps> = ({
         }
 
         if (isValid) {
+            setLoading(true);
+
             const response = await signInApi(formData);
 
             if (response.success) {
                 //object to store the action creator argument
                 let reduxState = {};
+
                 if (role === "provider") {
                     reduxState = {
                         email: response.email,
@@ -117,6 +122,7 @@ const SignInModal: React.FC<SignInProps> = ({
                         url: response.url,
                     };
                 }
+
                 dispatch(setReduxAction(reduxState));
                 navigate(navigateTo);
             } else {
@@ -126,6 +132,8 @@ const SignInModal: React.FC<SignInProps> = ({
                     toast.error(response.message);
                 }
             }
+
+            setLoading(false);
         }
     };
 
@@ -191,9 +199,16 @@ const SignInModal: React.FC<SignInProps> = ({
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={loading}
+                        className={`w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                         ${
+                             loading
+                                 ? "bg-gray-500 cursor-not-allowed"
+                                 : "bg-brandBlue hover:bg-blue-700"
+                         }
+                        `}
                     >
-                        Sign In
+                        {loading ? <LoadingSpinner /> : "Sign In"}
                     </button>
                 </form>
                 <p className="mt-4 text-center text-sm text-gray-600">

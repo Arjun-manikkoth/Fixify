@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface IResponse {
     success: boolean;
@@ -34,6 +35,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const [timer, setTimer] = useState<number>(120);
     const [resendEnabled, setResendEnabled] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         let countdown: NodeJS.Timeout;
@@ -78,6 +80,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
         }
         if (oneTimePassword.length === 6) {
             try {
+                setLoading(true);
                 const response = await onSubmit(oneTimePassword, email);
 
                 if (response.success === true) {
@@ -98,6 +101,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
                 } else {
                     toast.error(response.message);
                 }
+                setLoading(false);
             } catch (error: any) {
                 toast.error(error.message || "Failed to verify OTP");
             }
@@ -109,6 +113,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
     const handleResendOtp = async () => {
         try {
             const email = localStorage.getItem(mailType) || "";
+            setLoading(true);
             const response = await onResend(email);
 
             if (response.success === true) {
@@ -118,6 +123,7 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
             } else {
                 toast.error(response.message);
             }
+            setLoading(false);
         } catch (error: any) {
             toast.error(error.message || "Failed to resend OTP");
         }
@@ -145,9 +151,14 @@ const OtpVerifyModal: React.FC<OtpVerifyModalProps> = ({
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={loading}
+                        className={`w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Verify
+                        {loading ? <LoadingSpinner /> : "Verify"}
                     </button>
                 </form>
                 <div className="mt-4 text-center">

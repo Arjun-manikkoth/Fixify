@@ -47,6 +47,7 @@ const UserProfile: React.FC = () => {
 
     useEffect(() => {
         if (user.id) {
+            setLoading(true);
             getUserData(user.id)
                 .then((data) => {
                     setProfileData(data.data);
@@ -54,6 +55,7 @@ const UserProfile: React.FC = () => {
                 .catch((error) => {
                     console.log(error.message);
                 });
+            setLoading(false);
         }
     }, []);
 
@@ -153,14 +155,13 @@ const UserProfile: React.FC = () => {
             ref.current.value = "";
         }
     };
-
+    console.log(loading);
     return (
         <>
             {/* Main Content Section */}
-            <div className="flex space-x-6 bg-customBlue p-9 me-12 rounded-xl">
-                {/* Left Block - User Profile */}
-
-                <div className="w-1/2 bg-white shadow p-11 rounded-xl">
+            <div className="flex flex-col space-y-6 bg-customBlue p-9 me-12 rounded-xl">
+                {/* Profile Section */}
+                <div className="w-full bg-white shadow p-11 rounded-xl">
                     <h2 className="text-lg font-semibold text-black mb-4">My Profile</h2>
                     <div className="flex flex-col items-center">
                         {loading ? (
@@ -256,95 +257,33 @@ const UserProfile: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Right Block - Address & Passwords */}
-                <div className="w-1/2 space-y-6">
-                    {/* Address Details */}
-                    <div className="bg-white shadow p-11 rounded-xl">
-                        <h2 className="text-lg font-semibold text-black mt-0 mb-4">
-                            Address Details
-                        </h2>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="Eden Gardens"
-                                    readOnly
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="Near Athena Store"
-                                    readOnly
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="Thalaserry"
-                                    readOnly
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="Kannur"
-                                    readOnly
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1  border-b-2  border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="670107"
-                                    readOnly
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-1 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                    defaultValue="Kerala"
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Passwords & Security */}
-                    <div className="bg-white shadow p-11 rounded-xl">
-                        {!profileData?.google_id ? (
-                            <>
-                                <h2 className="text-lg font-semibold text-black mb-4">
-                                    Passwords And Security
-                                </h2>
-                                <p className="text-black mb-6">
-                                    For optimal security, consider updating your password
-                                    periodically.
-                                </p>
-                                <button
-                                    className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600"
-                                    onClick={() => setModal("changePassword")}
-                                >
-                                    Change Now
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <h2 className="text-lg font-semibold text-black mb-4">
-                                    Signed In With Google Account
-                                </h2>
-                                <p className="text-black mb-6 leading-relaxed">
-                                    You can Seamlessly sign in everytime with your gmail account.
-                                </p>
-                            </>
-                        )}
-                    </div>
+                {/* Password Section */}
+                <div className="w-full bg-white shadow p-11 rounded-xl">
+                    {!profileData?.google_id ? (
+                        <>
+                            <h2 className="text-lg font-semibold text-black mb-4">
+                                Passwords And Security
+                            </h2>
+                            <p className="text-black mb-6">
+                                For optimal security, consider updating your password periodically.
+                            </p>
+                            <button
+                                className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600"
+                                onClick={() => setModal("changePassword")}
+                            >
+                                Change Now
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="text-lg font-semibold text-black mb-4">
+                                Signed In With Google Account
+                            </h2>
+                            <p className="text-black mb-6 leading-relaxed">
+                                You can Seamlessly sign in everytime with your gmail account.
+                            </p>
+                        </>
+                    )}
                 </div>
             </div>
             {modalType === "changePassword" && <ChangePasswordModalUser setModal={setModal} />}

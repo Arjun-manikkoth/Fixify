@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GoogleAuthWrapper from "../GoogleOAuthWrapper";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface IServiceData {
     _id: string;
@@ -51,6 +52,7 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
         password: "",
         passwordConfirm: "",
     });
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [services, setServices] = useState<IServiceData[]>([]);
 
@@ -61,11 +63,11 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
 
     useEffect(() => {
         if (role === "provider" && getServices) {
-            getServices()
-                .then((data) => {
-                    if (data.success) setServices(data.services);
-                })
-                .catch(() => {});
+            setLoading(true);
+            getServices().then((data) => {
+                if (data.success) setServices(data.services);
+            });
+            setLoading(false);
         }
     }, [role, getServices]);
 
@@ -123,14 +125,16 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validateForm()) return;
-
+        setLoading(true);
         const response = await handleSignUp(formData);
         if (response.success) {
             localStorage.setItem(`${role}Email`, response.email || "");
+
             openModal(`${role}OtpVerify`);
         } else {
             toast.error(response.message);
         }
+        setLoading(false);
     };
 
     return (
@@ -205,7 +209,7 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
                             placeholder="Enter Password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 pr-10 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                            className="w-full px-4 py-3  border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                         />
                         <span
                             onClick={() => toggleEyeButton("password")}
@@ -222,7 +226,7 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
                             placeholder="Confirm Password"
                             value={formData.passwordConfirm}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            className="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                         />
                         <span
                             onClick={() => toggleEyeButton("passwordConfirm")}
@@ -234,9 +238,14 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={loading}
+                        className={`w-full py-3 text-white text-lg rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Sign Up
+                        {loading ? <LoadingSpinner /> : "Sign Up"}
                     </button>
                 </form>
                 <p className="mt-4 text-center text-sm text-gray-600">

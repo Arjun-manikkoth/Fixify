@@ -16,12 +16,6 @@ interface MapModalProps {
     ) => void;
 }
 
-interface AddressComponent {
-    long_name: string;
-    short_name: string;
-    types: string[];
-}
-
 const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
     const [libraries] = useState<Libraries>(["places"]);
 
@@ -33,11 +27,6 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(
         null
     );
-
-    useEffect(() => {
-        console.log("map mounted");
-        return console.log("map unmounted");
-    }, []);
 
     const mapRef = useRef<google.maps.Map | null>(null);
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);

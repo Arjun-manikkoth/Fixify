@@ -6,6 +6,7 @@ import { RootState } from "../../../Redux/Store";
 import { clearUser } from "../../../Redux/UserSlice";
 import { clearProvider } from "../../../Redux/ProviderSlice";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingSpinner from "../LoadingSpinner";
 
 //reset password form state interface
 interface IResetPassword {
@@ -43,6 +44,9 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
         password: "",
         confirmPassword: "",
     });
+
+    const [loading, setLoading] = useState<boolean>(false);
+
     // password show hide
     const [inputType, setInputType] = useState<{ password: boolean; passwordConfirm: boolean }>({
         password: false,
@@ -106,6 +110,7 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
 
             if (isValid) {
                 let email = role === "user" ? user.email : provider.email;
+                setLoading(true);
                 const response = await submitPassword(email, formData.password); // calls backend api with email and password
                 if (response.success === true) {
                     toast.success("Password Changed successfully,Kindly login with new password");
@@ -118,6 +123,7 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
                 } else {
                     toast.error(response.message);
                 }
+                setLoading(false);
             }
         } catch (error: any) {
             console.log(error.message);
@@ -173,9 +179,13 @@ const NewPasswordModal: React.FC<IResetPasswordProps> = ({
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Confirm Password
+                        {loading ? <LoadingSpinner /> : "Confirm Password"}
                     </button>
                 </form>
             </div>

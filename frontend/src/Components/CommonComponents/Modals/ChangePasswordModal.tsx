@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../Redux/Store";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingSpinner from "../LoadingSpinner";
 
 // Change password form state interface
 interface IChangePassword {
@@ -44,7 +45,7 @@ const ChangePasswordModal: React.FC<IChangePasswordProps> = ({
         password: false,
         passwordConfirm: false,
     });
-
+    const [loading, setLoading] = useState<boolean>(false);
     // Form data input updation
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -81,12 +82,14 @@ const ChangePasswordModal: React.FC<IChangePasswordProps> = ({
         let id = role === "user" ? user.id : provider.id;
 
         if (isValid) {
+            setLoading(true);
             const response = await verifyPassword(id, formData.currentPassword); // Call the API to verify the current password
             if (response.success === true) {
                 setModal("newPassword");
             } else {
                 toast.error(response.message);
             }
+            setLoading(false);
         }
     };
 
@@ -139,9 +142,13 @@ const ChangePasswordModal: React.FC<IChangePasswordProps> = ({
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`w-full py-3 bg-brandBlue text-white text-lg font-semibold rounded-lg hover:bg-brandBlue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            loading
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-brandBlue hover:bg-blue-700"
+                        }`}
                     >
-                        Change Password
+                        {loading ? <LoadingSpinner /> : "Change Password"}
                     </button>
                 </form>
             </div>

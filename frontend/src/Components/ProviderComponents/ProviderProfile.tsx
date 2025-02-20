@@ -18,6 +18,7 @@ import { IServices } from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import { IProviderProfile } from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import ChangePasswordModalProvider from "./ProviderChangePassword";
 import ProviderResetPassword from "./ProviderResetPassword";
+import LoadingSpinner from "../CommonComponents/LoadingSpinner"; // Import the LoadingSpinner component
 
 const ProviderProfile: React.FC = () => {
     const ref = useRef<HTMLInputElement | null>(null);
@@ -25,7 +26,7 @@ const ProviderProfile: React.FC = () => {
     const dispatch = useDispatch();
 
     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
-    //state to store services
+    const [loading, setLoading] = useState<boolean>(false); // State for loading spinner
     const [services, setServices] = useState<IServices[]>([]);
     const [profileData, setProfileData] = useState<IProviderProfile>({
         provider: {
@@ -42,7 +43,6 @@ const ProviderProfile: React.FC = () => {
         service: null,
     });
 
-    //interface for registration
     interface IRegistration {
         description: string;
         aadharImage: File | null;
@@ -51,14 +51,12 @@ const ProviderProfile: React.FC = () => {
     }
     const provider = useSelector((state: RootState) => state.provider);
 
-    //edit user form data state
     const [formData, setFormData] = useState<profileData>({
         userName: provider.name,
         mobileNo: provider.phone,
         image: null,
     });
 
-    // registration user form data
     const [registration, setRegistration] = useState<IRegistration>({
         description: "",
         expertise: "",
@@ -67,40 +65,43 @@ const ProviderProfile: React.FC = () => {
     });
 
     const [preview, setPreview] = useState<string>("");
-    console.log(registration);
+
     useEffect(() => {
         if (provider.id) {
-            //calls api to get lookup data of the provider
+            setLoading(true); // Start loading
             getProviderData(provider.id)
                 .then((data) => {
-                    console.log(data.data);
                     setProfileData(data.data);
                 })
                 .catch((error) => {
                     console.log(error.message);
+                })
+                .finally(() => {
+                    setLoading(false); // Stop loading
                 });
         }
     }, []);
 
     useEffect(() => {
         if (provider.id) {
-            //calls api to get all services
+            setLoading(true); // Start loading
             getServices()
                 .then((data) => {
                     setServices(data.services);
                 })
                 .catch((error) => {
                     console.log(error.message);
+                })
+                .finally(() => {
+                    setLoading(false); // Stop loading
                 });
         }
     }, []);
 
-    // Handle Expertise Change
     const handleExpertiseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRegistration((prev) => ({ ...prev, expertise: e.target.value }));
     };
 
-    // Handle Aadhaar Image Change
     const handleAadharImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
@@ -116,7 +117,6 @@ const ProviderProfile: React.FC = () => {
         }
     };
 
-    // Handle Work Images Change
     const handleWorkImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
@@ -138,7 +138,6 @@ const ProviderProfile: React.FC = () => {
         }
     };
 
-    // Validate Registration Form
     const validateRegistrationForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const { description, expertise, aadharImage, workImages } = registration;
@@ -162,68 +161,66 @@ const ProviderProfile: React.FC = () => {
             toast.error("Two work images are required.");
             return;
         }
-        let aadharUpload = null;
-        let workImageUrls = null;
 
-        // Upload Aadhaar Image
-        if (registration.aadharImage) {
-            aadharUpload = await cloudinaryApi(registration.aadharImage);
-        }
-        // Upload Work Images
-        if (registration.workImages) {
-            workImageUrls = await uploadImagesToCloudinary(registration.workImages);
-        }
+        setLoading(true); // Start loading
+        try {
+            let aadharUpload = null;
+            let workImageUrls = null;
 
-        // api register providers by sending requests to admin
-        if (provider.id) {
-            const response = await registerProvider(
-                provider.id,
-                aadharUpload?.url,
-                workImageUrls,
-                registration.description,
-                registration.expertise
-            );
-            if (response.success === true) {
-                toast.success("Approval request sent successfully");
-            } else {
-                toast.error(response.message);
+            if (registration.aadharImage) {
+                aadharUpload = await cloudinaryApi(registration.aadharImage);
             }
+            if (registration.workImages) {
+                workImageUrls = await uploadImagesToCloudinary(registration.workImages);
+            }
+
+            if (provider.id) {
+                const response = await registerProvider(
+                    provider.id,
+                    aadharUpload?.url,
+                    workImageUrls,
+                    registration.description,
+                    registration.expertise
+                );
+                if (response.success === true) {
+                    toast.success("Approval request sent successfully");
+                } else {
+                    toast.error(response.message);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
-    //validate edit profile form
     const validateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault();
 
-            let isValid = true; //sets to true initially
+            let isValid = true;
 
-            //checks username inputs
             if (formData.userName.trim() === "") {
                 toast.error("Name cant be empty.");
                 isValid = false;
             }
 
-            //checks mobileNo inputs is empty
             if (formData.mobileNo.trim() === "") {
                 toast.error("Phone number cant be empty");
                 isValid = false;
             } else if (formData.mobileNo.trim().length !== 10) {
-                //checks whether it is 10 numbers long
-
                 toast.error("Phone number must be 10 digits.");
                 isValid = false;
             }
 
             if (isValid) {
+                setLoading(true); // Start loading
                 let imageUrl = "";
-                let status = false;
 
                 if (formData.image) {
                     const response = await cloudinaryApi(formData.image);
-
                     imageUrl = response.url;
-                    status = response.success;
                 }
 
                 if (provider.id) {
@@ -251,8 +248,11 @@ const ProviderProfile: React.FC = () => {
             }
         } catch (error: any) {
             console.log(error.message);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
+
     const handleImageUpload = () => {
         if (ref.current) {
             ref.current.click();
@@ -267,7 +267,6 @@ const ProviderProfile: React.FC = () => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
 
-            // image file size and type validation
             if (file.size > 5 * 1024 * 1024) {
                 toast.error("File size must be less than 5MB.");
                 return;
@@ -280,6 +279,7 @@ const ProviderProfile: React.FC = () => {
             setPreview(URL.createObjectURL(file));
         }
     };
+
     const cancelUpload = () => {
         setPreview("");
         setFormData({ ...formData, image: null });
@@ -290,7 +290,7 @@ const ProviderProfile: React.FC = () => {
 
     return (
         <>
-            {/* Main Content Section */}
+            {loading && <LoadingSpinner />} {/* Show loading spinner when loading is true */}
             <div className="bg-customBlue p-9 me-12 rounded-2xl shadow-lg">
                 {/* Profile Section */}
                 <div className="bg-white shadow-lg p-11 rounded-2xl mb-8">
@@ -414,7 +414,6 @@ const ProviderProfile: React.FC = () => {
                     </div>
                 )}
             </div>
-
             {!profileData.provider.is_approved && (
                 <div className="flex space-x-6 bg-customBlue p-9 mt-4 me-12 rounded-xl">
                     <div className="w-full bg-white shadow p-11 rounded-xl">
