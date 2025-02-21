@@ -31,10 +31,6 @@ const AddressPage: React.FC = () => {
     //state to store the edit address id
     const [selectedId, setSelectedId] = useState<string>("");
 
-    console.log(refresh);
-    console.log(addresses);
-    console.log("user addresses rendered");
-
     // Delete an address
     const handleDeleteAddress = async (id: string) => {
         try {
@@ -56,8 +52,6 @@ const AddressPage: React.FC = () => {
         getAddressesApi(user?.id)
             .then((response) => {
                 if (response.success) {
-                    console.log("get address api called");
-                    console.log("this data will be stored in the address statje", response.data);
                     setAddresses(response.data);
                     setLoading(false);
 

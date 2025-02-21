@@ -27,7 +27,9 @@ const ProviderProfile: React.FC = () => {
 
     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
     const [loading, setLoading] = useState<boolean>(false); // State for loading spinner
+    const [loadingRegister, setLoadingRegister] = useState<boolean>(false); // State for loading spinner
     const [services, setServices] = useState<IServices[]>([]);
+
     const [profileData, setProfileData] = useState<IProviderProfile>({
         provider: {
             _id: "",
@@ -162,7 +164,7 @@ const ProviderProfile: React.FC = () => {
             return;
         }
 
-        setLoading(true); // Start loading
+        setLoadingRegister(true); // Start loading
         try {
             let aadharUpload = null;
             let workImageUrls = null;
@@ -191,7 +193,7 @@ const ProviderProfile: React.FC = () => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false); // Stop loading
+            setLoadingRegister(false); // Stop loading
         }
     };
 
@@ -290,7 +292,6 @@ const ProviderProfile: React.FC = () => {
 
     return (
         <>
-            {loading && <LoadingSpinner />} {/* Show loading spinner when loading is true */}
             <div className="bg-customBlue p-9 me-12 rounded-2xl shadow-lg">
                 {/* Profile Section */}
                 <div className="bg-white shadow-lg p-11 rounded-2xl mb-8">
@@ -390,8 +391,15 @@ const ProviderProfile: React.FC = () => {
 
                             {/* Save Button */}
                             <div className="mt-10">
-                                <button className="px-9 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 text-lg transition">
-                                    Save
+                                <button
+                                    disabled={loading}
+                                    className={` px-9 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 text-lg transition ${
+                                        loading
+                                            ? "bg-gray-500 cursor-not-allowed"
+                                            : "bg-brandBlue hover:bg-blue-700"
+                                    }`}
+                                >
+                                    {loading ? <LoadingSpinner /> : "Save"}
                                 </button>
                             </div>
                         </form>
@@ -521,10 +529,18 @@ const ProviderProfile: React.FC = () => {
                                 {/* Submit Button */}
                                 <div className="flex justify-center my-3">
                                     <button
+                                        disabled={loading}
                                         type="submit"
-                                        className="px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg"
+                                        className={`px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg loading
+                                            ? "bg-gray-500 cursor-not-allowed"
+                                            : "bg-brandBlue hover:bg-blue-700"
+                         }`}
                                     >
-                                        Complete Registration
+                                        {loadingRegister ? (
+                                            <LoadingSpinner />
+                                        ) : (
+                                            " Complete Registration"
+                                        )}
                                     </button>
                                 </div>
                             </div>

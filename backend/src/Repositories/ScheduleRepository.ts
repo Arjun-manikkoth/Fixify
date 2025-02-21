@@ -322,6 +322,8 @@ class ScheduleRepository implements IScheduleRepository {
                             pincode: "$requests.address.pincode",
                             landmark: "$requests.address.landmark",
                             houseName: "$requests.address.house_name",
+                            latitude: "$requests.address.latitude",
+                            longitude: "$requests.address.longitude",
                         },
                     },
                 },
