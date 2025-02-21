@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaCommentDots, FaMapMarkerAlt } from "react-icons/fa";
+import { FaCommentDots, FaMapMarkerAlt, FaStar } from "react-icons/fa";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import PaymentModal from "./Modals/PaymentModal";
 import { getChatsApi as getProviderChats, paymentRequestApi } from "../../Api/ProviderApis";
@@ -10,7 +10,6 @@ import PaymentFormModal from "./Modals/PaymentFormModal";
 import ChatModal from "./Modals/ChatModal";
 import { stripePaymentApi, cancelBookingApi } from "../../Api/UserApis";
 import Ratings from "./Modals/Ratings";
-import { FaStar } from "react-icons/fa";
 
 interface IBookingDetail {
     _id: string;
@@ -124,11 +123,11 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const handlePaymentModal = () => {
         setStripeForm(true);
     };
-    //handle force refresh
+
     const handleReRender = () => {
         setForceRender((prev) => prev + 1);
     };
-    //checks the current time is 3 hour before the slot time
+
     const isMoreThanTwoHoursAway = (slotTime: string | Date) => {
         const currentTime = new Date();
         const bookingTime = new Date(slotTime);
@@ -137,7 +136,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
 
         return timeDifference > 3;
     };
-    //cancel booking
+
     const handleCancelBooking = (id: string) => {
         cancelBookingApi(id).then((response) => {
             if (response.success) {
@@ -150,12 +149,12 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     return (
         <div className="p-6 flex justify-center">
             <div className="w-full max-w-5xl bg-white rounded-lg shadow-md p-8">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6 ">Booking Details</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Booking Details</h2>
 
                 {/* Booking Details */}
-                <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-11">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-8">Service details</h3>
-                    <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700 ">
+                <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Service Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
                         <p>
                             <strong>Date:</strong>{" "}
                             {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -175,18 +174,18 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                             <strong>Service:</strong> {booking.service.name}
                         </p>
                     </div>
-                    <div className="mt-8">
-                        <strong>Description: </strong>
-                        {booking.description}
+                    <div className="mt-6">
+                        <strong>Description:</strong>{" "}
+                        <p className="text-gray-600">{booking.description}</p>
                     </div>
 
-                    {/* Cancel Button Inside Booking Details */}
+                    {/* Cancel Button */}
                     {role === "user" &&
                         booking.status !== "cancelled" &&
                         booking.payment?.payment_status !== "completed" &&
                         isMoreThanTwoHoursAway(booking.time) && (
                             <button
-                                className="mt-8 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                                className="mt-6 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
                                 onClick={() => handleCancelBooking(booking._id)}
                             >
                                 Cancel Booking
@@ -194,36 +193,31 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         )}
                 </div>
 
-                {/* Professional/user Details */}
-                <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-200">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-8">
+                {/* Professional/User Details */}
+                <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-200">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">
                         {role === "user" ? "Professional Details" : "Customer Details"}
                     </h3>
-                    <div className="flex flex-col sm:flex-row sm:justify-between items-center  gap-4">
-                        <div className="flex items-center gap-4 ">
-                            {booking.user.url || booking.provider.url ? (
-                                <img
-                                    src={role === "user" ? booking.user.url : booking.provider.url}
-                                    alt="Technician"
-                                    referrerPolicy="no-referrer"
-                                    className="w-20 h-20 rounded-full shadow-md border border-gray-300"
-                                />
-                            ) : (
-                                <img
-                                    src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
-                                    alt="Default Profile"
-                                    className="w-20 h-20 rounded-full shadow-md border border-gray-300"
-                                />
-                            )}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <img
+                                src={
+                                    role === "user"
+                                        ? booking.provider.url
+                                        : booking.user.url || "https://via.placeholder.com/80"
+                                }
+                                alt={role === "user" ? "Professional" : "Customer"}
+                                className="w-16 h-16 rounded-full shadow-md border border-gray-300"
+                            />
                             <div>
-                                <h4 className="text-xl font-semibold text-gray-900">
+                                <h4 className="text-lg font-semibold text-gray-900">
                                     {role === "user" ? booking.provider.name : booking.user.name}
                                 </h4>
-                                <p className="text-gray-600 text-base">
+                                <p className="text-gray-600">
                                     📧{" "}
                                     {role === "user" ? booking.provider.email : booking.user.email}
                                 </p>
-                                <p className="text-gray-600 text-base">
+                                <p className="text-gray-600">
                                     📞{" "}
                                     {role === "user"
                                         ? booking.provider.mobile_no
@@ -231,32 +225,29 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                 </p>
                             </div>
                         </div>
-
                         <button
                             onClick={() => setShowChat(true)}
-                            className="flex items-center gap-2 bg-blue-500 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition transform hover:scale-105"
+                            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
                         >
-                            <FaCommentDots className="text-md" /> Chat Now
+                            <FaCommentDots /> Chat Now
                         </button>
                     </div>
                 </div>
 
                 {/* Location Details */}
-                <div className="bg-gray-50 p-4 my-8 rounded-lg shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-700 ">Location Details</h3>
-                    <div className="flex justify-between items-center mt-3  pe-8">
-                        <p className="text-md text-gray-600">
+                <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Location Details</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <p className="text-gray-600">
                             {booking.user_address.house_name}, {booking.user_address.landmark},{" "}
                             {booking.user_address.city}, {booking.user_address.state},{" "}
                             {booking.user_address.pincode}
                         </p>
-
-                        {/* Google Maps Button */}
                         <a
-                            href={`https://www.google.com/maps?q=${booking.user_address.latitude},${booking.user_address.longitude}`}
+                            href={googleMapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 border border-gray-300 px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md transition"
+                            className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg shadow hover:shadow-md transition"
                         >
                             <FaMapMarkerAlt className="text-blue-600" />
                             <span className="text-sm font-medium text-gray-700">View in Map</span>
@@ -264,44 +255,38 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-11">
-                    <h3 className="text-xl font-semibold text-gray-700 mb-8">Payment details</h3>
+                {/* Payment Details */}
+                <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+                    <h3 className="text-xl font-semibold text-gray-700 mb-4">Payment Details</h3>
                     {role === "user" && !booking.payment && (
-                        <p className="text-center">Waiting for technician payment request</p>
+                        <p className="text-gray-600">Waiting for technician payment request</p>
                     )}
                     {booking.payment && (
                         <>
-                            <div className="grid grid-cols-2 gap-4 mt-3 text-base text-gray-700">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
                                 <p>
-                                    <strong>Payment Date : </strong>
-                                    <strong>Date :</strong>{" "}
+                                    <strong>Payment Date:</strong>{" "}
                                     {new Intl.DateTimeFormat("en-US", {
                                         dateStyle: "medium",
-                                    }).format(new Date(booking.payment.payment_date))}
-                                    ,
-                                    {new Intl.DateTimeFormat("en-US", {
                                         timeStyle: "short",
-                                    }).format(new Date(booking.payment.payment_date))}{" "}
+                                    }).format(new Date(booking.payment.payment_date))}
                                 </p>
                                 <p>
-                                    <strong>Amount : </strong>
-                                    {booking.payment.amount}{" "}
+                                    <strong>Amount:</strong> {booking.payment.amount}
                                 </p>
                                 <p>
-                                    <strong>Payment Status : </strong>
-                                    {booking.payment.payment_status} {""}
+                                    <strong>Payment Status:</strong>{" "}
+                                    {booking.payment.payment_status}
                                 </p>
                                 <p>
-                                    <strong>Payment Mode : </strong>
-                                    {booking.payment.payment_mode}
-                                    {""}
+                                    <strong>Payment Mode:</strong> {booking.payment.payment_mode}
                                 </p>
                             </div>
                             {booking.payment.payment_mode === "online" &&
                                 role === "user" &&
                                 booking.payment.payment_status !== "completed" && (
                                     <button
-                                        className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
+                                        className="mt-6 w-full bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
                                         onClick={handlePaymentModal}
                                     >
                                         Pay Now
@@ -310,30 +295,36 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         </>
                     )}
 
-                    {/*Request payment button Inside Booking Details */}
+                    {/* Request Payment Button */}
                     {role === "provider" && !booking.payment && (
                         <button
-                            className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
+                            className="mt-6 w-full bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
                             onClick={() => setRequestModalOpen(true)}
                         >
                             Request Payment
                         </button>
                     )}
-                    {/*show add review button*/}
-                    {role === "user" && booking.payment?.payment_status && !booking.review && (
-                        <button
-                            className="mt-8 w-full bg-brandBlue text-white px-4 py-2 rounded-lg shadow hover:bg-brandBlue transition"
-                            onClick={() => setShowReviewForm(true)}
-                        >
-                            Add Review
-                        </button>
-                    )}
+
+                    {/* Add Review Button */}
+                    {role === "user" &&
+                        booking.payment?.payment_status === "completed" &&
+                        !booking.review && (
+                            <button
+                                className="mt-6 w-full bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
+                                onClick={() => setShowReviewForm(true)}
+                            >
+                                Add Review
+                            </button>
+                        )}
                 </div>
+
                 {/* Review Details */}
                 {booking.review && (
-                    <div className=" text-gray-700 p-6 rounded-lg shadow-md mb-11">
-                        <h3 className="text-2xl font-bold text-gray-800 mb-8">Customer Review</h3>
-                        <div className="flex items-center gap-3 mb-4 bg-white p-3 rounded-lg shadow-sm">
+                    <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                        <h3 className="text-xl font-semibold text-gray-700 mb-4">
+                            Customer Review
+                        </h3>
+                        <div className="flex items-center gap-3 mb-4">
                             <span className="text-lg font-medium text-gray-800">
                                 {booking.review.title}
                             </span>
@@ -344,7 +335,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                 ))}
                             </span>
                         </div>
-                        <p className="text-gray-600 text-md mb-4">{booking.review.description}</p>
+                        <p className="text-gray-600">{booking.review.description}</p>
                         {booking.review.images.length > 0 && (
                             <div className="mt-4">
                                 <h4 className="text-lg font-semibold text-gray-700 mb-2">
@@ -364,7 +355,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         )}
                     </div>
                 )}
-                {/* Payment confirmation Modal */}
+
+                {/* Modals */}
                 {booking?.payment && (
                     <PaymentFormModal
                         isOpen={showStripeForm}
@@ -376,14 +368,13 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     />
                 )}
 
-                {/* Payment request Modal */}
                 <PaymentModal
                     isOpen={requestModalOpen}
                     onClose={() => setRequestModalOpen(false)}
                     onPaymentSubmit={handlePaymentSubmit}
                     handleRefresh={handleReRender}
                 />
-                {/* Chat Modal */}
+
                 {showChat && (
                     <ChatModal
                         senderId={role === "user" ? booking.user._id : booking.provider._id}
@@ -394,6 +385,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         onClose={closeChatModal}
                     />
                 )}
+
                 {showReviewForm && (
                     <Ratings
                         booking_id={booking._id}
