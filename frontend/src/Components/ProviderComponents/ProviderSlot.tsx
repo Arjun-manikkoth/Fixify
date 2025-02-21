@@ -64,7 +64,7 @@ const Slots: React.FC = () => {
         if (!selectedDate) return;
 
         setLoading(true);
-        setLoading(true);
+
         getScheduleApi(provider.id, selectedDate).then((res) => {
             if (res.data) {
                 setSlots(res.data.slots);
@@ -86,8 +86,6 @@ const Slots: React.FC = () => {
             }
             setLoading(false);
         });
-
-        setLoading(false);
     }, [selectedDate, forceFetch]);
 
     const onLocationSelect = (
@@ -101,7 +99,7 @@ const Slots: React.FC = () => {
         setMap(false);
 
         setLocation({ lat, lng, city, state, pincode, street });
-
+        setLoading(true);
         createScheduleApi(provider.id, selectedDate, {
             latitude: lat,
             longitude: lng,
@@ -109,13 +107,14 @@ const Slots: React.FC = () => {
             state,
             pincode,
             street,
-        })
-            .then(() => {
+        }).then((response) => {
+            if (response.success) {
                 setForceFetch((prev) => prev + 1);
-            })
-            .catch((error) => {
-                toast.error(error.message);
-            });
+            } else {
+                toast.error(response.message);
+            }
+            setLoading(false);
+        });
     };
 
     const handleOpenMap = () => {

@@ -528,7 +528,7 @@ class ProviderController {
                     data: null,
                 });
             } else {
-                res.status(401).json({
+                res.status(403).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -538,7 +538,7 @@ class ProviderController {
             console.error(error.message);
             res.status(500).json({
                 success: false,
-                message: "An internal server error occurred.",
+                message: "An internal server error occurredg",
                 data: null,
             });
         }

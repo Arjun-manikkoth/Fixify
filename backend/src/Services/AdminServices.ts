@@ -245,8 +245,8 @@ class AdminService implements IAdminService {
         try {
             const updatedData = await this.approvalRepository.updateApprovalStatus(id, status);
             if (updatedData?.provider_id) {
-                const providerData = await this.providerRepository.getProviderById(
-                    updatedData.provider_id
+                const providerData = await this.providerRepository.getProviderDataWithId(
+                    updatedData.provider_id.toString()
                 );
 
                 if (updatedData?.status === "Approved") {

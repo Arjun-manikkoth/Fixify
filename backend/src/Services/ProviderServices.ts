@@ -23,6 +23,7 @@ import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterf
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
+import mongoose from "mongoose";
 
 interface IResponse {
     success: boolean;
@@ -745,6 +746,15 @@ class ProviderService implements IProviderService {
 
     async addSchedule(id: string, date: string, address: IAddress): Promise<IResponse> {
         try {
+            const providerData = await this.providerRepository.getProviderDataWithId(id);
+
+            if (!providerData?.is_approved) {
+                return {
+                    success: false,
+                    message: "Complete verification to create schedules",
+                    data: null,
+                };
+            }
             const status = await this.scheduleRepository.createSchedule(id, date, address);
 
             return status
