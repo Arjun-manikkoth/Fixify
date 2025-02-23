@@ -30,8 +30,6 @@ class UserRepository implements IUserRepository {
     //find user with email id
     async findUserByEmail(email: string): Promise<IUser | null> {
         try {
-            console.log(email);
-            console.log(await User.findOne({ email: email }));
             return await User.findOne({ email: email });
         } catch (error: any) {
             console.log(error.message);

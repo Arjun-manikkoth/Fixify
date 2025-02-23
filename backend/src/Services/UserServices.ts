@@ -858,6 +858,20 @@ class UserService implements IUserService {
     //add a booking request to a slot
     async requestBooking(bookingData: IBookingRequestData): Promise<IResponse> {
         try {
+            console.log(bookingData, "bookingd data");
+            const time = new Date();
+            //checks for duplicate requests
+            const exists = await this.scheduleRepository.findBookingRequest(
+                bookingData.user_id,
+                bookingData.slot_id,
+                bookingData.time,
+                bookingData.date
+            );
+
+            if (exists.success) {
+                return { success: false, message: exists.message, data: null };
+            }
+
             const slots = await this.scheduleRepository.bookingRequestAdd(bookingData);
 
             return slots.success

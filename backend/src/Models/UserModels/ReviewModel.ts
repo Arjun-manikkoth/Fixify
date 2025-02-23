@@ -16,8 +16,8 @@ const reviewSchema: Schema = new Schema(
         title: String,
         description: String,
         rating: Number,
-        provider_id: String,
-        booking_id: String,
+        provider_id: Schema.Types.ObjectId,
+        booking_id: Schema.Types.ObjectId,
         images: [{ type: String }],
         is_deleted: {
             type: Boolean,

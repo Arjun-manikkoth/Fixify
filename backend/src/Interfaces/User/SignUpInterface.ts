@@ -62,6 +62,7 @@ export interface IBookingRequestData {
     address: Address;
     slot_id: string;
     time: string;
+    date: string;
 }
 
 export interface IReviewData {

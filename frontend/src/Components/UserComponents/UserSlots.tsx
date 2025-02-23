@@ -40,6 +40,7 @@ interface IFormData extends IQueryData, IAddress {}
 export interface ISelectedSlot {
     slot_id: string;
     time: string;
+    date: string;
 }
 
 const ProviderFinder: React.FC = () => {
@@ -62,6 +63,7 @@ const ProviderFinder: React.FC = () => {
     const [selectedSlot, setSelectedSlot] = useState<ISelectedSlot>({
         slot_id: "",
         time: "",
+        date: "",
     });
     const [chosenAddress, setChosenAddress] = useState<IAddress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -111,15 +113,15 @@ const ProviderFinder: React.FC = () => {
             return;
         }
 
-        if (new Date(formData.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
-            toast.error("Choose a valid date");
-            return;
-        }
+        // if (new Date(formData.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
+        //     toast.error("Choose a valid date");
+        //     return;
+        // }
 
-        if (new Date().getTime() > new Date(formData.time).getTime()) {
-            toast.error("Choose a valid time");
-            return;
-        }
+        // if (new Date().getTime() > new Date(formData.time).getTime()) {
+        //     toast.error("Choose a valid time");
+        //     return;
+        // }
 
         setLoading(true);
         try {
@@ -138,9 +140,9 @@ const ProviderFinder: React.FC = () => {
         }
     };
 
-    const handleBookingRequest = (id: string, time: string) => {
+    const handleBookingRequest = (id: string, time: string, date: string) => {
         setRequestModal(true);
-        setSelectedSlot({ slot_id: id, time: time });
+        setSelectedSlot({ slot_id: id, time: time, date: date });
     };
 
     return (
@@ -179,14 +181,13 @@ const ProviderFinder: React.FC = () => {
                             Select Time
                         </option>
                         {Array.from({ length: 12 }, (_, i) => {
-                            const today = new Date();
                             const hour = i + 9;
+                            if (hour === 13) return null;
                             const period = hour >= 12 ? "PM" : "AM";
                             const formattedHour = ((hour - 1) % 12) + 1;
 
-                            const timeISO = new Date(today.setHours(hour, 0, 0, 0)).toISOString();
                             return (
-                                <option key={hour} value={timeISO}>
+                                <option key={hour} value={`${formattedHour}:00 ${period}`}>
                                     {formattedHour}:00 {period}
                                 </option>
                             );
@@ -245,10 +246,6 @@ const ProviderFinder: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-2 ms-3 text-sm text-gray-600">
                                     <FaClock className="text-brandBlue" />
-
-                                    {new Intl.DateTimeFormat("en-US", {
-                                        timeStyle: "short",
-                                    }).format(new Date(formData.time))}
                                 </div>
                             </div>
 
@@ -271,7 +268,9 @@ const ProviderFinder: React.FC = () => {
                             <div className="w-full sm:w-auto lg:w-1/4 text-center sm:text-left mt-4 ps-4 sm:mt-0">
                                 <button
                                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-200 ease-in-out"
-                                    onClick={() => handleBookingRequest(slot._id, formData.time)}
+                                    onClick={() =>
+                                        handleBookingRequest(slot._id, formData.time, formData.date)
+                                    }
                                 >
                                     Request Booking
                                 </button>

@@ -49,7 +49,6 @@ class ScheduleRepository implements IScheduleRepository {
 
             // Convert time slots to full Date objects
             const slots = timeSlots.map((each) => {
-                console.log(new Date(`${date} ${each.time}`));
                 return {
                     time: new Date(`${date} ${each.time}`), // Converts to proper Date object
                 };
@@ -107,14 +106,15 @@ class ScheduleRepository implements IScheduleRepository {
             };
         }
     }
+
     //finds slots with selected date time location and service
     async findSlots(data: ISlotFetch): Promise<IResponse> {
         try {
-            const { date, lat: latitude, long: longitude, service_id } = data;
+            const { date, lat: latitude, long: longitude, service_id, time } = data;
+
+            const formattedTime = new Date(`${date} ${time}`);
 
             const radiusInMeters = 10 * 1000;
-
-            const currentTime = new Date();
 
             const schedules = await Schedule.aggregate([
                 {
@@ -132,6 +132,12 @@ class ScheduleRepository implements IScheduleRepository {
                     $match: {
                         date: new Date(date),
                         is_active: true,
+                        slots: {
+                            $elemMatch: {
+                                time: formattedTime,
+                                status: "available",
+                            },
+                        },
                     },
                 },
                 {
@@ -146,6 +152,11 @@ class ScheduleRepository implements IScheduleRepository {
                     $unwind: "$technician",
                 },
                 {
+                    $match: {
+                        "technician.service_id": new mongoose.Types.ObjectId(service_id),
+                    },
+                },
+                {
                     $lookup: {
                         from: "services",
                         localField: "technician.service_id",
@@ -156,11 +167,16 @@ class ScheduleRepository implements IScheduleRepository {
                 {
                     $unwind: "$service",
                 },
+
                 {
-                    $match: {
-                        "technician.service_id": new mongoose.Types.ObjectId(service_id),
+                    $lookup: {
+                        from: "reviews",
+                        localField: "technician._id",
+                        foreignField: "provider_id",
+                        as: "reviews",
                     },
                 },
+
                 {
                     $project: {
                         technician: 1,
@@ -172,14 +188,15 @@ class ScheduleRepository implements IScheduleRepository {
                                 as: "slot",
                                 cond: {
                                     $and: [
+                                        { $eq: ["$$slot.time", formattedTime] },
                                         { $eq: ["$$slot.status", "available"] },
-                                        { $gt: ["$$slot.time", currentTime] },
                                     ],
                                 },
                             },
                         },
                         location: 1,
                         service: 1,
+                        reviews: 1,
                     },
                 },
             ]);
@@ -201,16 +218,7 @@ class ScheduleRepository implements IScheduleRepository {
     //adds booking request
     async bookingRequestAdd(bookingData: IBookingRequestData): Promise<IResponse> {
         try {
-            //checks for duplicate requests
-            const exists = await this.findBookingRequest(
-                bookingData.user_id,
-                bookingData.slot_id,
-                bookingData.time
-            );
-
-            if (exists.success) {
-                return { success: false, message: exists.message, data: null };
-            }
+            const formattedTime = new Date(`${bookingData.date} ${bookingData.time}`);
 
             const scheduleData = await Schedule.updateOne(
                 { _id: new mongoose.Types.ObjectId(bookingData.slot_id) },
@@ -228,7 +236,7 @@ class ScheduleRepository implements IScheduleRepository {
                                 latitude: bookingData.address.latitude,
                                 longitude: bookingData.address.longitude,
                             },
-                            time: new Date(bookingData.time),
+                            time: formattedTime,
                         },
                     },
                 }
@@ -248,12 +256,18 @@ class ScheduleRepository implements IScheduleRepository {
     }
 
     // Checks for duplicate bookings
-    async findBookingRequest(user_id: string, slot_id: string, time: string): Promise<IResponse> {
+    async findBookingRequest(
+        user_id: string,
+        slot_id: string,
+        time: string,
+        date: string
+    ): Promise<IResponse> {
         try {
+            const formattedTime = new Date(`${date} ${time}`);
             const requestExists = await Schedule.exists({
                 _id: new mongoose.Types.ObjectId(slot_id),
                 "requests.user_id": new mongoose.Types.ObjectId(user_id),
-                "requests.time": time,
+                "requests.time": formattedTime,
             });
 
             return requestExists

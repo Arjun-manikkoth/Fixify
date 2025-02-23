@@ -194,11 +194,13 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                 </div>
 
                 {/* Professional/User Details */}
+                {/* Professional/User Details */}
                 <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-700 mb-4">
                         {role === "user" ? "Professional Details" : "Customer Details"}
                     </h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        {/* Left Side: Professional/User Info */}
                         <div className="flex items-center gap-4">
                             <img
                                 src={
@@ -225,6 +227,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                 </p>
                             </div>
                         </div>
+
+                        {/* Right Side: Chat Button */}
                         <button
                             onClick={() => setShowChat(true)}
                             className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"

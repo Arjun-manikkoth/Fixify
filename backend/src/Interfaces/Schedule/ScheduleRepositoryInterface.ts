@@ -8,7 +8,12 @@ interface IScheduleRepository {
     fetchSchedule(id: string, date: string): Promise<IResponse>;
     findSlots(data: ISlotFetch): Promise<IResponse>;
     bookingRequestAdd(bookingData: IBookingRequestData): Promise<IResponse>;
-    findBookingRequest(user_id: string, slot_id: string, time: string): Promise<IResponse>;
+    findBookingRequest(
+        user_id: string,
+        slot_id: string,
+        time: string,
+        date: string
+    ): Promise<IResponse>;
     findAllRequests(provider_id: string): Promise<IResponse>;
     updateBookingRequestStatus(request_id: string, statusL: string): Promise<boolean>;
     getBookingRequest(id: string): Promise<IResponse>;

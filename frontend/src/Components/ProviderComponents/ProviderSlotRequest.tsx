@@ -61,7 +61,7 @@ const SlotRequests: React.FC = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen p-6 lg:p-8">
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-11">Booking Requests</h2>
+            <h2 className="text-3xl font-semibold text-gray-800 mb-11">Booking Requests</h2>
 
             {isLoading ? (
                 <div className="flex justify-center items-center h-64">

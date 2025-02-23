@@ -95,7 +95,7 @@ const Header: FC = () => {
                                 className="text-base sm:text-lg"
                                 style={{ color: "#1E60AA" }}
                             />
-                            <span>New York</span>
+                            <span>India</span>
                         </div>
                         <div className="text-gray-400 hidden sm:block">|</div>
 
@@ -110,15 +110,15 @@ const Header: FC = () => {
 
                     <div className="flex space-x-2 sm:space-x-4 md:space-x-6 text-xs sm:text-sm md:text-base text-black">
                         <a href="#" className="hover:text-gray-400">
-                            India
+                            Kerela
                         </a>
                         <span className=" text-gray-400">|</span>
                         <a href="#" className="hover:text-gray-400">
-                            Canada
+                            Bangalore
                         </a>
                         <span className="text-gray-400">|</span>
                         <a href="#" className="hover:text-gray-400">
-                            Europe
+                            Chennai
                         </a>
                     </div>
                 </div>
