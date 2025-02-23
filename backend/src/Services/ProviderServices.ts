@@ -561,6 +561,7 @@ class ProviderService implements IProviderService {
                     ...data,
                     expertise,
                 });
+
                 if (status) {
                     return {
                         success: true,

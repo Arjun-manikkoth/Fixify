@@ -22,6 +22,20 @@ class ProviderController {
     // sign up and sends the corresponding success code
     async signUp(req: Request, res: Response): Promise<void> {
         try {
+            if (
+                !req.body.email ||
+                !req.body.password ||
+                !req.body.userName ||
+                !req.body.mobileNo ||
+                !req.body.service_id
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,password,username,mobile no and service id are required feilds",
+                });
+                return;
+            }
+
             const provider = await this.providerService.createProvider(req.body); //this function is called to check and save data to the db
 
             if (provider?.success === true) {
@@ -49,6 +63,14 @@ class ProviderController {
     // login and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,password are required feilds",
+                });
+                return;
+            }
+
             const response = await this.providerService.authenticateProvider(req.body); //this function checks and verify the credentials
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
@@ -118,6 +140,14 @@ class ProviderController {
 
     async otpVerify(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.otp) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email,otp are required feilds",
+                });
+                return;
+            }
+
             const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
             // Check the OTP verification status
@@ -153,6 +183,13 @@ class ProviderController {
 
     async otpResend(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email is a required feild",
+                });
+                return;
+            }
             const status = await this.providerService.otpResend(req.body.email); // resends otps via mail
 
             if (status) {
@@ -198,7 +235,6 @@ class ProviderController {
     // function which validates the refresh token and sends an access token if required
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
-            console.log("call reached at controller refresh token");
             const token = req.cookies.refreshToken;
 
             if (!token) {
@@ -235,6 +271,13 @@ class ProviderController {
     //google sign in and sign up route
     async googleAuth(req: Request, res: Response) {
         try {
+            if (!req.query.code) {
+                res.status(400).json({
+                    success: false,
+                    message: "Google signin code is required feild",
+                });
+                return;
+            }
             const { code } = req.query;
 
             const response = await this.providerService.googleAuth(code as string);
@@ -296,7 +339,13 @@ class ProviderController {
     //update provider profile data
     async updateProfile(req: Request, res: Response) {
         try {
-            console.log(req.body);
+            if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Name,mobile no and id are required feilds",
+                });
+                return;
+            }
             const status = await this.providerService.editProfile(req.body);
             if (status) {
                 res.status(200).json({
@@ -319,6 +368,13 @@ class ProviderController {
     //fetch provider profile data
     async fetchProfile(req: Request, res: Response) {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                });
+                return;
+            }
             const status = await this.providerService.getProfileData(req.query.id as string);
 
             res.status(200).json({
@@ -364,6 +420,13 @@ class ProviderController {
     // Checks email and sends OTP for verifying email for forgot password
     async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email is a required feild",
+                });
+                return;
+            }
             const status = await this.providerService.forgotPasswordVerify(req.body.email);
 
             if (status.message === "Mail sent successfully") {
@@ -404,6 +467,14 @@ class ProviderController {
     //verifies the otp associated with the mail id for forgot password
     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.otp) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email and otp are a required feilds",
+                });
+                return;
+            }
+
             const otpStatus = await this.providerService.passworOtpCheck(
                 req.body.otp,
                 req.body.email
@@ -441,6 +512,13 @@ class ProviderController {
     //updates with new password
     async resetPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.email || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Email and password are a required feilds",
+                });
+                return;
+            }
             const response = await this.providerService.changePassword(
                 req.body.email as string,
                 req.body.password as string
@@ -472,6 +550,13 @@ class ProviderController {
     //confirm the old password
     async confirmPassword(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.params.id || !req.body.password) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and password are a required feilds",
+                });
+                return;
+            }
             const response = await this.providerService.verifyPassword(
                 req.params.id as string,
                 req.body.password as string
@@ -509,6 +594,14 @@ class ProviderController {
     //creates a schedule for the day with locacation
     async createSchedule(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.id || !req.body.address || !req.body.date) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id,address and date are required feilds",
+                });
+                return;
+            }
+
             const response = await this.providerService.addSchedule(
                 req.body.id,
                 req.body.date,
@@ -547,6 +640,13 @@ class ProviderController {
     //get schedule for a day with date
     async getSchedule(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id || !req.query.date) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and date are required feilds",
+                });
+                return;
+            }
             const schedule = await this.providerService.getSchedule(
                 req.query.id as string,
                 req.query.date as string
@@ -572,6 +672,13 @@ class ProviderController {
     //get all booking requests
     async getBookingRequests(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required feild",
+                });
+                return;
+            }
             const requestData = await this.providerService.getAllRequests(req.query.id as string);
 
             if (requestData.success) {
@@ -638,6 +745,14 @@ class ProviderController {
     //fetch all bookings for provider with id
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id || !req.query.page) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id and page are required fields",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.providerService.fetchBookings(
                 req.query.id as string,
                 Number(req.query.page)
@@ -670,6 +785,14 @@ class ProviderController {
     //fetch bookings details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required field",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.providerService.fetchBookingDetail(req.query.id as string);
 
             if (response.success) {
@@ -699,6 +822,14 @@ class ProviderController {
     //create payment request for the work
     async createPaymentRequest(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.body.id || !req.body.amount || !req.body.method) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id,amount and payment method are required fields",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.providerService.intiatePaymentRequest(
                 req.body.id,
                 req.body.amount,
@@ -732,6 +863,14 @@ class ProviderController {
     //fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
+            if (!req.query.id) {
+                res.status(400).json({
+                    success: false,
+                    message: "Id is a required field",
+                    data: null,
+                });
+                return;
+            }
             const response = await this.providerService.fetchChat(req.query.id as string);
 
             if (response.success) {
