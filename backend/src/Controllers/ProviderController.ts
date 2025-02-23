@@ -1,15 +1,27 @@
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
 import { Request, Response } from "express";
+import { HttpStatus } from "../Constants/StatusCodes";
+
+const {
+    OK,
+    CREATED,
+    BAD_REQUEST,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    NOT_FOUND,
+    GONE,
+    INTERNAL_SERVER_ERROR,
+} = HttpStatus;
 
 class ProviderController {
     constructor(private providerService: IProviderService) {}
 
-    //get all services
+    // Get all services
     async getAllServices(req: Request, res: Response): Promise<void> {
         try {
             const services = await this.providerService.getServices();
 
-            res.status(200).json({
+            res.status(OK).json({
                 success: true,
                 message: "services fetched sucessfully",
                 data: services,
@@ -19,7 +31,7 @@ class ProviderController {
         }
     }
 
-    // sign up and sends the corresponding success code
+    // Sign up and sends the corresponding success code
     async signUp(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -29,58 +41,57 @@ class ProviderController {
                 !req.body.mobileNo ||
                 !req.body.service_id
             ) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,password,username,mobile no and service id are required feilds",
                 });
                 return;
             }
 
-            const provider = await this.providerService.createProvider(req.body); //this function is called to check and save data to the db
+            const provider = await this.providerService.createProvider(req.body); // This function is called to check and save data to the db
 
             if (provider?.success === true) {
-                //sends for successfull sign up
-
-                res.status(201).json({
+                // Sends for successful sign up
+                res.status(CREATED).json({
                     success: true,
                     message: provider.message,
                     data: provider.email,
                 });
             } else {
-                //sends this response for failed sign up
-
-                res.status(400).json({
+                // Sends this response for failed sign up
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: provider?.message || "Sign up failed.",
+                    message: provider?.message || "Sign up failed",
                 });
             }
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // login and sends the corresponding status code
+    // Login and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,password are required feilds",
                 });
                 return;
             }
 
-            const response = await this.providerService.authenticateProvider(req.body); //this function checks and verify the credentials
+            const response = await this.providerService.authenticateProvider(req.body); // This function checks and verifies the credentials
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                //sends user data ,access and refresh token in cookie after a sucessfull signin
-
-                res.status(200)
+                // Sends user data, access, and refresh token in cookie after a successful sign-in
+                res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: false,
-                        // sameSite: 'none',
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
@@ -88,7 +99,6 @@ class ProviderController {
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
                         secure: false,
-                        //  sameSite: 'none',
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -104,27 +114,31 @@ class ProviderController {
                         phone: response.mobileNo,
                     });
             } else {
-                // Error handling based on  error messages
+                // Error handling based on error messages
                 switch (response?.message) {
                     case "Account doesnot exist":
-                        res.status(400).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
-
                     case "Invalid Credentials":
-                        res.status(401).json({ success: false, message: response.message });
+                        res.status(UNAUTHORIZED).json({
+                            success: false,
+                            message: response.message,
+                        });
                         break;
-
                     case "Didn't complete otp verification":
-                        res.status(403).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({ success: false, message: response.message });
                         break;
                     case "Please Sign in With Google":
-                        res.status(401).json({ success: false, message: response.message });
+                        res.status(UNAUTHORIZED).json({
+                            success: false,
+                            message: response.message,
+                        });
                         break;
                     case "Account blocked by admin":
-                        res.status(403).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({ success: false, message: response.message });
                         break;
                     default:
-                        res.status(500).json({
+                        res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
                         });
@@ -133,146 +147,159 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
+    // Verify OTP
     async otpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,otp are required feilds",
                 });
                 return;
             }
 
-            const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
+            const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email); // Checks for OTP and validates
 
-            // Check the OTP verification status
             if (otpStatus.success) {
-                //sends on a successfull verification
-
-                res.status(200).json({ success: true, message: otpStatus.message });
+                // Sends on a successful verification
+                res.status(OK).json({ success: true, message: otpStatus.message });
             } else {
-                // Error handling based on  error messages
+                // Error handling based on error messages
                 switch (otpStatus.message) {
                     case "Invalid Otp":
-                        res.status(400).json({ success: false, message: otpStatus.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     case "Otp is expired":
-                        res.status(410).json({ success: false, message: otpStatus.message });
+                        res.status(GONE).json({ success: false, message: otpStatus.message });
                         break;
                     case "Otp error":
-                        res.status(500).json({ success: false, message: otpStatus.message });
+                        res.status(INTERNAL_SERVER_ERROR).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     default:
-                        res.status(404).json({ success: false, message: "Provider not found" });
+                        res.status(NOT_FOUND).json({
+                            success: false,
+                            message: "Provider not found",
+                        });
                         break;
                 }
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // this function resends otp for expired otps
-
+    // Resend OTP for expired OTPs
     async otpResend(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required feild",
                 });
                 return;
             }
-            const status = await this.providerService.otpResend(req.body.email); // resends otps via mail
+            const status = await this.providerService.otpResend(req.body.email); // Resends OTPs via mail
 
             if (status) {
-                //sends for sucessfully mail
-                res.status(200).json({ success: true, message: "Otp sent Successfully" });
+                // Sends for successfully sent mail
+                res.status(OK).json({ success: true, message: "Otp sent Successfully" });
             } else {
-                //sends for failed otp
-                res.status(500).json({
+                // Sends for failed OTP
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
                     message: "Otp Cannot be send at this moment",
                 });
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // sign out function which clears the cookie
+    // Sign out function which clears the cookie
     async signOut(req: Request, res: Response): Promise<void> {
         try {
             res.clearCookie("accessToken", {
                 httpOnly: true,
                 secure: false,
-                // sameSite: 'none',
             });
 
             res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: false,
-                //  sameSite: 'none',
             });
 
-            res.status(200).json({ success: true, message: "Signed Out Successfully" });
+            res.status(OK).json({ success: true, message: "Signed Out Successfully" });
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // function which validates the refresh token and sends an access token if required
+    // Validate refresh token and send access token if required
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
             const token = req.cookies.refreshToken;
 
             if (!token) {
-                //if the cookie is deleted or expired
-
-                res.status(401).json({ success: false, message: "Refresh Token missing" });
+                // If the cookie is deleted or expired
+                res.status(UNAUTHORIZED).json({ success: false, message: "Refresh Token missing" });
             } else {
-                //checks  the validity of refresh token and returns access token
+                // Checks the validity of refresh token and returns access token
                 const response = await this.providerService.refreshTokenCheck(token);
 
                 if (response.accessToken) {
-                    //sends the token via cookie for successfull refresh token
-
-                    res.status(200)
+                    // Sends the token via cookie for successful refresh token
+                    res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                             httpOnly: true,
                             secure: false,
-                            // sameSite: 'none',
                             maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                                 ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                                 : 15 * 60 * 1000, // 15 minutes
                         })
                         .json({ success: true, message: "Access token sent successfully" });
                 } else {
-                    res.status(401).json({ success: true, message: response.message });
+                    res.status(UNAUTHORIZED).json({ success: true, message: response.message });
                 }
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //google sign in and sign up route
+
+    // Google sign-in and sign-up route
     async googleAuth(req: Request, res: Response) {
         try {
             if (!req.query.code) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Google signin code is required feild",
                 });
@@ -283,13 +310,11 @@ class ProviderController {
             const response = await this.providerService.googleAuth(code as string);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                //sends user data ,access and refresh token in cookie after a sucessfull signin
-
-                res.status(200)
+                // Sends user data, access, and refresh token in cookie after a successful sign-in
+                res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: false,
-                        // sameSite: 'none',
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
@@ -297,7 +322,6 @@ class ProviderController {
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
                         secure: false,
-                        //  sameSite: 'none',
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -312,18 +336,19 @@ class ProviderController {
                         phone: response.mobileNo,
                     });
             } else {
-                // Error handling based on  error messages
+                // Error handling based on error messages
                 switch (response?.message) {
                     case "Google Sign In failed":
-                        res.status(400).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
-
                     case "Account blocked by admin":
-                        res.status(401).json({ success: false, message: response.message });
+                        res.status(UNAUTHORIZED).json({
+                            success: false,
+                            message: response.message,
+                        });
                         break;
-
                     default:
-                        res.status(500).json({
+                        res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
                         });
@@ -332,15 +357,18 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //update provider profile data
+
+    // Update provider profile data
     async updateProfile(req: Request, res: Response) {
         try {
             if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Name,mobile no and id are required feilds",
                 });
@@ -348,13 +376,13 @@ class ProviderController {
             }
             const status = await this.providerService.editProfile(req.body);
             if (status) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "Profile updated successfully",
                     data: status,
                 });
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: "Profile updated failed",
                     data: null,
@@ -362,14 +390,18 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //fetch provider profile data
+
+    // Fetch provider profile data
     async fetchProfile(req: Request, res: Response) {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
                 });
@@ -377,22 +409,26 @@ class ProviderController {
             }
             const status = await this.providerService.getProfileData(req.query.id as string);
 
-            res.status(200).json({
+            res.status(OK).json({
                 success: true,
                 message: "Data fetched successfully",
                 data: status,
             });
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //register provider data
+
+    // Register provider data
     async registerProfile(req: Request, res: Response) {
         try {
             const response = await this.providerService.registerProvider(req.body);
             if (response.success === true) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "Provider registration successfully",
                     data: "",
@@ -400,11 +436,10 @@ class ProviderController {
             } else {
                 switch (response?.message) {
                     case "Already requested for approval":
-                        res.status(400).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
-
                     default:
-                        res.status(500).json({
+                        res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Cannot register at this moment",
                         });
@@ -413,15 +448,18 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // Checks email and sends OTP for verifying email for forgot password
+    // Forgot password logic
     async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required feild",
                 });
@@ -430,25 +468,25 @@ class ProviderController {
             const status = await this.providerService.forgotPasswordVerify(req.body.email);
 
             if (status.message === "Mail sent successfully") {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "OTP email sent successfully",
                     data: status.data,
                 });
             } else if (status.message === "Mail not registered") {
-                res.status(404).json({
+                res.status(NOT_FOUND).json({
                     success: false,
                     message: "Email is not registered",
                     data: null,
                 });
             } else if (status.message === "Please Sign in with your google account") {
-                res.status(401).json({
+                res.status(UNAUTHORIZED).json({
                     success: false,
                     message: "Please Sign in with your google account",
                     data: null,
                 });
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Failed to verify email",
                     data: null,
@@ -456,19 +494,18 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Forgot Password Error:", error.message);
-
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
             });
         }
     }
 
-    //verifies the otp associated with the mail id for forgot password
+    // Verify OTP for forgot password
     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and otp are a required feilds",
                 });
@@ -478,42 +515,51 @@ class ProviderController {
             const otpStatus = await this.providerService.passworOtpCheck(
                 req.body.otp,
                 req.body.email
-            ); //checks for otp and validate
+            ); // Checks for OTP and validates
 
-            // Check the OTP verification status
             if (otpStatus.success) {
-                //sends on a successfull verification
-
-                res.status(200).json({ success: true, message: otpStatus.message });
+                // Sends on a successful verification
+                res.status(OK).json({ success: true, message: otpStatus.message });
             } else {
-                // Error handling based on  error messages
+                // Error handling based on error messages
                 switch (otpStatus.message) {
                     case "Invalid Otp":
-                        res.status(400).json({ success: false, message: otpStatus.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     case "Otp is expired":
-                        res.status(410).json({ success: false, message: otpStatus.message });
+                        res.status(GONE).json({ success: false, message: otpStatus.message });
                         break;
                     case "Otp error":
-                        res.status(500).json({ success: false, message: otpStatus.message });
+                        res.status(INTERNAL_SERVER_ERROR).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     default:
-                        res.status(404).json({ success: false, message: "Account not found" });
+                        res.status(NOT_FOUND).json({
+                            success: false,
+                            message: "Account not found",
+                        });
                         break;
                 }
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    //updates with new password
+    // Reset password logic
     async resetPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and password are a required feilds",
                 });
@@ -525,13 +571,13 @@ class ProviderController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -539,19 +585,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred.",
+                message: "An internal server error occurred",
                 data: null,
             });
         }
     }
 
-    //confirm the old password
+    // Confirm old password logic
     async confirmPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and password are a required feilds",
                 });
@@ -563,19 +609,19 @@ class ProviderController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: null,
                 });
             } else if (response.message === "Failed to verify password") {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(401).json({
+                res.status(UNAUTHORIZED).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -583,19 +629,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred.",
+                message: "An internal server error occurred",
                 data: null,
             });
         }
     }
 
-    //creates a schedule for the day with locacation
+    // Create a schedule for the day with location
     async createSchedule(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.id || !req.body.address || !req.body.date) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id,address and date are required feilds",
                 });
@@ -609,19 +655,19 @@ class ProviderController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: null,
                 });
             } else if (response.message === "Failed to create schedule") {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(403).json({
+                res.status(FORBIDDEN).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -629,19 +675,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurredg",
+                message: "An internal server error occurred",
                 data: null,
             });
         }
     }
 
-    //get schedule for a day with date
+    // Get schedule for a day with date
     async getSchedule(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id || !req.query.date) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and date are required feilds",
                 });
@@ -652,13 +698,15 @@ class ProviderController {
                 req.query.date as string
             );
             if (schedule.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "schedule fetched sucessfully",
                     data: schedule.data,
                 });
             } else {
-                res.status(schedule.message === "Resource not found" ? 404 : 500).json({
+                res.status(
+                    schedule.message === "Resource not found" ? NOT_FOUND : INTERNAL_SERVER_ERROR
+                ).json({
                     success: false,
                     message: schedule.message,
                     data: null,
@@ -669,11 +717,11 @@ class ProviderController {
         }
     }
 
-    //get all booking requests
+    // Get all booking requests
     async getBookingRequests(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
                 });
@@ -682,14 +730,16 @@ class ProviderController {
             const requestData = await this.providerService.getAllRequests(req.query.id as string);
 
             if (requestData.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: requestData.message,
                     data: requestData.data,
                 });
             } else {
                 res.status(
-                    requestData.message === "Failed to retrieve booking requests" ? 404 : 500
+                    requestData.message === "Failed to retrieve booking requests"
+                        ? NOT_FOUND
+                        : INTERNAL_SERVER_ERROR
                 ).json({
                     success: false,
                     message: requestData.message,
@@ -701,13 +751,13 @@ class ProviderController {
         }
     }
 
-    //change the booking requests status
+    // Change the booking request status
     async updateBookingRequestStatus(req: Request, res: Response): Promise<void> {
         try {
             const { id, status } = req.body;
 
             if (!id || !status) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Booking request ID and status are required",
                     data: null,
@@ -718,7 +768,10 @@ class ProviderController {
             const requestData = await this.providerService.changeBookingRequestStatus(id, status);
 
             if (!requestData.success) {
-                const statusCode = requestData.message === "Booking request not found" ? 404 : 500;
+                const statusCode =
+                    requestData.message === "Booking request not found"
+                        ? NOT_FOUND
+                        : INTERNAL_SERVER_ERROR;
                 res.status(statusCode).json({
                     success: false,
                     message: requestData.message,
@@ -727,14 +780,14 @@ class ProviderController {
                 return;
             }
 
-            res.status(200).json({
+            res.status(OK).json({
                 success: true,
                 message: requestData.message,
                 data: requestData.data,
             });
         } catch (error: any) {
             console.error("Error in updateBookingRequestStatus:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
                 data: null,
@@ -742,11 +795,11 @@ class ProviderController {
         }
     }
 
-    //fetch all bookings for provider with id
+    // Fetch all bookings for provider with ID
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id || !req.query.page) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and page are required fields",
                     data: null,
@@ -759,14 +812,13 @@ class ProviderController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -774,19 +826,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //fetch bookings details for user
+    // Fetch booking details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required field",
                     data: null,
@@ -796,14 +848,13 @@ class ProviderController {
             const response = await this.providerService.fetchBookingDetail(req.query.id as string);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -811,19 +862,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //create payment request for the work
+    // Create payment request for the work
     async createPaymentRequest(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.id || !req.body.amount || !req.body.method) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id,amount and payment method are required fields",
                     data: null,
@@ -837,14 +888,13 @@ class ProviderController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -852,19 +902,19 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in creating payment request:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //fetch chat data
+    // Fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required field",
                     data: null,
@@ -874,13 +924,13 @@ class ProviderController {
             const response = await this.providerService.fetchChat(req.query.id as string);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
                     message: response.message,
                     data: response.data,
@@ -888,12 +938,13 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in fetching chat details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 }
+
 export default ProviderController;

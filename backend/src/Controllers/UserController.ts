@@ -1,62 +1,74 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
+import { HttpStatus } from "../Constants/StatusCodes";
+
+const {
+    OK,
+    CREATED,
+    BAD_REQUEST,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    NOT_FOUND,
+    CONFLICT,
+    GONE,
+    INTERNAL_SERVER_ERROR,
+} = HttpStatus;
 
 class UserController {
     constructor(private UserService: IUserService) {}
 
-    // sign up if account doesnot exists and sends the corresponding success code
-
+    // Sign up if account does not exist and sends the corresponding success code
     async signUp(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password || !req.body.userName || !req.body.mobileNo) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,password,username,mobile no are required feilds",
+                    message: "Email, password, username, and mobile number are required fields",
                 });
                 return;
             }
 
-            const user = await this.UserService.createUser(req.body); //this function is called to check and save data to the db
+            const user = await this.UserService.createUser(req.body);
 
             if (user?.success === true) {
-                //sends for successfull sign up
-
-                res.status(201).json({ success: true, message: user.message, data: user.email });
+                res.status(CREATED).json({
+                    success: true,
+                    message: user.message,
+                    data: user.email,
+                });
             } else {
-                //sends this response for failed sign up
-
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: user?.message || "Sign up failed.",
+                    message: user?.message || "Sign up failed",
                 });
             }
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // login if account exists and sends the corresponding status code
+    // Login if account exists and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,password are required feilds",
+                    message: "Email and password are required fields",
                 });
                 return;
             }
 
-            const response = await this.UserService.authenticateUser(req.body); //this function checks and verify the credentials
+            const response = await this.UserService.authenticateUser(req.body);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                //sends user data ,access and refresh token in cookie after a sucessfull signin
-
-                res.status(200)
+                res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: false,
-                        // sameSite: 'none',
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
@@ -64,7 +76,6 @@ class UserController {
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
                         secure: false,
-                        //  sameSite: 'none',
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -79,30 +90,23 @@ class UserController {
                         url: response.url,
                     });
             } else {
-                // Error handling based on  error messages
                 switch (response?.message) {
-                    case "Account doesnot exist":
-                        res.status(400).json({ success: false, message: response.message });
+                    case "Account does not exist":
+                        res.status(NOT_FOUND).json({ success: false, message: response.message });
                         break;
-
                     case "Invalid Credentials":
-                        res.status(401).json({ success: false, message: response.message });
+                        res.status(UNAUTHORIZED).json({
+                            success: false,
+                            message: response.message,
+                        });
                         break;
-
-                    case "Didn't complete otp verification":
-                        res.status(403).json({ success: false, message: response.message });
-                        break;
-
+                    case "Didn't complete OTP verification":
                     case "Please Sign in With Google":
-                        res.status(403).json({ success: false, message: response.message });
-                        break;
-
                     case "Account blocked by admin":
-                        res.status(403).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({ success: false, message: response.message });
                         break;
-
                     default:
-                        res.status(500).json({
+                        res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
                         });
@@ -111,163 +115,161 @@ class UserController {
             }
         } catch (error: any) {
             console.log(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //verifies the otp associated with the mail id for account verification
+
+    // Verify OTP for account verification
     async otpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,otp are required feilds",
+                    message: "Email and OTP are required fields",
                 });
                 return;
             }
-            const otpStatus = await this.UserService.otpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
-            // Check the OTP verification status
+            const otpStatus = await this.UserService.otpCheck(req.body.otp, req.body.email);
+
             if (otpStatus.success) {
-                //sends on a successfull verification
-
-                res.status(200).json({ success: true, message: otpStatus.message });
+                res.status(OK).json({ success: true, message: otpStatus.message });
             } else {
-                // Error handling based on  error messages
                 switch (otpStatus.message) {
-                    case "Invalid Otp":
-                        res.status(400).json({ success: false, message: otpStatus.message });
+                    case "Invalid OTP":
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
-                    case "Otp is expired":
-                        res.status(410).json({ success: false, message: otpStatus.message });
+                    case "OTP is expired":
+                        res.status(GONE).json({ success: false, message: otpStatus.message });
                         break;
-                    case "Otp error":
-                        res.status(500).json({ success: false, message: otpStatus.message });
+                    case "OTP error":
+                        res.status(INTERNAL_SERVER_ERROR).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     default:
-                        res.status(404).json({ success: false, message: "User not found" });
+                        res.status(NOT_FOUND).json({ success: false, message: "User not found" });
                         break;
                 }
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // this function resends otp for expired otps
-
+    // Resend OTP for expired OTPs
     async otpResend(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required feild",
+                    message: "Email is a required field",
                 });
                 return;
             }
-            const status = await this.UserService.otpResend(req.body.email); // resends otps via mail
+
+            const status = await this.UserService.otpResend(req.body.email);
 
             if (status) {
-                //sends for sucessfully mail
-                res.status(200).json({ success: true, message: "Otp sent Successfully" });
+                res.status(OK).json({ success: true, message: "OTP sent successfully" });
             } else {
-                //sends for failed otp
-                res.status(500).json({
-                    success: true,
-                    message: "Otp Cannot be send at this moment",
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "OTP cannot be sent at this moment",
                 });
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // sign out function which clears the cookie
+    // Sign out by clearing cookies
     async signOut(req: Request, res: Response): Promise<void> {
         try {
-            res.clearCookie("accessToken", {
-                httpOnly: true,
-                secure: false,
-                // sameSite: 'none',
-            });
+            res.clearCookie("accessToken", { httpOnly: true, secure: false });
+            res.clearCookie("refreshToken", { httpOnly: true, secure: false });
 
-            res.clearCookie("refreshToken", {
-                httpOnly: true,
-                secure: false,
-                //  sameSite: 'none',
-            });
-
-            res.status(200).json({ success: true, message: "Signed Out Successfully" });
+            res.status(OK).json({ success: true, message: "Signed out successfully" });
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // function which validates the refresh token and sends an access token if required
+    // Refresh token logic
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
             const token = req.cookies.refreshToken;
 
             if (!token) {
-                //if the cookie is deleted or expired
-
-                res.status(401).json({ success: false, message: "Refresh Token missing" });
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: "Refresh token missing",
+                });
                 return;
             }
-            //checks  the validity of refresh token and returns access token
+
             const response = await this.UserService.refreshTokenCheck(token);
 
             if (response.accessToken) {
-                //sends the token via cookie for successfull refresh token
-
-                res.status(200)
+                res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: false,
-                        // sameSite: 'none',
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
                     })
                     .json({ success: true, message: "Access token sent successfully" });
             } else {
-                res.status(401).json({ success: true, message: response.message });
+                res.status(UNAUTHORIZED).json({ success: false, message: response.message });
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    //sign and sign in with google
-    async googleAuth(req: Request, res: Response) {
+    // Google authentication logic
+    async googleAuth(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.code) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Google signin code is required feild",
+                    message: "Google sign-in code is required",
                 });
                 return;
             }
-            const { code } = req.query;
 
+            const { code } = req.query;
             const response = await this.UserService.googleAuth(code as string);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                //sends user data ,access and refresh token in cookie after a sucessfull signin
-
-                res.status(200)
+                res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: false,
-                        // sameSite: 'none',
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
@@ -275,7 +277,6 @@ class UserController {
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
                         secure: false,
-                        //  sameSite: 'none',
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -292,17 +293,15 @@ class UserController {
                         cookie2: response.refreshToken,
                     });
             } else {
-                // Error handling based on  error messages
                 switch (response?.message) {
                     case "Google Sign In failed":
-                        res.status(400).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
-
                     case "Account blocked by admin":
-                        res.status(403).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({ success: false, message: response.message });
                         break;
                     default:
-                        res.status(500).json({
+                        res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
                         });
@@ -311,61 +310,69 @@ class UserController {
             }
         } catch (error: any) {
             console.log(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
-    //update user profile data
-    async updateProfile(req: Request, res: Response) {
+
+    // Update user profile data
+    async updateProfile(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Name,mobile no and id are required feilds",
+                    message: "Name, mobile number, and ID are required fields",
                 });
                 return;
             }
 
             const status = await this.UserService.editProfile(req.body);
+
             if (status) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "Profile updated successfully",
                     data: status,
                 });
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Profile updated failed",
+                    message: "Profile update failed",
                     data: null,
                 });
             }
         } catch (error: any) {
             console.log(error.message);
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    //fetches and send the user profile data
+    // Fetch user profile data
     async getUser(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: "ID is a required field",
                 });
                 return;
             }
+
             const status = await this.UserService.getUserData(req.query.id as string);
 
             if (status) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "Profile data fetched successfully",
                     data: status,
                 });
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: "Profile fetching failed",
                     data: null,
@@ -373,43 +380,46 @@ class UserController {
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    // Checks email and sends OTP for verifying email for forgot password
+    // Forgot password logic
     async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required feild",
+                    message: "Email is a required field",
                 });
                 return;
             }
+
             const status = await this.UserService.forgotPasswordVerify(req.body.email);
 
             if (status.message === "Mail sent successfully") {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "OTP email sent successfully",
                     data: status.data,
                 });
             } else if (status.message === "Mail not registered") {
-                res.status(404).json({
+                res.status(NOT_FOUND).json({
                     success: false,
                     message: "Email is not registered",
                     data: null,
                 });
-            } else if (status.message === "Please Sign in with your google account") {
-                res.status(401).json({
+            } else if (status.message === "Please Sign in with your Google account") {
+                res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: "Please Sign in with your google account",
+                    message: "Please Sign in with your Google account",
                     data: null,
                 });
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Failed to verify email",
                     data: null,
@@ -417,62 +427,69 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Forgot Password Error:", error.message);
-
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
             });
         }
     }
 
-    //verifies the otp associated with the mail id for forgot password
+    // Verify OTP for forgot password
     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and otp are a required feilds",
+                    message: "Email and OTP are required fields",
                 });
                 return;
             }
-            const otpStatus = await this.UserService.passworOtpCheck(req.body.otp, req.body.email); //checks for otp and validate
 
-            // Check the OTP verification status
+            const otpStatus = await this.UserService.passworOtpCheck(req.body.otp, req.body.email);
+
             if (otpStatus.success) {
-                //sends on a successfull verification
-
-                res.status(200).json({ success: true, message: otpStatus.message });
+                res.status(OK).json({ success: true, message: otpStatus.message });
             } else {
-                // Error handling based on  error messages
                 switch (otpStatus.message) {
-                    case "Invalid Otp":
-                        res.status(400).json({ success: false, message: otpStatus.message });
+                    case "Invalid OTP":
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
-                    case "Otp is expired":
-                        res.status(410).json({ success: false, message: otpStatus.message });
+                    case "OTP is expired":
+                        res.status(GONE).json({ success: false, message: otpStatus.message });
                         break;
-                    case "Otp error":
-                        res.status(500).json({ success: false, message: otpStatus.message });
+                    case "OTP error":
+                        res.status(INTERNAL_SERVER_ERROR).json({
+                            success: false,
+                            message: otpStatus.message,
+                        });
                         break;
                     default:
-                        res.status(404).json({ success: false, message: "Account not found" });
+                        res.status(NOT_FOUND).json({
+                            success: false,
+                            message: "Account not found",
+                        });
                         break;
                 }
             }
         } catch (error: any) {
             console.error(error.message);
-
-            res.status(500).json({ success: false, message: "Internal server error" });
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
     }
 
-    //updates with new password
+    // Reset password logic
     async resetPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and password are a required feilds",
+                    message: "Email and password are required fields",
                 });
                 return;
             }
@@ -483,13 +500,13 @@ class UserController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -497,43 +514,44 @@ class UserController {
             }
         } catch (error: any) {
             console.error(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred.",
+                message: "An internal server error occurred",
                 data: null,
             });
         }
     }
 
-    //confirm the old password
+    // Confirm old password logic
     async confirmPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.body.password) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and password are a required feilds",
+                    message: "ID and password are required fields",
                 });
                 return;
             }
+
             const response = await this.UserService.verifyPassword(
                 req.params.id as string,
                 req.body.password as string
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: null,
                 });
             } else if (response.message === "Failed to verify password") {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(401).json({
+                res.status(UNAUTHORIZED).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -541,9 +559,9 @@ class UserController {
             }
         } catch (error: any) {
             console.error(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred.",
+                message: "An internal server error occurred",
                 data: null,
             });
         }
@@ -555,200 +573,191 @@ class UserController {
             const { address } = req.body;
 
             if (!address) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address is required.",
+                    message: "Address is required",
                 });
+                return;
             }
 
             const status = await this.UserService.createAddress(address);
-            // Specific failure messages
-            const failureMessages = ["Address already added", "You can only add upto 3 addresses"];
+
             if (status?.success) {
-                // Success response
-                res.status(201).json({
+                res.status(CREATED).json({
                     success: true,
                     message: status.message,
                     data: null,
                 });
-            } else if (failureMessages.includes(status.message)) {
-                res.status(400).json({
+            } else if (
+                status?.message === "Address already added" ||
+                status?.message === "You can only add up to 3 addresses"
+            ) {
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: status.message,
                 });
             } else {
-                // Fallback response for other failures
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: status?.message || "Address creation failed.",
+                    message: status?.message || "Address creation failed",
                 });
             }
         } catch (error: any) {
             console.error("Error in createAddress:", error.message);
-
-            res.status(500).json({
-                success: false,
-                message: "Internal server error.",
-            });
-        }
-    }
-
-    // get all addresses of the user
-    async getAddresses(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = req.params.id;
-
-            if (!userId) {
-                res.status(400).json({
-                    success: false,
-                    message: "User id is required.",
-                });
-            } else {
-                const status = await this.UserService.findAddresses(userId);
-
-                // Check if the response is successful
-                if (status?.success) {
-                    res.status(200).json({
-                        success: true,
-                        message: status.message,
-                        data: status.data,
-                    });
-                }
-
-                // Handle specific failure messages
-                if (status?.message === "Failed to fetch addresses") {
-                    res.status(500).json({
-                        success: false,
-                        message: status.message,
-                        data: [],
-                    });
-                }
-            }
-        } catch (error: any) {
-            console.error("Error in getAddresses:", error.message);
-
-            res.status(500).json({
-                success: false,
-                message: "Internal server error.",
-            });
-        }
-    }
-
-    // delete address
-    async deleteAddresses(req: Request, res: Response): Promise<void> {
-        try {
-            if (!req.params.id) {
-                res.status(400).json({
-                    success: false,
-                    message: "Address id is required.",
-                });
-            } else {
-                const response = await this.UserService.changeAddressStatus(req.params.id);
-
-                if (response) {
-                    res.status(200).json({
-                        success: true,
-                        message: "Address deleted successfully",
-                        data: null,
-                    });
-                } else {
-                    res.status(500).json({
-                        success: false,
-                        message: "Failed to delete address",
-                        data: null,
-                    });
-                }
-            }
-        } catch (error: any) {
-            console.log(error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
             });
         }
     }
 
-    // get single address of the user
+    // Get all addresses of the user
+    async getAddresses(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = req.params.id;
+
+            if (!userId) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "User ID is required",
+                });
+                return;
+            }
+
+            const status = await this.UserService.findAddresses(userId);
+
+            if (status?.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: status.message,
+                    data: status.data,
+                });
+            } else if (status?.message === "Failed to fetch addresses") {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: status.message,
+                    data: [],
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in getAddresses:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    // Delete address logic
+    async deleteAddresses(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.params.id) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Address ID is required",
+                });
+                return;
+            }
+
+            const response = await this.UserService.changeAddressStatus(req.params.id);
+
+            if (response) {
+                res.status(OK).json({
+                    success: true,
+                    message: "Address deleted successfully",
+                    data: null,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "Failed to delete address",
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.log(error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
+    // Get single address of the user
     async getAddress(req: Request, res: Response): Promise<void> {
         try {
             const addressId = req.params.id;
 
             if (!addressId) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address Id is required.",
+                    message: "Address ID is required",
                 });
-            } else {
-                const status = await this.UserService.getAddress(addressId);
+                return;
+            }
 
-                // Check if the response is successfull
-                if (status?.success) {
-                    // Success response with the address data
-                    res.status(200).json({
-                        success: true,
-                        message: status.message,
-                        data: status.data,
-                    });
-                }
+            const status = await this.UserService.getAddress(addressId);
 
-                // Handle specific failure messages
-                if (status?.message === "Failed to fetch address") {
-                    res.status(500).json({
-                        success: false,
-                        message: status.message,
-                        data: null,
-                    });
-                }
+            if (status?.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: status.message,
+                    data: status.data,
+                });
+            } else if (status?.message === "Failed to fetch address") {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: status.message,
+                    data: null,
+                });
             }
         } catch (error: any) {
             console.error("Error in getAddress:", error.message);
-
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
             });
         }
     }
 
-    // updates address for the user
+    // Update address for the user
     async updateAddress(req: Request, res: Response): Promise<void> {
         try {
             const { address } = req.body;
             const id = req.params.id;
 
             if (!address || !id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address and id are required.",
+                    message: "Address and ID are required",
                 });
+                return;
             }
 
             const status = await this.UserService.editAddress(address, id);
 
             if (status?.success) {
-                // Success response
-                res.status(201).json({
+                res.status(CREATED).json({
                     success: true,
                     message: status.message,
                     data: null,
                 });
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: status?.message || "Address creation failed.",
+                    message: status?.message || "Address update failed",
                 });
             }
         } catch (error: any) {
-            console.error("Error in createAddress:", error.message);
-
-            res.status(500).json({
+            console.error("Error in updateAddress:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
             });
         }
     }
 
-    //fetch all available slots based on location
+    // Fetch all available slots based on location
     async fetchSlots(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -758,9 +767,9 @@ class UserController {
                 !req.query.date ||
                 !req.query.time
             ) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Service Id,location ,date and time are required feilds",
+                    message: "Service ID, location, date, and time are required fields",
                     data: null,
                 });
                 return;
@@ -775,19 +784,19 @@ class UserController {
             });
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
             } else if (response.message === "Failed to fetch slots") {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
             } else {
-                res.status(401).json({
+                res.status(UNAUTHORIZED).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -795,15 +804,14 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching slots:", error.message);
-
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
             });
         }
     }
 
-    //adds booking request to book slots
+    // Add booking request to book slots
     async requestSlots(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -813,17 +821,18 @@ class UserController {
                 !req.body.data.address ||
                 !req.body.data.description
             ) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id,slot id,time,address,description are required feilds",
+                    message: "User ID, slot ID, time, address, and description are required fields",
                     data: null,
                 });
                 return;
             }
+
             const response = await this.UserService.requestBooking(req.body.data);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
@@ -833,28 +842,21 @@ class UserController {
 
             switch (response.message) {
                 case "Booking request exists":
-                    res.status(409).json({
+                    res.status(CONFLICT).json({
                         success: false,
                         message: response.message,
                         data: null,
                     });
                     break;
                 case "Failed to add booking request":
-                    res.status(500).json({
-                        success: false,
-                        message: response.message,
-                        data: null,
-                    });
-                    break;
-                case "Internal server error":
-                    res.status(500).json({
+                    res.status(INTERNAL_SERVER_ERROR).json({
                         success: false,
                         message: response.message,
                         data: null,
                     });
                     break;
                 default:
-                    res.status(400).json({
+                    res.status(BAD_REQUEST).json({
                         success: false,
                         message: response.message,
                         data: null,
@@ -862,21 +864,21 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in requestSlots:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //fetch all bookings for user with id
+    // Fetch all bookings for user with ID
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id || !req.query.page) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and page no are required feilds",
+                    message: "ID and page number are required fields",
                     data: null,
                 });
                 return;
@@ -888,14 +890,13 @@ class UserController {
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -903,21 +904,21 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //fetch bookings details for user
+    // Fetch booking details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: "ID is a required field",
                     data: null,
                 });
                 return;
@@ -926,14 +927,13 @@ class UserController {
             const response = await this.UserService.fetchBookingDetail(req.query.id as string);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -941,39 +941,39 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //logic to handle payment intent
+    // Logic to handle payment intent
     async createStripePayment(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.id || !req.body.amount) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and amount are required feilds",
+                    message: "ID and amount are required fields",
                     data: null,
                 });
                 return;
             }
+
             const response = await this.UserService.processOnlinePayment(
                 req.body.id,
                 req.body.amount
             );
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -981,36 +981,36 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //cancel booking based on the time
+    // Cancel booking based on the time
     async cancelBooking(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: "ID is a required field",
                     data: null,
                 });
                 return;
             }
+
             const response = await this.UserService.cancelBooking(req.body.id);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
-                return;
             } else {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
                     message: response.message,
                     data: null,
@@ -1018,21 +1018,21 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //fetch chat data
+    // Fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.id) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Room id is a required feild",
+                    message: "Room ID is a required field",
                     data: null,
                 });
                 return;
@@ -1041,13 +1041,13 @@ class UserController {
             const response = await this.UserService.fetchChat(req.query.id as string);
 
             if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: response.message,
                     data: response.data,
                 });
             } else {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: response.data,
@@ -1055,15 +1055,15 @@ class UserController {
             }
         } catch (error: any) {
             console.error("Error in fetching chat details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: "Internal server error",
                 data: null,
             });
         }
     }
 
-    //add review to bookings
+    // Add review to bookings
     async addReview(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -1074,9 +1074,9 @@ class UserController {
                 !req.body.booking_id ||
                 !req.body.provider_id
             ) {
-                res.status(400).json({
+                res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Ratings,review, description and images are required fields",
+                    message: "Rating, review, description, and images are required fields",
                     data: null,
                 });
                 return;
@@ -1086,39 +1086,35 @@ class UserController {
                 req.body,
                 req.files as Express.Multer.File[]
             );
-            console.log(response, "response at controller ");
 
             if (response.message === "Review added already") {
-                res.status(409).json({
+                res.status(CONFLICT).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
-                return;
             } else if (response.message === "Failed to store image") {
-                res.status(500).json({
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
-                return;
             } else if (response.success) {
-                res.status(200).json({
+                res.status(OK).json({
                     success: true,
                     message: "Review added successfully",
                     data: response.data,
                 });
-                return;
+            } else {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Failed to add review",
+                    data: null,
+                });
             }
-
-            res.status(400).json({
-                success: false,
-                message: "Failed to add review",
-                data: null,
-            });
         } catch (error: any) {
             console.error("Error in fetching booking details:", error.message);
-            res.status(500).json({
+            res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error.",
                 data: null,
