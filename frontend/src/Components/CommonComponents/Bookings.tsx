@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaClock, FaLocationArrow, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import Pagination from "../CommonComponents/Pagination";
 import { useSelector } from "react-redux";
@@ -119,11 +119,35 @@ const Bookings: React.FC<IProps> = ({ role, bookingsApi }) => {
 
                                 {/* Booking Details */}
                                 <div className="flex flex-col sm:flex-row w-full sm:w-1/3 gap-3 sm:gap-14 justify-between sm:justify-center">
-                                    <div className="flex items-center text-gray-600 gap-2">
+                                    {/* Date and Time for Small Screens */}
+                                    <div className="sm:hidden flex items-center text-gray-600 gap-2">
                                         <FaClock className="text-blue-500" />
-                                        {new Intl.DateTimeFormat("en-US", {
-                                            dateStyle: "medium",
-                                        }).format(new Date(booking.date))}
+                                        <span>
+                                            {new Intl.DateTimeFormat("en-US", {
+                                                dateStyle: "short",
+                                                timeStyle: "short",
+                                            }).format(new Date(booking.date))}
+                                        </span>
+                                    </div>
+
+                                    {/* Date for Larger Screens */}
+                                    <div className="hidden sm:flex items-center text-gray-600 gap-2">
+                                        <FaClock className="text-blue-500" />
+                                        <span>
+                                            {new Intl.DateTimeFormat("en-US", {
+                                                dateStyle: "medium",
+                                            }).format(new Date(booking.date))}
+                                        </span>
+                                    </div>
+
+                                    {/* Time for Larger Screens */}
+                                    <div className="hidden sm:flex items-center text-gray-600 gap-2">
+                                        <FaClock className="text-blue-500" />
+                                        <span>
+                                            {new Intl.DateTimeFormat("en-US", {
+                                                timeStyle: "short",
+                                            }).format(new Date(booking.time))}
+                                        </span>
                                     </div>
                                 </div>
 
