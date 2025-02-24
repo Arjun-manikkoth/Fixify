@@ -116,7 +116,7 @@ class ProviderController {
             } else {
                 // Error handling based on error messages
                 switch (response?.message) {
-                    case "Account doesnot exist":
+                    case "Account does not exist":
                         res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
                     case "Invalid Credentials":
@@ -921,6 +921,7 @@ class ProviderController {
                 });
                 return;
             }
+
             const response = await this.providerService.fetchChat(req.query.id as string);
 
             if (response.success) {
@@ -938,6 +939,7 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in fetching chat details:", error.message);
+
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",

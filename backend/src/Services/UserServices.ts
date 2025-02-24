@@ -143,8 +143,91 @@ class UserService implements IUserService {
 
             const mail = await sentMail(
                 email,
-                "Verification Mail",
-                `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
+                "Fixify - OTP Verification",
+                `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Fixify - OTP Verification</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-align: center;
+                            padding: 20px;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                            color: #333333;
+                        }
+                        .content h2 {
+                            font-size: 20px;
+                            margin-bottom: 10px;
+                        }
+                        .content p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .otp-code {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #007bff;
+                            text-align: center;
+                            margin: 20px 0;
+                        }
+                        .footer {
+                            background-color: #f4f4f4;
+                            text-align: center;
+                            padding: 10px;
+                            font-size: 14px;
+                            color: #666666;
+                        }
+                        .footer a {
+                            color: #007bff;
+                            text-decoration: none;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="header">
+                            <h1>Fixify</h1>
+                        </div>
+                        <div class="content">
+                            <h2>Verify Your Account</h2>
+                            <p>Dear User,</p>
+                            <p>Thank you for choosing Fixify! To complete your account verification, please use the following One-Time Password (OTP):</p>
+                            <div class="otp-code">${otp}</div>
+                            <p>This code is valid for <b>2 minutes</b>. Please do not share this code with anyone for security reasons.</p>
+                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                            <p>Best regards,<br>The Fixify Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2025 Fixify. All rights reserved.</p>
+                            <p><a href="https://fixify.com">Visit our website</a></p>
+                        </div>
+                    </div>
+                </body>
+                </html>`
             ); //this utility function sends otp through mail
 
             if (mail) {
@@ -180,8 +263,86 @@ class UserService implements IUserService {
 
                 const mail = await sentMail(
                     email,
-                    "Verification Mail",
-                    `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
+                    "Fixify - OTP Verification",
+                    `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Fixify - OTP Verification</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .email-container {
+                                max-width: 600px;
+                                margin: 20px auto;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                overflow: hidden;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            }
+                            .header {
+                                background-color: #007bff;
+                                color: #ffffff;
+                                text-align: center;
+                                padding: 20px;
+                            }
+                            .header h1 {
+                                margin: 0;
+                                font-size: 24px;
+                            }
+                            .content {
+                                padding: 20px;
+                                color: #333333;
+                            }
+                            .content p {
+                                font-size: 16px;
+                                line-height: 1.6;
+                            }
+                            .otp-code {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #007bff;
+                                text-align: center;
+                                margin: 20px 0;
+                            }
+                            .footer {
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 10px;
+                                font-size: 14px;
+                                color: #666666;
+                            }
+                            .footer a {
+                                color: #007bff;
+                                text-decoration: none;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            <div class="header">
+                                <h1>Fixify</h1>
+                            </div>
+                            <div class="content">
+                                <p>Dear User,</p>
+                                <p>To verify your Fixify account, please enter the following One-Time Password (OTP):</p>
+                                <div class="otp-code">${otp}</div>
+                                <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                                <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                                <p>Best regards,<br>The Fixify Team</p>
+                            </div>
+                            <div class="footer">
+                                <p>© 2025 Fixify. All rights reserved.</p>
+                                <p><a href="https://fixify.com">Visit our website</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>`
                 ); //utility function sends the otp via email to the user
 
                 if (mail) {
@@ -339,7 +500,7 @@ class UserService implements IUserService {
                 //executes this if the user account is not found
                 return {
                     success: false,
-                    message: "Account doesnot exist",
+                    message: "Account does not exist",
                     email: null,
                     name: "",
                     mobileNo: "",
@@ -531,8 +692,86 @@ class UserService implements IUserService {
 
             const mail = await sentMail(
                 email,
-                "Forgot Password Verification",
-                `<p>Enter this code <b>${otp}</b> to verify your email for resetting the password.</p><p>This code expires in <b>2 Minutes</b></p>`
+                "Fixify - Forgot Password Verification",
+                `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Fixify - Forgot Password Verification</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-align: center;
+                            padding: 20px;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                            color: #333333;
+                        }
+                        .content p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .otp-code {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #007bff;
+                            text-align: center;
+                            margin: 20px 0;
+                        }
+                        .footer {
+                            background-color: #f4f4f4;
+                            text-align: center;
+                            padding: 10px;
+                            font-size: 14px;
+                            color: #666666;
+                        }
+                        .footer a {
+                            color: #007bff;
+                            text-decoration: none;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="header">
+                            <h1>Fixify</h1>
+                        </div>
+                        <div class="content">
+                            <p>Dear User,</p>
+                            <p>To reset your password, please enter the following One-Time Password (OTP):</p>
+                            <div class="otp-code">${otp}</div>
+                            <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                            <p>Best regards,<br>The Fixify Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2024 Fixify. All rights reserved.</p>
+                            <p><a href="https://fixify.com">Visit our website</a></p>
+                        </div>
+                    </div>
+                </body>
+                </html>`
             ); //this utility function sends otp through mail
 
             if (mail) {
@@ -858,8 +1097,8 @@ class UserService implements IUserService {
     //add a booking request to a slot
     async requestBooking(bookingData: IBookingRequestData): Promise<IResponse> {
         try {
-            console.log(bookingData, "bookingd data");
             const time = new Date();
+
             //checks for duplicate requests
             const exists = await this.scheduleRepository.findBookingRequest(
                 bookingData.user_id,

@@ -12,6 +12,7 @@ import ScheduleRepository from "../Repositories/ScheduleRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ChatRepository from "../Repositories/ChatRepository";
+import UserRepository from "../Repositories/UserRepository";
 
 const providerRepository = new ProviderRepository(); // Initialise repository instance
 const otpRepository = new OtpRepository(); // Initialise otp repository instance
@@ -21,6 +22,7 @@ const scheduleRepository = new ScheduleRepository(); //initialise schedule repos
 const bookingRepository = new BookingRepository(); //initialise booking repository
 const paymentRepository = new PaymentRepository(); //initialise payment repository
 const chatRepository = new ChatRepository(); //initialise payment repository
+const userRepository = new UserRepository(); //initialise payment repository
 
 const providerService = new ProviderService(
     providerRepository,
@@ -30,7 +32,8 @@ const providerService = new ProviderService(
     scheduleRepository,
     bookingRepository,
     paymentRepository,
-    chatRepository
+    chatRepository,
+    userRepository
 );
 
 // Dependency injection of repository into service

@@ -92,7 +92,7 @@ class AdminService implements IAdminService {
                 //executes this if the admin account is not found
                 return {
                     success: false,
-                    message: "Account doesnot exist",
+                    message: "Account does not exist",
                     email: null,
                     _id: null,
                     accessToken: null,
@@ -259,15 +259,167 @@ class AdminService implements IAdminService {
                         }
                         await sentMail(
                             providerData.email,
-                            "Approval Mail",
-                            `<p>Your request has been successfully approved! You can start working with Fixify.</p>`
+                            "Fixify - Approval Confirmation",
+                            `<!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>Fixify - Approval Confirmation</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f4;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    .email-container {
+                                        max-width: 600px;
+                                        margin: 20px auto;
+                                        background-color: #ffffff;
+                                        border-radius: 8px;
+                                        overflow: hidden;
+                                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                    }
+                                    .header {
+                                        background-color: #007bff;
+                                        color: #ffffff;
+                                        text-align: center;
+                                        padding: 20px;
+                                    }
+                                    .header h1 {
+                                        margin: 0;
+                                        font-size: 24px;
+                                    }
+                                    .content {
+                                        padding: 20px;
+                                        color: #333333;
+                                    }
+                                    .content h2 {
+                                        font-size: 20px;
+                                        margin-bottom: 10px;
+                                    }
+                                    .content p {
+                                        font-size: 16px;
+                                        line-height: 1.6;
+                                    }
+                                    .footer {
+                                        background-color: #f4f4f4;
+                                        text-align: center;
+                                        padding: 10px;
+                                        font-size: 14px;
+                                        color: #666666;
+                                    }
+                                    .footer a {
+                                        color: #007bff;
+                                        text-decoration: none;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="email-container">
+                                    <div class="header">
+                                        <h1>Fixify</h1>
+                                    </div>
+                                    <div class="content">
+                                        <h2>Your Request Has Been Approved!</h2>
+                                        <p>Dear Provider,</p>
+                                        <p>We are excited to inform you that your request to join <strong>Fixify</strong> has been successfully approved! 🎉</p>
+                                        <p>You can now start working with Fixify and providing your services to our valued customers. Log in to your account to get started and explore the opportunities waiting for you.</p>
+                                        <p>If you have any questions or need assistance, feel free to reach out to our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                                        <p>Welcome to the Fixify family! We look forward to working with you.</p>
+                                        <p>Best regards,<br>The Fixify Team</p>
+                                    </div>
+                                    <div class="footer">
+                                        <p>© 2025 Fixify. All rights reserved.</p>
+                                        <p><a href="https://fixify.com">Visit our website</a></p>
+                                    </div>
+                                </div>
+                            </body>
+                            </html>`
                         );
                     }
                 } else if (providerData) {
                     await sentMail(
                         providerData.email,
-                        "Rejection Mail",
-                        `<p>Unfortunately, your request has been rejected due to a lack of experience/lack of work perfection. Please contact support for further details.</p>`
+                        "Fixify - Request Rejection",
+                        `<!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Fixify - Request Rejection</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    background-color: #f4f4f4;
+                                    margin: 0;
+                                    padding: 0;
+                                }
+                                .email-container {
+                                    max-width: 600px;
+                                    margin: 20px auto;
+                                    background-color: #ffffff;
+                                    border-radius: 8px;
+                                    overflow: hidden;
+                                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                }
+                                .header {
+                                    background-color: #007bff;
+                                    color: #ffffff;
+                                    text-align: center;
+                                    padding: 20px;
+                                }
+                                .header h1 {
+                                    margin: 0;
+                                    font-size: 24px;
+                                }
+                                .content {
+                                    padding: 20px;
+                                    color: #333333;
+                                }
+                                .content h2 {
+                                    font-size: 20px;
+                                    margin-bottom: 10px;
+                                }
+                                .content p {
+                                    font-size: 16px;
+                                    line-height: 1.6;
+                                }
+                                .footer {
+                                    background-color: #f4f4f4;
+                                    text-align: center;
+                                    padding: 10px;
+                                    font-size: 14px;
+                                    color: #666666;
+                                }
+                                .footer a {
+                                    color: #007bff;
+                                    text-decoration: none;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="email-container">
+                                <div class="header">
+                                    <h1>Fixify</h1>
+                                </div>
+                                <div class="content">
+                                    <h2>Your Request Has Been Rejected</h2>
+                                    <p>Dear Provider,</p>
+                                    <p>We regret to inform you that your request to join <strong>Fixify</strong> has been rejected. After careful consideration, we found that your application did not meet our current requirements due to <strong>lack of experience</strong> or <strong>work perfection</strong>.</p>
+                                    <p>We understand that this news may be disappointing, and we encourage you to continue improving your skills and gaining experience. You are welcome to reapply in the future when you feel more confident in meeting our standards.</p>
+                                    <p>If you have any questions or would like further details about the decision, please feel free to contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                                    <p>Thank you for your interest in Fixify, and we wish you the best in your future endeavors.</p>
+                                    <p>Best regards,<br>The Fixify Team</p>
+                                </div>
+                                <div class="footer">
+                                    <p>© 2025 Fixify. All rights reserved.</p>
+                                    <p><a href="https://fixify.com">Visit our website</a></p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>`
                     );
                 }
             }

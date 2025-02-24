@@ -24,6 +24,7 @@ import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
 import mongoose from "mongoose";
+import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 
 interface IResponse {
     success: boolean;
@@ -73,7 +74,8 @@ class ProviderService implements IProviderService {
         private scheduleRepository: IScheduleRepository,
         private bookingRepository: IBookingRepository,
         private paymentRepository: IPaymentRepository,
-        private chatRepository: IChatRepository
+        private chatRepository: IChatRepository,
+        private userRepository: IUserRepository
     ) {}
     //get all services
     async getServices(): Promise<IServices[] | null> {
@@ -90,6 +92,7 @@ class ProviderService implements IProviderService {
             return null;
         }
     }
+
     //create provider account to db
     async createProvider(data: SignUp): Promise<ISignUpResponse | null> {
         try {
@@ -161,10 +164,92 @@ class ProviderService implements IProviderService {
 
             const mail = await sentMail(
                 email,
-                "Verification Mail",
-                `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
-            ); //this utility function sends otp through mail
-
+                "Fixify - OTP Verification",
+                `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Fixify - OTP Verification</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-align: center;
+                            padding: 20px;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                            color: #333333;
+                        }
+                        .content h2 {
+                            font-size: 20px;
+                            margin-bottom: 10px;
+                        }
+                        .content p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .otp-code {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #007bff;
+                            text-align: center;
+                            margin: 20px 0;
+                        }
+                        .footer {
+                            background-color: #f4f4f4;
+                            text-align: center;
+                            padding: 10px;
+                            font-size: 14px;
+                            color: #666666;
+                        }
+                        .footer a {
+                            color: #007bff;
+                            text-decoration: none;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="header">
+                            <h1>Fixify</h1>
+                        </div>
+                        <div class="content">
+                            <h2>Verify Your Account</h2>
+                            <p>Dear User,</p>
+                            <p>Thank you for choosing Fixify! To complete your account verification, please use the following One-Time Password (OTP):</p>
+                            <div class="otp-code">${otp}</div>
+                            <p>This code is valid for <b>2 minutes</b>. Please do not share this code with anyone for security reasons.</p>
+                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                            <p>Best regards,<br>The Fixify Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2025 Fixify. All rights reserved.</p>
+                            <p><a href="https://fixify.com">Visit our website</a></p>
+                        </div>
+                    </div>
+                </body>
+                </html>`
+            ); //sends otp mail
             if (mail) {
                 // works if mail is sucessfully sent
 
@@ -195,11 +280,88 @@ class ProviderService implements IProviderService {
                 //works if the provider account exists
 
                 const otp = generateOtp(); //generate otp
-
                 const mail = await sentMail(
                     email,
-                    "Verification Mail",
-                    `<p>Enter this code <b>${otp}</b> to verify your Fixify account.</p><p>This code expires in <b>2 Minutes</b></p>`
+                    "Fixify - OTP Verification",
+                    `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Fixify - OTP Verification</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .email-container {
+                                max-width: 600px;
+                                margin: 20px auto;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                overflow: hidden;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            }
+                            .header {
+                                background-color: #007bff;
+                                color: #ffffff;
+                                text-align: center;
+                                padding: 20px;
+                            }
+                            .header h1 {
+                                margin: 0;
+                                font-size: 24px;
+                            }
+                            .content {
+                                padding: 20px;
+                                color: #333333;
+                            }
+                            .content p {
+                                font-size: 16px;
+                                line-height: 1.6;
+                            }
+                            .otp-code {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #007bff;
+                                text-align: center;
+                                margin: 20px 0;
+                            }
+                            .footer {
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 10px;
+                                font-size: 14px;
+                                color: #666666;
+                            }
+                            .footer a {
+                                color: #007bff;
+                                text-decoration: none;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            <div class="header">
+                                <h1>Fixify</h1>
+                            </div>
+                            <div class="content">
+                                <p>Dear User,</p>
+                                <p>To verify your Fixify account, please enter the following One-Time Password (OTP):</p>
+                                <div class="otp-code">${otp}</div>
+                                <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                                <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                                <p>Best regards,<br>The Fixify Team</p>
+                            </div>
+                            <div class="footer">
+                                <p>© 2025 Fixify. All rights reserved.</p>
+                                <p><a href="https://fixify.com">Visit our website</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>`
                 ); //utility function sends the otp via email to the provider
 
                 if (mail) {
@@ -254,7 +416,8 @@ class ProviderService implements IProviderService {
 
                         return { success: false, message: "Otp is expired" };
                     }
-                } //if provider account doesnot exists returns
+                }
+                //if provider account doesnot exists returns
                 return {
                     success: false,
                     message: "Provider not found",
@@ -370,7 +533,7 @@ class ProviderService implements IProviderService {
                 //executes this if the provider account is not found
                 return {
                     success: false,
-                    message: "Account doesnot exist",
+                    message: "Account does not exist",
                     email: null,
                     name: "",
                     mobileNo: "",
@@ -610,8 +773,86 @@ class ProviderService implements IProviderService {
 
             const mail = await sentMail(
                 email,
-                "Forgot Password Verification",
-                `<p>Enter this code <b>${otp}</b> to verify your email for resetting the password.</p><p>This code expires in <b>2 Minutes</b></p>`
+                "Fixify - Forgot Password Verification",
+                `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Fixify - Forgot Password Verification</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f4f4f4;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 20px auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-align: center;
+                            padding: 20px;
+                        }
+                        .header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                            color: #333333;
+                        }
+                        .content p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .otp-code {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #007bff;
+                            text-align: center;
+                            margin: 20px 0;
+                        }
+                        .footer {
+                            background-color: #f4f4f4;
+                            text-align: center;
+                            padding: 10px;
+                            font-size: 14px;
+                            color: #666666;
+                        }
+                        .footer a {
+                            color: #007bff;
+                            text-decoration: none;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="header">
+                            <h1>Fixify</h1>
+                        </div>
+                        <div class="content">
+                            <p>Dear User,</p>
+                            <p>To reset your password, please enter the following One-Time Password (OTP):</p>
+                            <div class="otp-code">${otp}</div>
+                            <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                            <p>Best regards,<br>The Fixify Team</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2024 Fixify. All rights reserved.</p>
+                            <p><a href="https://fixify.com">Visit our website</a></p>
+                        </div>
+                    </div>
+                </body>
+                </html>`
             ); //this utility function sends otp through mail
 
             if (mail) {
@@ -848,12 +1089,17 @@ class ProviderService implements IProviderService {
                     };
                 }
 
+                const request = requestData.data[0].requests.filter((each: any) => {
+                    return each._id.toString() === request_id;
+                });
+
                 const bookingStatus = await this.bookingRepository.createBooking(
                     requestData.data[0],
                     request_id
                 );
 
                 await this.scheduleRepository.changeTimeSlotStatus(request_id);
+
                 if (!bookingStatus) {
                     return {
                         success: false,
@@ -865,6 +1111,138 @@ class ProviderService implements IProviderService {
                 updateStatus = await this.scheduleRepository.updateBookingRequestStatus(
                     request_id,
                     "booked"
+                );
+
+                const userData = await this.userRepository.getUserDataWithId(request[0].user_id);
+
+                if (!userData) {
+                    return {
+                        success: false,
+                        message: "Failed to find user data",
+                        data: null,
+                    };
+                }
+
+                const formattedTime = new Intl.DateTimeFormat("en-US", {
+                    timeStyle: "short",
+                }).format(new Date(request[0].time));
+
+                const bookingDetails = {
+                    date: new Date(requestData.data[0].date).toDateString(),
+                    time: formattedTime,
+                    providerName: requestData.data[0].technician.name,
+                    bookingUrl: `https://fixify.com/users/${userData._id}/bookings/${bookingStatus._id}.`,
+                };
+
+                await sentMail(
+                    userData?.email as string,
+                    "Fixify - Booking Confirmation",
+                    `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Fixify - Booking Confirmation</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .email-container {
+                                max-width: 600px;
+                                margin: 20px auto;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                overflow: hidden;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            }
+                            .header {
+                                background-color: #007bff;
+                                color: #ffffff;
+                                text-align: center;
+                                padding: 20px;
+                            }
+                            .header h1 {
+                                margin: 0;
+                                font-size: 24px;
+                            }
+                            .content {
+                                padding: 20px;
+                                color: #333333;
+                            }
+                            .content h2 {
+                                font-size: 20px;
+                                margin-bottom: 10px;
+                            }
+                            .content p {
+                                font-size: 16px;
+                                line-height: 1.6;
+                            }
+                            .booking-details {
+                                background-color: #f9f9f9;
+                                padding: 15px;
+                                border-radius: 8px;
+                                margin: 20px 0;
+                            }
+                            .booking-details p {
+                                margin: 5px 0;
+                            }
+                            .cta-button {
+                                display: inline-block;
+                                margin: 20px 0;
+                                padding: 10px 20px;
+                                background-color: #007bff;
+                                color: #ffffff;
+                                text-decoration: none;
+                                border-radius: 5px;
+                            }
+                            .footer {
+                                background-color: #f4f4f4;
+                                text-align: center;
+                                padding: 10px;
+                                font-size: 14px;
+                                color: #666666;
+                            }
+                            .footer a {
+                                color: #007bff;
+                                text-decoration: none;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            <div class="header">
+                                <h1>Fixify</h1>
+                            </div>
+                            <div class="content">
+                                <h2>Booking Confirmation</h2>
+                                <p>Dear ${userData?.name},</p>
+                                <p>Your booking has been successfully confirmed! 🎉 Here are the details:</p>
+                
+                                <div class="booking-details">
+                              
+                                    <p><strong>Date:</strong> ${bookingDetails.date}</p>
+                                    <p><strong>Time:</strong> ${bookingDetails.time}</p>
+                                    <p><strong>Provider:</strong> ${bookingDetails.providerName}</p>
+              
+                                </div>
+                
+                                <p>You can view and manage your booking details by clicking the button below:</p>
+                                <a href="${bookingDetails.bookingUrl}" class="cta-button">View Booking Details</a>
+                
+                                <p>If you have any questions or need to make changes, feel free to contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                                <p>Thank you for choosing Fixify. We look forward to serving you!</p>
+                                <p>Best regards,<br>The Fixify Team</p>
+                            </div>
+                            <div class="footer">
+                                <p>© 2023 Fixify. All rights reserved.</p>
+                                <p><a href="https://fixify.com">Visit our website</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>`
                 );
             } else {
                 updateStatus = await this.scheduleRepository.updateBookingRequestStatus(

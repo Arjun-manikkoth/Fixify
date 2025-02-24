@@ -46,7 +46,7 @@ class AdminController {
             } else {
                 // Error handling based on error messages
                 switch (response?.message) {
-                    case "Account doesnot exist":
+                    case "Account does not exist":
                         res.status(BAD_REQUEST).json({ success: false, message: response.message });
                         break;
                     case "Invalid Credentials":

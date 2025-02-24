@@ -1,11 +1,11 @@
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
-import Booking from "../Models/ProviderModels/BookingModel";
+import Booking, { IBooking } from "../Models/ProviderModels/BookingModel";
 import { IFilteredSchedule } from "../Interfaces/Booking/IBooking";
 import mongoose, { Mongoose } from "mongoose";
 import { IResponse } from "../Services/AdminServices";
 
 class BookingRepository implements IBookingRepository {
-    async createBooking(data: IFilteredSchedule, request_id: string): Promise<boolean | null> {
+    async createBooking(data: IFilteredSchedule, request_id: string): Promise<IBooking | null> {
         try {
             const request = data.requests.filter((each) => {
                 return each._id.toString() === request_id;
@@ -22,8 +22,7 @@ class BookingRepository implements IBookingRepository {
                 description: request[0].description,
             });
 
-            const status = await booking.save();
-            return status ? true : false;
+            return await booking.save();
         } catch (error: any) {
             console.log(error.message);
             return null;

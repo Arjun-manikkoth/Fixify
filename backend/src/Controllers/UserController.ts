@@ -63,7 +63,7 @@ class UserController {
             }
 
             const response = await this.UserService.authenticateUser(req.body);
-
+            console.log(response, "user sign in response");
             if (response?.success && response?.accessToken && response?.refreshToken) {
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
