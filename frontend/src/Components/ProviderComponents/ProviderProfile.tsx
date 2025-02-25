@@ -8,9 +8,7 @@ import {
     updateProfile,
     getServices,
     registerProvider,
-    uploadImagesToCloudinary,
 } from "../../Api/ProviderApis";
-import { cloudinaryApi } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";
 import { setProvider } from "../../Redux/ProviderSlice";
 import { profileData } from "../../Interfaces/ProviderInterfaces/SignInInterface";
@@ -48,8 +46,8 @@ const ProviderProfile: React.FC = () => {
     interface IRegistration {
         description: string;
         aadharImage: File | null;
-        expertise: string;
-        workImages: File[] | null;
+        expertise_id: string;
+        workImages: File[];
     }
     const provider = useSelector((state: RootState) => state.provider);
 
@@ -61,9 +59,9 @@ const ProviderProfile: React.FC = () => {
 
     const [registration, setRegistration] = useState<IRegistration>({
         description: "",
-        expertise: "",
+        expertise_id: "",
         aadharImage: null,
-        workImages: null,
+        workImages: [],
     });
 
     const [preview, setPreview] = useState<string>("");
@@ -101,7 +99,7 @@ const ProviderProfile: React.FC = () => {
     }, []);
 
     const handleExpertiseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRegistration((prev) => ({ ...prev, expertise: e.target.value }));
+        setRegistration((prev) => ({ ...prev, expertise_id: e.target.value }));
     };
 
     const handleAadharImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,14 +140,14 @@ const ProviderProfile: React.FC = () => {
 
     const validateRegistrationForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const { description, expertise, aadharImage, workImages } = registration;
+        const { description, expertise_id, aadharImage, workImages } = registration;
 
         if (!description.trim()) {
             toast.error("Experience description is required.");
             return;
         }
         if (!profileData.service?.name) {
-            if (!expertise) {
+            if (!expertise_id) {
                 toast.error("Please select your area of expertise.");
                 return;
             }
@@ -166,23 +164,13 @@ const ProviderProfile: React.FC = () => {
 
         setLoadingRegister(true); // Start loading
         try {
-            let aadharUpload = null;
-            let workImageUrls = null;
-
-            if (registration.aadharImage) {
-                aadharUpload = await cloudinaryApi(registration.aadharImage);
-            }
-            if (registration.workImages) {
-                workImageUrls = await uploadImagesToCloudinary(registration.workImages);
-            }
-
             if (provider.id) {
                 const response = await registerProvider(
                     provider.id,
-                    aadharUpload?.url,
-                    workImageUrls,
+                    aadharImage,
+                    workImages,
                     registration.description,
-                    registration.expertise
+                    registration.expertise_id
                 );
                 if (response.success === true) {
                     toast.success("Approval request sent successfully");
@@ -462,7 +450,7 @@ const ProviderProfile: React.FC = () => {
                                         <select
                                             id="expertise"
                                             className="w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            value={registration.expertise}
+                                            value={registration.expertise_id}
                                             onChange={handleExpertiseChange}
                                         >
                                             <option value="">Select your expertise</option>

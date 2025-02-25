@@ -240,15 +240,30 @@ const uploadImagesToCloudinary = async (files: File[]) => {
 };
 //api to register provider data for approval
 const registerProvider = async (
-    _id: string,
-    aadharImage: string,
-    workImages: string[] | null,
+    provider_id: string,
+    aadharImage: File,
+    workImages: File[],
     description: string,
-    expertise: string
+    expertise_id: string
 ) => {
     try {
-        const data = { aadharImage, workImages, description, expertise, _id };
-        const response = await axiosProvider.post(providerRoutes.register, data);
+        const formData = new FormData();
+
+        formData.append("provider_id", provider_id);
+
+        if (aadharImage) {
+            formData.append("aadharImage", aadharImage);
+        }
+
+        // Append images as files
+        workImages.forEach((image) => {
+            formData.append("workImages", image);
+        });
+
+        formData.append("description", description);
+        formData.append("expertise_id", expertise_id);
+
+        const response = await axiosProvider.post(providerRoutes.register, formData);
 
         return {
             success: true,

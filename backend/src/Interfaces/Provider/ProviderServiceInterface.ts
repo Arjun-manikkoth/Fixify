@@ -1,4 +1,4 @@
-import { IAddress, IProviderRegistration, IProviderWithService, SignUp } from "./SignIn";
+import { IAddress, IProviderRegistrationParsed, IProviderWithService, SignUp } from "./SignIn";
 import { ISignIn } from "./SignIn";
 import { ISignUpResponse } from "../../Services/ProviderServices";
 import { IOtpResponse } from "../../Services/ProviderServices";
@@ -24,7 +24,7 @@ interface IProviderService {
     ): Promise<Partial<IProvider | null>>;
     getProfileData(id: string): Promise<Partial<IProviderWithService> | null>;
     forgotPasswordVerify(id: string): Promise<IResponse>;
-    registerProvider(data: IProviderRegistration): Promise<IOtpResponse>;
+    registerProvider(data: IProviderRegistrationParsed): Promise<IOtpResponse>;
     changePassword(email: string, password: string): Promise<IResponse>;
     passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;
     verifyPassword(id: string, password: string): Promise<IResponse>;

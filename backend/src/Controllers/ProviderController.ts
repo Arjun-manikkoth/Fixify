@@ -433,7 +433,10 @@ class ProviderController {
     // Register provider data
     async registerProfile(req: Request, res: Response) {
         try {
-            const response = await this.providerService.registerProvider(req.body);
+            const response = await this.providerService.registerProvider({
+                ...req.body,
+                ...(req.files as Express.Multer.File[]),
+            });
             if (response.success === true) {
                 res.status(OK).json({
                     success: true,

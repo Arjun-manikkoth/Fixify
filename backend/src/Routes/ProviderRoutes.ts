@@ -107,9 +107,16 @@ providerRoute.get(
 );
 
 //provider register for approval
-providerRoute.post("/register", (req, res) => {
-    providerController.registerProfile(req, res);
-});
+providerRoute.post(
+    "/register",
+    upload.fields([
+        { name: "aadharImage", maxCount: 1 },
+        { name: "workImages", maxCount: 2 },
+    ]),
+    (req, res) => {
+        providerController.registerProfile(req, res);
+    }
+);
 
 // Route for forgot password mail verify
 providerRoute.post("/forgot_password", (req, res) => {

@@ -36,12 +36,20 @@ export interface IProviderWithService {
     service: Partial<IServices> | null;
 }
 export interface IProviderRegistration {
-    _id: string;
+    provider_id: string;
     description: string;
-    aadharImage: string;
-    expertise: string;
-    workImages: string[];
+    expertise_id: string;
 }
+export interface IProviderRegistrationParsed extends IProviderRegistration {
+    aadharImage: Express.Multer.File[];
+    workImages: Express.Multer.File[];
+}
+
+export interface IProviderRegistrationUrls extends IProviderRegistration {
+    aadharUrl: string;
+    workImageUrls: string[];
+}
+
 export interface IAddress {
     latitude: number;
     longitude: number;

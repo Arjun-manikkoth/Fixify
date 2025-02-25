@@ -8,7 +8,11 @@ import { hashPassword, comparePasswords } from "../Utils/HashPassword";
 import { generateTokens } from "../Utils/GenerateTokens";
 import { verifyToken } from "../Utils/CheckToken";
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
-import { IProviderWithService, SignUp } from "../Interfaces/Provider/SignIn";
+import {
+    IProviderRegistrationParsed,
+    IProviderWithService,
+    SignUp,
+} from "../Interfaces/Provider/SignIn";
 import { ISignIn } from "../Interfaces/Provider/SignIn";
 import { IUpdateProfile } from "../Interfaces/Provider/SignIn";
 import { IProviderRegistration } from "../Interfaces/Provider/SignIn";
@@ -25,6 +29,8 @@ import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import { uploadImages } from "../Utils/Cloudinary";
+import { upload } from "../Utils/Multer";
+import { describe } from "node:test";
 
 interface IResponse {
     success: boolean;
@@ -721,24 +727,37 @@ class ProviderService implements IProviderService {
         }
     }
     //register provider for approval request
-    async registerProvider(data: IProviderRegistration): Promise<IOtpResponse> {
+    async registerProvider(data: IProviderRegistrationParsed): Promise<IOtpResponse> {
         try {
-            const exists = await this.approvalRepository.approvalExists(data._id);
+            const exists = await this.approvalRepository.approvalExists(data.provider_id);
 
             if (!exists) {
-                let expertise = data.expertise;
+                let { expertise_id } = data;
 
-                if (!data.expertise) {
+                if (!expertise_id) {
                     const providerData = await this.providerRepository.getProviderDataWithId(
-                        data._id
+                        data.provider_id
                     );
                     if (providerData?.service_id) {
-                        expertise = providerData.service_id.toString();
+                        expertise_id = providerData.service_id.toString();
                     }
                 }
+
+                const urls = await uploadImages([...data.aadharImage, ...data.workImages]);
+
+                if (urls.length === 0) {
+                    return {
+                        success: false,
+                        message: "Failed to update images",
+                    };
+                }
+
                 const status = await this.approvalRepository.providerApprovalRegistration({
-                    ...data,
-                    expertise,
+                    provider_id: data.provider_id,
+                    description: data.description,
+                    aadharUrl: urls[0],
+                    workImageUrls: urls.slice(1),
+                    expertise_id,
                 });
 
                 if (status) {
