@@ -194,7 +194,6 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                 </div>
 
                 {/* Professional/User Details */}
-                {/* Professional/User Details */}
                 <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-700 mb-4">
                         {role === "user" ? "Professional Details" : "Customer Details"}
@@ -204,9 +203,11 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         <div className="flex items-center gap-4">
                             <img
                                 src={
-                                    role === "user"
-                                        ? booking.provider.url
-                                        : booking.user.url || "https://via.placeholder.com/80"
+                                    role === "provider"
+                                        ? booking.provider.url ||
+                                          "https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8"
+                                        : booking.user.url ||
+                                          "https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8"
                                 }
                                 alt={role === "user" ? "Professional" : "Customer"}
                                 className="w-16 h-16 rounded-full shadow-md border border-gray-300"

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
-
-const socket = io("http://localhost:5000");
+console.log(process.env.REACT_APP_FIXIFY_URL, "backend url");
+const socket = io(process.env.REACT_APP_FIXIFY_URL as string);
 
 // Define TypeScript interfaces
 interface ChatModalProps {
@@ -46,7 +46,11 @@ const ChatModal: React.FC<ChatModalProps> = ({
             });
 
             socket.on("receiveMessage", (data: Message) => {
-                setMessages((prev) => [...prev, data]);
+                setMessages((prev) => {
+                    data.timestamp = new Date().toISOString();
+
+                    return [...prev, data];
+                });
             });
 
             return () => {
@@ -103,7 +107,19 @@ const ChatModal: React.FC<ChatModalProps> = ({
                                         : "bg-gray-200 text-gray-800 self-start"
                                 }`}
                             >
-                                {msg.message}
+                                {/* Message Text */}
+                                <div>{msg.message}</div>
+
+                                {/* Timestamp */}
+                                <div
+                                    className={`text-xs mt-1 ${
+                                        msg.sender === senderId ? "text-right" : "text-left"
+                                    }`}
+                                >
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        timeStyle: "short",
+                                    }).format(new Date(msg.timestamp))}
+                                </div>
                             </div>
                         </div>
                     ))}

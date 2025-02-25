@@ -2,8 +2,6 @@ import { Server } from "socket.io";
 
 const configureSockets = (io: Server) => {
     io.on("connection", (socket) => {
-        console.log("New client connected:", socket.id);
-
         // Join a room (User & Provider will be in a unique room)
         socket.on("joinRoom", (roomId) => {
             socket.join(roomId);
