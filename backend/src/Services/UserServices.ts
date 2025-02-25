@@ -641,9 +641,25 @@ class UserService implements IUserService {
     }
 
     //user edit profile to db
-    async editProfile(data: IUpdateProfile): Promise<Partial<IUser | null>> {
+    async editProfile(
+        data: IUpdateProfile,
+        image: Express.Multer.File | null
+    ): Promise<Partial<IUser | null>> {
         try {
-            const status = await this.userRepository.updateUserWithId(data);
+            let image_url: string[] = [];
+
+            if (image) {
+                image_url = await uploadImages([image]);
+
+                if (image_url.length === 0) {
+                    return null;
+                }
+            }
+
+            const status = await this.userRepository.updateUserWithId({
+                ...data,
+                url: image_url[0],
+            });
             if (!status) {
                 return null;
             } else {

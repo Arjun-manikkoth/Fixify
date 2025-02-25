@@ -99,7 +99,6 @@ class ProviderRepository implements IProviderRepository {
         try {
             interface Profile {
                 name?: string;
-                email?: string;
                 url?: string;
                 mobile_no?: string;
             }

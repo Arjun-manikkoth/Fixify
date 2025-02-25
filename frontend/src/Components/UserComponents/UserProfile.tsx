@@ -83,21 +83,10 @@ const UserProfile: React.FC = () => {
             }
 
             if (isValid) {
-                let imageUrl = "";
-                let status = false;
-
-                if (formData.image) {
-                    const response = await cloudinaryApi(formData.image);
-
-                    imageUrl = response.url;
-                    status = response.success;
-                }
-
                 if (user.id) {
                     setLoading(true);
                     const updateResponse = await updateProfile({
                         ...formData,
-                        url: imageUrl,
                         id: user.id,
                     });
 
@@ -155,7 +144,7 @@ const UserProfile: React.FC = () => {
             ref.current.value = "";
         }
     };
-    console.log(loading);
+
     return (
         <>
             {/* Main Content Section */}
@@ -208,6 +197,8 @@ const UserProfile: React.FC = () => {
 
                                 <input
                                     type="file"
+                                    accept="image/*"
+                                    alt="profile"
                                     ref={ref}
                                     id="image"
                                     onChange={imageOnChange}

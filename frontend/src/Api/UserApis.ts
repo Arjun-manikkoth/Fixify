@@ -219,13 +219,23 @@ const cloudinaryApi = async (file: File) => {
 };
 
 //api to update the profile data
-const updateProfile = async (formData: {
+const updateProfile = async (data: {
     id: string;
-    url: string;
+    image: File | null;
     userName: string;
     mobileNo: string;
 }) => {
     try {
+        const formData = new FormData();
+
+        formData.append("id", data.id);
+
+        if (data.image) {
+            formData.append("image", data.image);
+        }
+        formData.append("userName", data.userName);
+        formData.append("mobileNo", data.mobileNo);
+
         const response = await axiosUser.patch(userRoutes.update_profile, formData);
         return {
             success: true,

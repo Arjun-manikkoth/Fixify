@@ -16,7 +16,10 @@ interface IUserService {
     authenticateUser(userData: ISignIn): Promise<ISignInResponse | null>;
     refreshTokenCheck(token: string): Promise<IRefreshTokenResponse>;
     googleAuth(code: string): Promise<ISignInResponse>;
-    editProfile(data: IUpdateProfile): Promise<Partial<IUser> | null>;
+    editProfile(
+        data: IUpdateProfile,
+        image: Express.Multer.File | null
+    ): Promise<Partial<IUser> | null>;
     getUserData(id: string): Promise<Partial<IUser> | null>;
     forgotPasswordVerify(id: string): Promise<IResponse>;
     passworOtpCheck(otp: string, email: string): Promise<IOtpResponse>;

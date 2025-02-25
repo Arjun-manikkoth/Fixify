@@ -25,7 +25,7 @@ export interface ISignIn {
 }
 
 export interface IUpdateProfile {
-    url: string;
+    url?: string;
     userName: string;
     mobileNo: string;
     id: string;

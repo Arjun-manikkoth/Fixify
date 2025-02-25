@@ -18,7 +18,10 @@ interface IProviderService {
     refreshTokenCheck(token: string): Promise<IRefreshTokenResponse>;
     getServices(): Promise<IServices[] | null>;
     googleAuth(code: string): Promise<ISignInResponse>;
-    editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>>;
+    editProfile(
+        data: IUpdateProfile,
+        image: Express.Multer.File | null
+    ): Promise<Partial<IProvider | null>>;
     getProfileData(id: string): Promise<Partial<IProviderWithService> | null>;
     forgotPasswordVerify(id: string): Promise<IResponse>;
     registerProvider(data: IProviderRegistration): Promise<IOtpResponse>;

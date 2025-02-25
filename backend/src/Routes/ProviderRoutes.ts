@@ -13,6 +13,7 @@ import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ChatRepository from "../Repositories/ChatRepository";
 import UserRepository from "../Repositories/UserRepository";
+import { upload } from "../Utils/Multer";
 
 const providerRepository = new ProviderRepository(); // Initialise repository instance
 const otpRepository = new OtpRepository(); // Initialise otp repository instance
@@ -83,6 +84,7 @@ providerRoute.patch(
     verifyToken,
     verifyRole(["provider"]),
     checkBlockedStatus,
+    upload.single("image"),
     (req, res) => {
         providerController.updateProfile(req, res);
     }

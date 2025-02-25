@@ -23,8 +23,8 @@ import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterf
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
-import mongoose from "mongoose";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
+import { uploadImages } from "../Utils/Cloudinary";
 
 interface IResponse {
     success: boolean;
@@ -680,9 +680,25 @@ class ProviderService implements IProviderService {
         }
     }
     //provider edit profile to db
-    async editProfile(data: IUpdateProfile): Promise<Partial<IProvider | null>> {
+    async editProfile(
+        data: IUpdateProfile,
+        image: Express.Multer.File | null
+    ): Promise<Partial<IProvider | null>> {
         try {
-            const status = await this.providerRepository.updateProviderWithId(data);
+            let image_url: string[] = [];
+
+            if (image) {
+                image_url = await uploadImages([image]);
+
+                if (image_url.length === 0) {
+                    return null;
+                }
+            }
+
+            const status = await this.providerRepository.updateProviderWithId({
+                ...data,
+                url: image_url[0],
+            });
             if (!status) {
                 return null;
             } else {

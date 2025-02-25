@@ -218,17 +218,10 @@ const ProviderProfile: React.FC = () => {
 
             if (isValid) {
                 setLoading(true); // Start loading
-                let imageUrl = "";
-
-                if (formData.image) {
-                    const response = await cloudinaryApi(formData.image);
-                    imageUrl = response.url;
-                }
 
                 if (provider.id) {
                     const updateResponse = await updateProfile({
                         ...formData,
-                        url: imageUrl,
                         id: provider.id,
                     });
 

@@ -73,6 +73,7 @@ userRoute.patch(
     verifyToken,
     verifyRole(["user"]),
     checkBlockedStatus,
+    upload.single("image"),
     (req, res) => {
         userController.updateProfile(req, res);
     }

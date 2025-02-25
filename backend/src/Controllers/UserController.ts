@@ -328,7 +328,13 @@ class UserController {
                 return;
             }
 
-            const status = await this.UserService.editProfile(req.body);
+            let image = null;
+
+            if (req.file) {
+                image = req.file;
+            }
+
+            const status = await this.UserService.editProfile(req.body, image);
 
             if (status) {
                 res.status(OK).json({
