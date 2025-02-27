@@ -669,6 +669,47 @@ class AdminController {
             });
         }
     }
+
+    // get sales data based on the queries
+    async getSales(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.query.page || !req.query.fromDate || !req.query.toDate) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Page number,from date and to date are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.AdminService.fetchSalesData({
+                page: req.query.page as string,
+                fromDate: req.query.fromDate as string,
+                toDate: req.query.toDate as string,
+            });
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking data:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
 }
 
 export default AdminController;

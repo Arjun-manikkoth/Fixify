@@ -3,6 +3,7 @@ import Booking, { IBooking } from "../Models/ProviderModels/BookingModel";
 import { IFilteredSchedule } from "../Interfaces/Booking/IBooking";
 import mongoose, { Mongoose } from "mongoose";
 import { IResponse } from "../Services/AdminServices";
+import { ISalesQuery } from "../Interfaces/Admin/SignInInterface";
 
 class BookingRepository implements IBookingRepository {
     async createBooking(data: IFilteredSchedule, request_id: string): Promise<IBooking | null> {
@@ -715,6 +716,113 @@ class BookingRepository implements IBookingRepository {
             };
         } catch (error: any) {
             console.error("Error fetching dashboard details:", error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    async getSalesData(queries: ISalesQuery): Promise<IResponse> {
+        try {
+            const { fromDate, toDate, page } = queries;
+            const limit = 10;
+            // Convert dates to MongoDB date format
+            const startDate = fromDate ? new Date(fromDate) : null;
+            const endDate = toDate ? new Date(toDate) : null;
+
+            // Build the match stage for filtering
+            const matchStage: any = {
+                status: "completed",
+                date: { $gte: startDate, $lte: endDate },
+            };
+
+            const aggregationPipeline = [
+                { $match: matchStage },
+
+                // Stage 2: Lookup customer details
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "user_id",
+                        foreignField: "_id",
+                        as: "customer",
+                    },
+                },
+
+                // Stage 3: Lookup provider details
+                {
+                    $lookup: {
+                        from: "providers",
+                        localField: "provider_id",
+                        foreignField: "_id",
+                        as: "provider",
+                    },
+                },
+
+                // Stage 4: Lookup service details
+                {
+                    $lookup: {
+                        from: "services",
+                        localField: "service_id",
+                        foreignField: "_id",
+                        as: "service",
+                    },
+                },
+
+                // Stage 5: Lookup payment details
+                {
+                    $lookup: {
+                        from: "payments",
+                        localField: "payment_id",
+                        foreignField: "_id",
+                        as: "payment",
+                    },
+                },
+
+                // Stage 6: Unwind the joined arrays (since lookup returns an array)
+                { $unwind: "$customer" },
+                { $unwind: "$provider" },
+                { $unwind: "$service" },
+                { $unwind: "$payment" },
+
+                // Stage 7: Project the required fields
+                {
+                    $project: {
+                        _id: 0, // Exclude the default _id field
+                        id: "$_id",
+                        date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, // Format date as YYYY-MM-DD
+                        amount: "$payment.amount",
+                        service: "$service.name",
+                        profit: "$payment.site_fee",
+                        customer: "$customer.name",
+                        provider: "$provider.name",
+                    },
+                },
+
+                // Stage 8: Pagination
+                { $skip: (Number(page) - 1) * limit },
+                { $limit: limit },
+            ];
+
+            // Execute the aggregation pipeline
+            const salesData = await Booking.aggregate(aggregationPipeline);
+
+            // Calculate total number of pages
+            const totalBookings = await Booking.countDocuments(matchStage);
+            const totalPages = Math.ceil(totalBookings / limit);
+
+            return {
+                success: true,
+                message: "Sales data fetched successfully",
+                data: {
+                    sales: salesData,
+                    totalPages,
+                },
+            };
+        } catch (error: any) {
+            console.error("Error fetching sales data:", error.message);
             return {
                 success: false,
                 message: "Internal server error",

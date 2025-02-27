@@ -547,5 +547,34 @@ class AdminService implements IAdminService {
             };
         }
     }
+
+    async fetchSalesData(queries: {
+        page: string;
+        fromDate: string;
+        toDate: string;
+    }): Promise<IResponse> {
+        try {
+            const fetchingStatus = await this.bookingRepository.getSalesData(queries);
+
+            return fetchingStatus.success
+                ? {
+                      success: true,
+                      message: fetchingStatus.message,
+                      data: fetchingStatus.data,
+                  }
+                : {
+                      success: false,
+                      message: fetchingStatus.message,
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch sales data",
+                data: null,
+            };
+        }
+    }
 }
 export default AdminService;

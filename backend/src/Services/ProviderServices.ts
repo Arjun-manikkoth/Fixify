@@ -1453,7 +1453,7 @@ class ProviderService implements IProviderService {
                   }
                 : {
                       success: false,
-                      message: "Failed to update booking status",
+                      message: "Failed to fetch dashboard details",
                       data: null,
                   };
         } catch (error: any) {

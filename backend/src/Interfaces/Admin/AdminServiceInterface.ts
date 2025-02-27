@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
 import { ISignInResponse, IRefreshTokenResponse, IResponse } from "../../Services/AdminServices";
-import { IApprovalDetails, IPaginatedUsers, ISignIn } from "./SignInInterface";
+import { IApprovalDetails, IPaginatedUsers, ISalesQuery, ISignIn } from "./SignInInterface";
 import { IPaginatedProviders } from "./SignInInterface";
 import { IPaginatedApprovals } from "./SignInInterface";
 import { IPaginatedServices } from "../Service/IServices";
@@ -29,5 +29,6 @@ interface IAdminService {
     getServiceDetails(id: string): Promise<IServices | null>;
     updateService(id: string, data: IAddService): Promise<IResponse>;
     fetchBookings(page: number): Promise<IResponse>;
+    fetchSalesData(queries: ISalesQuery): Promise<IResponse>;
 }
 export default IAdminService;

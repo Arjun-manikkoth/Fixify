@@ -118,4 +118,9 @@ adminRoute.get("/bookings", verifyToken, verifyRole(["admin"]), (req, res) => {
     adminController.getBookings(req, res);
 });
 
+// // Route for sales data listing
+adminRoute.get("/sales", verifyToken, verifyRole(["admin"]), (req, res) => {
+    adminController.getSales(req, res);
+});
+
 export default adminRoute;

@@ -4,7 +4,6 @@ import { ToastContainer } from "react-toastify";
 import LandingPage from "./Pages/Common/LandingPage";
 import ProviderHomePage from "./Pages/Provider/ProviderHomePage";
 import UserProfilePage from "./Pages/User/UserHomePage";
-import AdminHomePage from "./Pages/Admin/AdminHomePage";
 import UserProtected from "./Components/UserComponents/UserProtected";
 import ProviderProtected from "./Components/ProviderComponents/ProviderProtected";
 import AdminProtected from "./Components/AdminComponents/AdminProtected";
@@ -24,6 +23,7 @@ import ProviderBookingsPage from "./Pages/Provider/ProviderBookings";
 import ProviderBookingDetailPage from "./Pages/Provider/ProviderBookingDetails";
 import AdminBookingsPage from "./Pages/Admin/AdminBookingsPage";
 import ProviderDashboardPage from "./Pages/Provider/ProviderDashboard";
+import AdminSalesListingPage from "./Pages/Admin/AdminSalesListingPage";
 
 const App: FC = () => {
     return (
@@ -76,7 +76,7 @@ const App: FC = () => {
                     {/*admin sign in page*/}
                     <Route path="/admins/sign_in" Component={AdminSignIn} />
                     <Route Component={AdminProtected}>
-                        <Route path="/admins/dashboard" Component={AdminHomePage} />
+                        <Route path="/admins/sales" Component={AdminSalesListingPage} />
                         <Route path="/admins/users" Component={AdminUsersPage} />
                         <Route path="/admins/providers" Component={AdminProvidersPage} />
                         <Route path="/admins/approvals" Component={AdminApprovalsPage} />

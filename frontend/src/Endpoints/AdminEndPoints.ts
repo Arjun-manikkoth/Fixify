@@ -16,5 +16,6 @@ const adminRoutes = {
     add_service: "/add_service",
     update_service: "/update_service",
     bookings: "bookings",
+    sales: "/sales",
 };
 export default adminRoutes;

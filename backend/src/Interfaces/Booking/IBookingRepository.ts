@@ -1,5 +1,6 @@
 import { IBooking } from "../../Models/ProviderModels/BookingModel";
 import { IResponse } from "../../Services/AdminServices";
+import { ISalesQuery } from "../Admin/SignInInterface";
 import { IFilteredSchedule } from "./IBooking";
 
 interface IBookingRepository {
@@ -13,5 +14,6 @@ interface IBookingRepository {
     getAllBookings(page: number): Promise<IResponse>;
     updateReviewDetails(review_id: string, booking_id: string): Promise<IResponse>;
     getProviderDashboardDetails(provider_id: string): Promise<IResponse>;
+    getSalesData(queries: ISalesQuery): Promise<IResponse>;
 }
 export default IBookingRepository;
