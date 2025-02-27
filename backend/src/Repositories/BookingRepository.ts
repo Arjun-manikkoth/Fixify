@@ -641,6 +641,11 @@ class BookingRepository implements IBookingRepository {
                                 },
                             },
                             {
+                                $sort: {
+                                    _id: 1,
+                                },
+                            },
+                            {
                                 $project: {
                                     _id: 0,
                                     month: "$_id",
@@ -671,6 +676,11 @@ class BookingRepository implements IBookingRepository {
                                 $group: {
                                     _id: { $dayOfWeek: "$date" }, // Group by day of the week (1 = Sunday, 7 = Saturday)
                                     dailyWorkingHours: { $sum: 1 },
+                                },
+                            },
+                            {
+                                $sort: {
+                                    _id: 1,
                                 },
                             },
                             {

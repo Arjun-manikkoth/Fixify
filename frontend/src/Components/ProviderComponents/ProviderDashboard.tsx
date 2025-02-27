@@ -157,7 +157,7 @@ const ProviderDashboard: React.FC = () => {
                                 <Tooltip />
                                 <Legend />
                                 <Line
-                                    type="step"
+                                    type="natural"
                                     dataKey="hours"
                                     stroke="#1E60AA" // Fixify Brand Blue for consistency
                                     strokeWidth={3}
