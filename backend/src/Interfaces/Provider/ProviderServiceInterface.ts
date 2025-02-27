@@ -1,4 +1,10 @@
-import { IAddress, IProviderRegistrationParsed, IProviderWithService, SignUp } from "./SignIn";
+import {
+    IAddress,
+    IProviderDashboardFilter,
+    IProviderRegistrationParsed,
+    IProviderWithService,
+    SignUp,
+} from "./SignIn";
 import { ISignIn } from "./SignIn";
 import { ISignUpResponse } from "../../Services/ProviderServices";
 import { IOtpResponse } from "../../Services/ProviderServices";
@@ -36,6 +42,6 @@ interface IProviderService {
     fetchBookingDetail(id: string): Promise<IResponse>;
     intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse>;
     fetchChat(room_id: string): Promise<IResponse>;
-    fetchDashboard(provider_id: string): Promise<IResponse>;
+    fetchDashboard(data: IProviderDashboardFilter): Promise<IResponse>;
 }
 export default IProviderService;

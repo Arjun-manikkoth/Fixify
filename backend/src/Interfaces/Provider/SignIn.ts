@@ -58,3 +58,9 @@ export interface IAddress {
     pincode: string;
     street?: string;
 }
+
+export interface IProviderDashboardFilter {
+    provider_id: string;
+    revenueBy: string;
+    hoursBy: string;
+}

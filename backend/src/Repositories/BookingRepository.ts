@@ -535,9 +535,15 @@ class BookingRepository implements IBookingRepository {
     }
 
     //get dashboard details with provider id
-
     async getProviderDashboardDetails(providerId: string): Promise<IResponse> {
         try {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const startOfCurrentWeek = new Date(
+                currentDate.setDate(currentDate.getDate() - currentDate.getDay())
+            ); // Start of the current week (Sunday)
+            const endOfCurrentWeek = new Date(currentDate.setDate(currentDate.getDate() + 6)); // End of the current week (Saturday)
+
             const result = await Booking.aggregate([
                 // Step 1: Match bookings for the given provider and status "completed"
                 {
@@ -549,7 +555,7 @@ class BookingRepository implements IBookingRepository {
                 // Step 2: Lookup payment details for each booking
                 {
                     $lookup: {
-                        from: "payments", // Name of the payment collection
+                        from: "payments",
                         localField: "payment_id",
                         foreignField: "_id",
                         as: "paymentDetails",
@@ -559,7 +565,7 @@ class BookingRepository implements IBookingRepository {
                 {
                     $unwind: "$paymentDetails",
                 },
-
+                // Step 4: Lookup review details for each booking
                 {
                     $lookup: {
                         from: "reviews",
@@ -568,14 +574,14 @@ class BookingRepository implements IBookingRepository {
                         as: "reviewDetails",
                     },
                 },
-
+                // Step 5: Unwind the reviewDetails array (preserve bookings without reviews)
                 {
                     $unwind: {
                         path: "$reviewDetails",
                         preserveNullAndEmptyArrays: true,
                     },
                 },
-
+                // Step 6: Group by provider_id to calculate totals
                 {
                     $group: {
                         _id: "$provider_id",
@@ -589,16 +595,93 @@ class BookingRepository implements IBookingRepository {
                         },
                     },
                 },
-
+                // Step 7: Calculate average rating
                 {
                     $addFields: {
                         averageRating: {
                             $cond: [
                                 { $gt: ["$totalReviews", 0] }, // Check if there are reviews
-                                { $divide: ["$totalRatings", "$totalReviews"] }, // Calculate average
+                                { $divide: ["$totalRatings", "$totalReviews"] },
                                 0, // Default to 0 if no reviews
                             ],
                         },
+                    },
+                },
+                // Step 8: Fetch revenue per month for the current year
+                {
+                    $lookup: {
+                        from: "bookings",
+                        let: { providerId: "$_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    provider_id: new mongoose.Types.ObjectId(providerId),
+                                    status: "completed",
+                                    date: {
+                                        $gte: new Date(`${currentYear}-01-01`), // Start of the current year
+                                        $lt: new Date(`${currentYear + 1}-01-01`), // End of the current year
+                                    },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: "payments",
+                                    localField: "payment_id",
+                                    foreignField: "_id",
+                                    as: "paymentDetails",
+                                },
+                            },
+                            {
+                                $unwind: "$paymentDetails",
+                            },
+                            {
+                                $group: {
+                                    _id: { $month: "$date" },
+                                    monthlyRevenue: { $sum: "$paymentDetails.amount" },
+                                },
+                            },
+                            {
+                                $project: {
+                                    _id: 0,
+                                    month: "$_id",
+                                    monthlyRevenue: 1,
+                                },
+                            },
+                        ],
+                        as: "monthlyRevenueData",
+                    },
+                },
+                // Step 9: Fetch daily working hours for the current week
+                {
+                    $lookup: {
+                        from: "bookings",
+                        let: { providerId: "$_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    provider_id: new mongoose.Types.ObjectId(providerId),
+                                    status: "completed",
+                                    date: {
+                                        $gte: startOfCurrentWeek,
+                                        $lte: endOfCurrentWeek,
+                                    },
+                                },
+                            },
+                            {
+                                $group: {
+                                    _id: { $dayOfWeek: "$date" }, // Group by day of the week (1 = Sunday, 7 = Saturday)
+                                    dailyWorkingHours: { $sum: 1 },
+                                },
+                            },
+                            {
+                                $project: {
+                                    _id: 0,
+                                    day: "$_id",
+                                    dailyWorkingHours: 1,
+                                },
+                            },
+                        ],
+                        as: "dailyWorkingHoursData",
                     },
                 },
 
@@ -609,10 +692,11 @@ class BookingRepository implements IBookingRepository {
                         totalEarnings: 1,
                         totalCompletedBookings: 1,
                         averageRating: 1,
+                        monthlyRevenueData: 1,
+                        dailyWorkingHoursData: 1,
                     },
                 },
             ]);
-            console.log(result, "result");
 
             return {
                 success: true,

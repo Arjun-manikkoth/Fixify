@@ -21,5 +21,6 @@ const providerRoutes = {
     payments: "/payments",
     chats: "/chats",
     dashboard: "/dashboard",
+    monthly_revenue: "/revenue",
 };
 export default providerRoutes;

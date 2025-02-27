@@ -961,16 +961,20 @@ class ProviderController {
     // Fetch dashboard details
     async fetchDashboard(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.query.id || !req.query.revenueBy || !req.query.hoursBy) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required field",
+                    message: "Id,revenue filter and working hours filters are required fields",
                     data: null,
                 });
                 return;
             }
 
-            const response = await this.providerService.fetchDashboard(req.query.id as string);
+            const response = await this.providerService.fetchDashboard({
+                provider_id: req.query.id as string,
+                revenueBy: req.query.revenueBy as string,
+                hoursBy: req.query.hoursBy as string,
+            });
 
             if (response.success) {
                 res.status(OK).json({

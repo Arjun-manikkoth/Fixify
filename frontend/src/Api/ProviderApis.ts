@@ -548,9 +548,11 @@ const getChatsApi = async (id: string) => {
 };
 
 //get provider  dashboard
-const providerDashboardApi = async (id: string) => {
+const providerDashboardApi = async (id: string, revenueBy: string, hoursBy: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.dashboard}`, { params: { id } });
+        const response = await axiosProvider.get(`${providerRoutes.dashboard}`, {
+            params: { id, revenueBy, hoursBy },
+        });
 
         return {
             success: true,

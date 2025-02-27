@@ -9,6 +9,7 @@ import { generateTokens } from "../Utils/GenerateTokens";
 import { verifyToken } from "../Utils/CheckToken";
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
 import {
+    IProviderDashboardFilter,
     IProviderRegistrationParsed,
     IProviderWithService,
     SignUp,
@@ -1438,9 +1439,11 @@ class ProviderService implements IProviderService {
     }
 
     //get dashboard details
-    async fetchDashboard(provider_id: string): Promise<IResponse> {
+    async fetchDashboard(data: IProviderDashboardFilter): Promise<IResponse> {
         try {
-            const response = await this.bookingRepository.getProviderDashboardDetails(provider_id);
+            const response = await this.bookingRepository.getProviderDashboardDetails(
+                data.provider_id
+            );
 
             return response.success
                 ? {
