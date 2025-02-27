@@ -122,7 +122,7 @@ const Slots: React.FC = () => {
     };
 
     return (
-        <div className="p-6 lg:p-9 bg-gray-50 me-12 rounded-xl">
+        <div className="p-9 me-12 rounded-2xl shadow-lg min-h-screen">
             {/* Date Selector */}
             <div className="flex">
                 <div className="w-2/3">

@@ -957,6 +957,44 @@ class ProviderController {
             });
         }
     }
+
+    // Fetch dashboard details
+    async fetchDashboard(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.query.id) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Id is a required field",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.providerService.fetchDashboard(req.query.id as string);
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching chat details:", error.message);
+
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
 }
 
 export default ProviderController;

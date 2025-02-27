@@ -12,5 +12,6 @@ interface IBookingRepository {
     updateBookingStatus(booking_id: string, status: string): Promise<boolean>;
     getAllBookings(page: number): Promise<IResponse>;
     updateReviewDetails(review_id: string, booking_id: string): Promise<IResponse>;
+    getProviderDashboardDetails(provider_id: string): Promise<IResponse>;
 }
 export default IBookingRepository;

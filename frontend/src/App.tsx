@@ -23,6 +23,7 @@ import UserBookingDetailsPage from "./Pages/User/UserBooingDetailsPage";
 import ProviderBookingsPage from "./Pages/Provider/ProviderBookings";
 import ProviderBookingDetailPage from "./Pages/Provider/ProviderBookingDetails";
 import AdminBookingsPage from "./Pages/Admin/AdminBookingsPage";
+import ProviderDashboardPage from "./Pages/Provider/ProviderDashboard";
 
 const App: FC = () => {
     return (
@@ -63,12 +64,13 @@ const App: FC = () => {
                         />
                         {/*provider bookings listing*/}
                         <Route path="/providers/bookings" Component={ProviderBookingsPage} />
-
                         {/*provider bookings details*/}
                         <Route
                             path="/providers/bookings/:id"
                             Component={ProviderBookingDetailPage}
                         />
+                        {/*provider dashboard */}
+                        <Route path="/providers/dashboard" Component={ProviderDashboardPage} />
                     </Route>
 
                     {/*admin sign in page*/}

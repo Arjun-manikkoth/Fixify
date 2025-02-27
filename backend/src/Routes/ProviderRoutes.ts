@@ -177,4 +177,10 @@ providerRoute.post("/payments", (req, res) => {
 providerRoute.get("/chats", (req, res) => {
     providerController.fetchChat(req, res);
 });
+
+// Route for fetching dashboard details
+providerRoute.get("/dashboard", (req, res) => {
+    providerController.fetchDashboard(req, res);
+});
+
 export default providerRoute;

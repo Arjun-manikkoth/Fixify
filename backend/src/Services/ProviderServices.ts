@@ -1436,6 +1436,32 @@ class ProviderService implements IProviderService {
             };
         }
     }
+
+    //get dashboard details
+    async fetchDashboard(provider_id: string): Promise<IResponse> {
+        try {
+            const response = await this.bookingRepository.getProviderDashboardDetails(provider_id);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: response.message,
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to update booking status",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default ProviderService;

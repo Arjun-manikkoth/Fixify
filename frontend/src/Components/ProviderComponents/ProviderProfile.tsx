@@ -273,118 +273,114 @@ const ProviderProfile: React.FC = () => {
 
     return (
         <>
-            <div className="bg-customBlue p-9 me-12 rounded-2xl shadow-lg">
+            <div className="p-9 px-14 me-12 rounded-2xl shadow-lg">
                 {/* Profile Section */}
-                <div className="bg-white shadow-lg p-11 rounded-2xl mb-8">
-                    <h2 className="text-xl font-bold text-gray-800 mb-6">My Profile</h2>
-                    <div className="flex flex-col items-center">
-                        <form
-                            onSubmit={validateProfile}
-                            className="flex flex-col items-center w-full"
-                        >
-                            {/* Profile Image */}
-                            <div className="relative w-full flex justify-center">
-                                {preview ? (
-                                    <>
-                                        <img
-                                            src={preview}
-                                            alt="Profile"
-                                            className="w-52 h-52 rounded-full border-4 border-blue-500 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
-                                            onClick={handleImageUpload}
-                                        />
-                                        <button
-                                            onClick={() => cancelUpload()}
-                                            className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-600"
-                                        >
-                                            ✕
-                                        </button>
-                                    </>
-                                ) : provider.url ? (
+
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6">My Profile</h2>
+                <div className="flex flex-col items-center">
+                    <form onSubmit={validateProfile} className="flex flex-col items-center w-full">
+                        {/* Profile Image */}
+                        <div className="relative w-full flex justify-center">
+                            {preview ? (
+                                <>
                                     <img
-                                        src={provider.url}
-                                        alt="Preview"
-                                        referrerPolicy="no-referrer"
+                                        src={preview}
+                                        alt="Profile"
                                         className="w-52 h-52 rounded-full border-4 border-blue-500 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
                                         onClick={handleImageUpload}
                                     />
-                                ) : (
-                                    <img
-                                        src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
-                                        alt="Default Profile"
-                                        className="w-52 h-52 rounded-full border-4 border-gray-300 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
-                                        onClick={handleImageUpload}
-                                    />
-                                )}
+                                    <button
+                                        onClick={() => cancelUpload()}
+                                        className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </>
+                            ) : provider.url ? (
+                                <img
+                                    src={provider.url}
+                                    alt="Preview"
+                                    referrerPolicy="no-referrer"
+                                    className="w-52 h-52 rounded-full border-4 border-blue-500 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
+                                    onClick={handleImageUpload}
+                                />
+                            ) : (
+                                <img
+                                    src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
+                                    alt="Default Profile"
+                                    className="w-52 h-52 rounded-full border-4 border-gray-300 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
+                                    onClick={handleImageUpload}
+                                />
+                            )}
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={ref}
+                            id="image"
+                            onChange={imageOnChange}
+                            className="hidden"
+                        />
+
+                        {/* Profile Name and Phone Number */}
+                        <div className="w-full space-y-6">
+                            <div
+                                className={`text-center text-lg ${
+                                    profileData?.service
+                                        ? "font-semibold text-blue-600"
+                                        : "text-red-700"
+                                }`}
+                            >
+                                {profileData?.service
+                                    ? profileData?.service.name
+                                    : "Service not chosen"}
                             </div>
-
-                            <input
-                                type="file"
-                                ref={ref}
-                                id="image"
-                                onChange={imageOnChange}
-                                className="hidden"
-                            />
-
-                            {/* Profile Name and Phone Number */}
-                            <div className="w-full space-y-6">
-                                <div
-                                    className={`text-center text-lg ${
-                                        profileData?.service
-                                            ? "font-semibold text-blue-600"
-                                            : "text-red-700"
-                                    }`}
-                                >
-                                    {profileData?.service
-                                        ? profileData?.service.name
-                                        : "Service not chosen"}
-                                </div>
-                                <div className="flex flex-col sm:flex-row sm:space-x-6">
-                                    <div className="w-full sm:w-1/2">
-                                        <input
-                                            type="text"
-                                            id="userName"
-                                            onChange={onChangeInput}
-                                            className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                            value={formData.userName}
-                                            placeholder="Enter your name"
-                                        />
-                                    </div>
-                                    <div className="w-full sm:w-1/2">
-                                        <input
-                                            type="text"
-                                            id="mobileNo"
-                                            onChange={onChangeInput}
-                                            className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                            value={formData.mobileNo}
-                                            placeholder="Enter your phone number"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
+                            <div className="flex flex-col sm:flex-row sm:space-x-6">
+                                <div className="w-full sm:w-1/2">
                                     <input
                                         type="text"
-                                        className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-gray-100 focus:outline-none"
-                                        defaultValue={provider.email}
-                                        readOnly
+                                        id="userName"
+                                        onChange={onChangeInput}
+                                        className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                        value={formData.userName}
+                                        placeholder="Enter your name"
+                                    />
+                                </div>
+                                <div className="w-full sm:w-1/2">
+                                    <input
+                                        type="text"
+                                        id="mobileNo"
+                                        onChange={onChangeInput}
+                                        className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                        value={formData.mobileNo}
+                                        placeholder="Enter your phone number"
                                     />
                                 </div>
                             </div>
-
-                            {/* Save Button */}
-                            <div className="mt-10">
-                                <button
-                                    disabled={loading}
-                                    className={` px-9 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 text-lg transition ${
-                                        loading
-                                            ? "bg-gray-500 cursor-not-allowed"
-                                            : "bg-brandBlue hover:bg-blue-700"
-                                    }`}
-                                >
-                                    {loading ? <LoadingSpinner /> : "Save"}
-                                </button>
+                            <div>
+                                <input
+                                    type="text"
+                                    className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-gray-100 focus:outline-none"
+                                    defaultValue={provider.email}
+                                    readOnly
+                                />
                             </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="mt-10">
+                            <button
+                                disabled={loading}
+                                className={` px-9 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 text-lg transition ${
+                                    loading
+                                        ? "bg-gray-500 cursor-not-allowed"
+                                        : "bg-brandBlue hover:bg-blue-700"
+                                }`}
+                            >
+                                {loading ? <LoadingSpinner /> : "Save"}
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 {!profileData?.provider.google_id && (
                     <div className="bg-white shadow-lg p-11 rounded-2xl">
@@ -404,7 +400,7 @@ const ProviderProfile: React.FC = () => {
                 )}
             </div>
             {!profileData.provider.is_approved && (
-                <div className="flex space-x-6 bg-customBlue p-9 mt-4 me-12 rounded-xl">
+                <div className="flex space-x-6 bg-customBlue p-9 px-14 mt-4 me-12 rounded-xl">
                     <div className="w-full bg-white shadow p-11 rounded-xl">
                         <h2 className="text-2xl font-semibold mt-6 text-black mb-6 text-center">
                             Provider Registration - Complete Your Profile

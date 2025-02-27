@@ -533,5 +533,100 @@ class BookingRepository implements IBookingRepository {
             };
         }
     }
+
+    //get dashboard details with provider id
+
+    async getProviderDashboardDetails(providerId: string): Promise<IResponse> {
+        try {
+            const result = await Booking.aggregate([
+                // Step 1: Match bookings for the given provider and status "completed"
+                {
+                    $match: {
+                        provider_id: new mongoose.Types.ObjectId(providerId),
+                        status: "completed",
+                    },
+                },
+                // Step 2: Lookup payment details for each booking
+                {
+                    $lookup: {
+                        from: "payments", // Name of the payment collection
+                        localField: "payment_id",
+                        foreignField: "_id",
+                        as: "paymentDetails",
+                    },
+                },
+                // Step 3: Unwind the paymentDetails array (since lookup returns an array)
+                {
+                    $unwind: "$paymentDetails",
+                },
+
+                {
+                    $lookup: {
+                        from: "reviews",
+                        localField: "review_id",
+                        foreignField: "_id",
+                        as: "reviewDetails",
+                    },
+                },
+
+                {
+                    $unwind: {
+                        path: "$reviewDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+
+                {
+                    $group: {
+                        _id: "$provider_id",
+                        totalEarnings: { $sum: "$paymentDetails.amount" },
+                        totalCompletedBookings: { $sum: 1 },
+                        totalRatings: { $sum: "$reviewDetails.rating" }, // Sum of all ratings
+                        totalReviews: {
+                            $sum: {
+                                $cond: [{ $ifNull: ["$reviewDetails", false] }, 1, 0], // Count only bookings with reviews
+                            },
+                        },
+                    },
+                },
+
+                {
+                    $addFields: {
+                        averageRating: {
+                            $cond: [
+                                { $gt: ["$totalReviews", 0] }, // Check if there are reviews
+                                { $divide: ["$totalRatings", "$totalReviews"] }, // Calculate average
+                                0, // Default to 0 if no reviews
+                            ],
+                        },
+                    },
+                },
+
+                {
+                    $project: {
+                        _id: 0,
+                        providerId: "$_id",
+                        totalEarnings: 1,
+                        totalCompletedBookings: 1,
+                        averageRating: 1,
+                    },
+                },
+            ]);
+            console.log(result, "result");
+
+            return {
+                success: true,
+                message: "Dashboard details fetched successfully",
+                data: result[0],
+            };
+        } catch (error: any) {
+            console.error("Error fetching dashboard details:", error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 export default BookingRepository;

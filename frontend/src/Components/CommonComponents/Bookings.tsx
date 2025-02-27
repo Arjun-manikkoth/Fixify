@@ -72,7 +72,7 @@ const Bookings: React.FC<IProps> = ({ role, bookingsApi }) => {
     };
 
     return (
-        <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-5xl mx-auto">
+        <div className="p-9  me-12 rounded-2xl shadow-lg">
             <h2 className="text-3xl font-semibold text-gray-800 mb-12">Bookings</h2>
             {loading ? (
                 <LoadingSpinner />

@@ -36,5 +36,6 @@ interface IProviderService {
     fetchBookingDetail(id: string): Promise<IResponse>;
     intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse>;
     fetchChat(room_id: string): Promise<IResponse>;
+    fetchDashboard(provider_id: string): Promise<IResponse>;
 }
 export default IProviderService;
