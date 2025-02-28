@@ -28,6 +28,7 @@ interface ISlotData {
         name: string;
     };
     distance: number;
+    averageRating: number;
 }
 
 export interface IQueryData {
@@ -253,7 +254,7 @@ const ProviderFinder: React.FC = () => {
                             <div className="flex w-full sm:w-1/3 gap-16 justify-between sm:justify-center lg:justify-start mb-4 sm:mb-0">
                                 {/* Ratings */}
                                 <div className="flex items-center text-brandBlue gap-2">
-                                    4.5 <FaStar className="text-brandBlue" />
+                                    {slot.averageRating} <FaStar className="text-brandBlue" />
                                     <span>of 5</span>
                                 </div>
 

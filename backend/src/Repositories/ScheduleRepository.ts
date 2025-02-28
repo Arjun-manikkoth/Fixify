@@ -167,7 +167,6 @@ class ScheduleRepository implements IScheduleRepository {
                 {
                     $unwind: "$service",
                 },
-
                 {
                     $lookup: {
                         from: "reviews",
@@ -176,7 +175,23 @@ class ScheduleRepository implements IScheduleRepository {
                         as: "reviews",
                     },
                 },
-
+                {
+                    $addFields: {
+                        totalRating: { $sum: "$reviews.rating" }, // Sum up all ratings
+                        reviewCount: { $size: "$reviews" }, // Count the number of reviews
+                    },
+                },
+                {
+                    $addFields: {
+                        averageRating: {
+                            $cond: {
+                                if: { $gt: ["$reviewCount", 0] }, // Check if there are reviews
+                                then: { $divide: ["$totalRating", "$reviewCount"] }, // Calculate average
+                                else: 0, // Default to 0 if no reviews
+                            },
+                        },
+                    },
+                },
                 {
                     $project: {
                         technician: 1,
@@ -196,7 +211,9 @@ class ScheduleRepository implements IScheduleRepository {
                         },
                         location: 1,
                         service: 1,
-                        reviews: 1,
+                        totalRating: 1,
+                        reviewCount: 1,
+                        averageRating: 1, // Include the average rating in the output
                     },
                 },
             ]);
