@@ -9,13 +9,15 @@ import ProviderRepository from "../Repositories/ProviderRepository";
 import ApprovalRepository from "../Repositories/ApprovalRepository";
 import ServiceRepository from "../Repositories/ServiceRepository";
 import BookingRepository from "../Repositories/BookingRepository";
+import PaymentRepository from "../Repositories/PaymentRepository";
 
 const adminRepository = new AdminRepository(); // Initialize admin repository instance
 const userRepository = new UserRepository(); // Initialize user repository instance
 const providerRepository = new ProviderRepository(); // Initialize provider repository instance
 const approvalRepository = new ApprovalRepository(); // Initialize approval repository instance
-const serviceRepository = new ServiceRepository(); // Initialize approval repository instance
-const bookingRepository = new BookingRepository(); // Initialize approval repository instance
+const serviceRepository = new ServiceRepository(); // Initialize service repository instance
+const bookingRepository = new BookingRepository(); // Initialize booking repository instance
+const paymentRepository = new PaymentRepository(); // Initialize payment repository instance
 
 const adminService = new AdminService(
     adminRepository,
@@ -23,7 +25,8 @@ const adminService = new AdminService(
     providerRepository,
     approvalRepository,
     serviceRepository,
-    bookingRepository
+    bookingRepository,
+    paymentRepository
 ); // Dependency injection of repository into service
 const adminController = new AdminController(adminService); // Dependency injection of service into controller
 
@@ -121,6 +124,16 @@ adminRoute.get("/bookings", verifyToken, verifyRole(["admin"]), (req, res) => {
 // // Route for sales data listing
 adminRoute.get("/sales", verifyToken, verifyRole(["admin"]), (req, res) => {
     adminController.getSales(req, res);
+});
+
+// // Route for dashboard tiles listing
+adminRoute.get("/dashboard", verifyToken, verifyRole(["admin"]), (req, res) => {
+    adminController.getDashboard(req, res);
+});
+
+// // Route for dashboard tiles listing
+adminRoute.get("/revenue", verifyToken, verifyRole(["admin"]), (req, res) => {
+    adminController.getRevenue(req, res);
 });
 
 export default adminRoute;

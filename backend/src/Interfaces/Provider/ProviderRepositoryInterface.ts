@@ -4,6 +4,7 @@ import { SignUp, IProviderWithOtp } from "./SignIn";
 import { IUpdateProfile } from "./SignIn";
 import { IProviderWithService } from "./SignIn";
 import { IPaginatedProviders } from "../Admin/SignInInterface";
+import { IResponse } from "../../Services/AdminServices";
 
 interface IProviderRepository {
     insertProvider(providerData: SignUp): Promise<IProvider | null>;
@@ -22,6 +23,7 @@ interface IProviderRepository {
     changeProviderUnBlockStatus(id: string): Promise<boolean>;
     updateProviderServiceApproval(providerId: ObjectId, serviceId: ObjectId): Promise<boolean>;
     updatePassword(email: string, password: string): Promise<boolean>;
+    getActiveProvidersCount(): Promise<IResponse>;
 }
 
 export default IProviderRepository;

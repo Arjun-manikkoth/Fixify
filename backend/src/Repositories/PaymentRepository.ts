@@ -61,6 +61,88 @@ class PaymentRepository implements IPaymentRepository {
             };
         }
     }
+
+    //get the revenue based on the filter
+    async getRevenueData(period: string): Promise<IResponse> {
+        try {
+            let groupByQuery: any;
+            let dateFormat: string;
+
+            // Define the aggregation query based on the period
+            switch (period) {
+                case "weekly":
+                    groupByQuery = {
+                        year: { $year: "$payment_date" },
+                        week: { $week: "$payment_date" },
+                    };
+                    dateFormat = "%Y-%U"; // Year and week number
+                    break;
+                case "monthly":
+                    groupByQuery = {
+                        year: { $year: "$payment_date" },
+                        month: { $month: "$payment_date" },
+                    };
+                    dateFormat = "%Y-%m"; // Year and month
+                    break;
+                case "yearly":
+                    groupByQuery = {
+                        year: { $year: "$payment_date" },
+                    };
+                    dateFormat = "%Y"; // Year only
+                    break;
+                default:
+                    throw new Error("Invalid period specified");
+            }
+
+            const revenueData = await Payment.aggregate([
+                {
+                    $match: {
+                        payment_status: "completed", // Only consider completed payments
+                    },
+                },
+                {
+                    $group: {
+                        _id: groupByQuery,
+                        totalRevenue: { $sum: "$amount" }, // Sum up the payment amounts
+                        payment_date: { $first: "$payment_date" }, // Include payment_date in the group
+                    },
+                },
+                {
+                    $addFields: {
+                        period: {
+                            $dateToString: {
+                                format: dateFormat,
+                                date: "$payment_date", // Use the payment_date from the group
+                            },
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0, // Exclude the _id field
+                        period: 1, // Include the period field
+                        revenue: "$totalRevenue", // Include the revenue field
+                    },
+                },
+                {
+                    $sort: { period: 1 }, // Sort by period in ascending order
+                },
+            ]);
+            console.log(revenueData, "revenue data");
+            return {
+                success: true,
+                message: "Revenue data fetched successfully",
+                data: revenueData,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default PaymentRepository;

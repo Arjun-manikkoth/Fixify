@@ -695,7 +695,72 @@ class AdminController {
                     data: response.data,
                 });
             } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking data:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
+
+    // get dashboard data to display as tiles
+    async getDashboard(req: Request, res: Response): Promise<void> {
+        try {
+            const response = await this.AdminService.fetchDashboardData();
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching booking data:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
+
+    // get dashboard revemue dadta  to display as chart with filter
+    async getRevenue(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.query.period) {
                 res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Period is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.AdminService.fetchRevenueData(req.query.period as string);
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,

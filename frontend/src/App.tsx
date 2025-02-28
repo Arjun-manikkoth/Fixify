@@ -24,6 +24,7 @@ import ProviderBookingDetailPage from "./Pages/Provider/ProviderBookingDetails";
 import AdminBookingsPage from "./Pages/Admin/AdminBookingsPage";
 import ProviderDashboardPage from "./Pages/Provider/ProviderDashboard";
 import AdminSalesListingPage from "./Pages/Admin/AdminSalesListingPage";
+import AdminDashboardPage from "./Pages/Admin/AdminDashboardPage";
 
 const App: FC = () => {
     return (
@@ -77,6 +78,7 @@ const App: FC = () => {
                     <Route path="/admins/sign_in" Component={AdminSignIn} />
                     <Route Component={AdminProtected}>
                         <Route path="/admins/sales" Component={AdminSalesListingPage} />
+                        <Route path="/admins/dashboard" Component={AdminDashboardPage} />
                         <Route path="/admins/users" Component={AdminUsersPage} />
                         <Route path="/admins/providers" Component={AdminProvidersPage} />
                         <Route path="/admins/approvals" Component={AdminApprovalsPage} />

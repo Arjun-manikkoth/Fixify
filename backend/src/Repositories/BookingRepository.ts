@@ -830,5 +830,118 @@ class BookingRepository implements IBookingRepository {
             };
         }
     }
+    //get total site revenue and booking count
+    async getTotalBookingData(): Promise<IResponse> {
+        try {
+            const aggregationResult = await Booking.aggregate([
+                {
+                    $facet: {
+                        earnings: [
+                            { $match: { status: "completed" } },
+                            {
+                                $lookup: {
+                                    from: "payments",
+                                    localField: "payment_id",
+                                    foreignField: "_id",
+                                    as: "payment",
+                                },
+                            },
+                            { $unwind: "$payment" }, // Unwind the joined payment array
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalSiteFee: { $sum: "$payment.site_fee" },
+                                    totalCompletedBookings: { $sum: 1 },
+                                },
+                            },
+                        ],
+
+                        // Count bookings per status
+                        statusCounts: [
+                            {
+                                $group: {
+                                    _id: "$status",
+                                    count: { $sum: 1 },
+                                },
+                            },
+                        ],
+
+                        // Find most booked services based on completed bookings
+                        mostBookedServices: [
+                            { $match: { status: "completed" } },
+                            {
+                                $group: {
+                                    _id: "$service_id",
+                                    count: { $sum: 1 },
+                                },
+                            },
+                            { $sort: { count: -1 } }, // Sort by highest booked count
+                            { $limit: 5 }, // Get top 5 most booked services
+                            {
+                                $lookup: {
+                                    from: "services", // Assuming service details are stored in 'services' collection
+                                    localField: "_id",
+                                    foreignField: "_id",
+                                    as: "serviceDetails",
+                                },
+                            },
+                            { $unwind: "$serviceDetails" }, // Extract service details
+                            {
+                                $project: {
+                                    _id: 0,
+                                    serviceName: "$serviceDetails.name", // Service name
+                                    count: 1, // Booking count
+                                },
+                            },
+                        ],
+                    },
+                },
+            ]);
+
+            // Extract results
+            const earningsResult = aggregationResult[0].earnings[0] || {
+                totalSiteFee: 0,
+                totalCompletedBookings: 0,
+            };
+            const statusCountsResult = aggregationResult[0].statusCounts;
+            const mostBookedServicesResult = aggregationResult[0].mostBookedServices || [];
+
+            // Convert status counts into a more usable format
+            const bookingStatusCounts = {
+                completed: 0,
+                cancelled: 0,
+                pending: 0,
+            };
+
+            statusCountsResult.forEach((statusCount: { _id: string; count: number }) => {
+                if (statusCount._id === "completed") {
+                    bookingStatusCounts.completed = statusCount.count;
+                } else if (statusCount._id === "cancelled") {
+                    bookingStatusCounts.cancelled = statusCount.count;
+                } else if (statusCount._id === "pending") {
+                    bookingStatusCounts.pending = statusCount.count;
+                }
+            });
+
+            // Final response
+            return {
+                success: true,
+                message: "Data fetched successfully",
+                data: {
+                    totalSiteFee: earningsResult.totalSiteFee,
+                    totalCompletedBookings: earningsResult.totalCompletedBookings,
+                    bookingStatusCounts,
+                    mostBookedServices: mostBookedServicesResult,
+                },
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 export default BookingRepository;

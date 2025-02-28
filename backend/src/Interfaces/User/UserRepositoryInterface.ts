@@ -2,6 +2,7 @@ import { ObjectId } from "mongoose";
 import { IUser } from "../../Models/UserModels/UserModel";
 import { IPaginatedUsers } from "../Admin/SignInInterface";
 import { SignUp, IUserWithOtp, IUpdateProfile } from "./SignUpInterface";
+import { IResponse } from "../../Services/AdminServices";
 
 interface IUserRepository {
     insertUser(userData: SignUp): Promise<IUser | null>;
@@ -14,6 +15,7 @@ interface IUserRepository {
     changeUserBlockStatus(id: string): Promise<boolean>;
     changeUserUnBlockStatus(id: string): Promise<boolean>;
     updatePassword(email: string, password: string): Promise<boolean>;
+    getActiveUsersCount(): Promise<IResponse>;
 }
 
 export default IUserRepository;

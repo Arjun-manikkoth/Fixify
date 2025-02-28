@@ -20,6 +20,7 @@ import IServiceRepository from "../Interfaces/Service/IServiceRepository";
 import { IPaginatedServices } from "../Interfaces/Service/IServices";
 import { IAddService } from "../Interfaces/Admin/SignInInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
+import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -51,7 +52,8 @@ class AdminService implements IAdminService {
         private providerRepository: IProviderRepository,
         private approvalRepository: IApprovalRepository,
         private serviceRepository: IServiceRepository,
-        private bookingRepository: IBookingRepository
+        private bookingRepository: IBookingRepository,
+        private paymentRepository: IPaymentRepository
     ) {}
 
     //authenticates admin by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
@@ -547,7 +549,7 @@ class AdminService implements IAdminService {
             };
         }
     }
-
+    //fetch sales data for sales report
     async fetchSalesData(queries: {
         page: string;
         fromDate: string;
@@ -572,6 +574,80 @@ class AdminService implements IAdminService {
             return {
                 success: false,
                 message: "Failed to fetch sales data",
+                data: null,
+            };
+        }
+    }
+    //fetch admin dashboard title data,booking status chart and top 5 booked services
+    async fetchDashboardData(): Promise<IResponse> {
+        try {
+            const totalUserData = await this.userRepository.getActiveUsersCount();
+            if (!totalUserData.success) {
+                return {
+                    success: false,
+                    message: "Failed to fetch dashboard data",
+                    data: null,
+                };
+            }
+            const totalProviderData = await this.providerRepository.getActiveProvidersCount();
+            if (!totalProviderData.success) {
+                return {
+                    success: false,
+                    message: "Failed to fetch dashboard data",
+                    data: null,
+                };
+            }
+
+            const totalBookingData = await this.bookingRepository.getTotalBookingData();
+
+            if (!totalBookingData.success) {
+                return {
+                    success: false,
+                    message: "Failed to fetch dashboard data",
+                    data: null,
+                };
+            }
+
+            return {
+                success: true,
+                message: "Fetched dashboard tiles",
+                data: {
+                    ...totalBookingData.data,
+                    totalProviders: totalProviderData.data,
+                    totalUsers: totalUserData.data,
+                },
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch dashboard data",
+                data: null,
+            };
+        }
+    }
+
+    async fetchRevenueData(period: string): Promise<IResponse> {
+        try {
+            const revenueData = await this.paymentRepository.getRevenueData(period);
+
+            if (!revenueData.success) {
+                return {
+                    success: false,
+                    message: "Failed to fetch dashboard revenue data",
+                    data: null,
+                };
+            }
+            return {
+                success: true,
+                message: "Fetched dashboard revenue data",
+                data: revenueData.data,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch dashboard revenue data",
                 data: null,
             };
         }

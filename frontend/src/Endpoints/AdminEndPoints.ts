@@ -17,5 +17,7 @@ const adminRoutes = {
     update_service: "/update_service",
     bookings: "bookings",
     sales: "/sales",
+    dashboard: "/dashboard",
+    revenue: "/revenue",
 };
 export default adminRoutes;

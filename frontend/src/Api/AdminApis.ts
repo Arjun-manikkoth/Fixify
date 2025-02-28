@@ -361,6 +361,46 @@ const adminSalesApi = async (fromDate: string, toDate: string, page: number) => 
     }
 };
 
+//get admin dashboard tiles api
+const adminDashboardTilesApi = async () => {
+    try {
+        const response = await axiosAdmin.get(`${adminRoutes.dashboard}`);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
+//get admin dashboard revenue api
+const adminDashboardRevenueApi = async (period: string) => {
+    try {
+        const response = await axiosAdmin.get(`${adminRoutes.revenue}`, { params: { period } });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     logoutAdmin,
@@ -381,4 +421,6 @@ export {
     getService,
     fetchBookingsApi,
     adminSalesApi,
+    adminDashboardTilesApi,
+    adminDashboardRevenueApi,
 };

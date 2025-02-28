@@ -30,5 +30,7 @@ interface IAdminService {
     updateService(id: string, data: IAddService): Promise<IResponse>;
     fetchBookings(page: number): Promise<IResponse>;
     fetchSalesData(queries: ISalesQuery): Promise<IResponse>;
+    fetchDashboardData(): Promise<IResponse>;
+    fetchRevenueData(period: string): Promise<IResponse>;
 }
 export default IAdminService;

@@ -6,6 +6,7 @@ import { IUpdateProfile } from "../Interfaces/Provider/SignIn";
 import { IPaginatedProviders } from "../Interfaces/Admin/SignInInterface";
 import { IProvider } from "../Models/ProviderModels/ProviderModel";
 import Provider from "../Models/ProviderModels/ProviderModel";
+import { IResponse } from "../Services/AdminServices";
 
 class ProviderRepository implements IProviderRepository {
     //insert provider to db
@@ -300,6 +301,32 @@ class ProviderRepository implements IProviderRepository {
         } catch (error: any) {
             console.log(error.message);
             return false;
+        }
+    }
+
+    //get total providers count
+    // get total verified users
+    async getActiveProvidersCount(): Promise<IResponse> {
+        try {
+            const count = await Provider.countDocuments({
+                is_verified: true,
+                is_approved: true,
+                is_blocked: false,
+                is_deleted: false,
+            });
+
+            return {
+                success: true,
+                message: "Fetched active providers count",
+                data: count,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch active providers count",
+                data: null,
+            };
         }
     }
 }

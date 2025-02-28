@@ -6,6 +6,7 @@ import { IPaginatedUsers } from "../Interfaces/Admin/SignInInterface";
 import User from "../Models/UserModels/UserModel";
 import { IUser } from "../Models/UserModels/UserModel";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
+import { IResponse } from "../Services/AdminServices";
 
 class UserRepository implements IUserRepository {
     //adds user to db
@@ -213,6 +214,30 @@ class UserRepository implements IUserRepository {
         } catch (error: any) {
             console.log(error.message);
             return false;
+        }
+    }
+
+    // get total verified users
+    async getActiveUsersCount(): Promise<IResponse> {
+        try {
+            const count = await User.countDocuments({
+                is_verified: true,
+                is_blocked: false,
+                is_deleted: false,
+            });
+
+            return {
+                success: true,
+                message: "Fetched active users count",
+                data: count,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch active users count",
+                data: null,
+            };
         }
     }
 }
