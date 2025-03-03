@@ -671,6 +671,31 @@ const reviewApi = async (review: {
     }
 };
 
+//report account api
+const reportProviderApi = async (data: {
+    reporterId: string;
+    reportedId: string;
+    reportedRole: string;
+    reason: string;
+}) => {
+    try {
+        const response = await axiosUser.post(`${userRoutes.chats}`, data);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -700,4 +725,5 @@ export {
     cancelBookingApi,
     getChatsApi,
     reviewApi,
+    reportProviderApi,
 };

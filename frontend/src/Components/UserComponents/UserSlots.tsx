@@ -29,8 +29,13 @@ interface ISlotData {
     };
     distance: number;
     averageRating: number;
+    slots: ISlots[];
 }
-
+interface ISlots {
+    time: string;
+    status: string;
+    _id: string;
+}
 export interface IQueryData {
     service_id: string;
     date: string;
@@ -247,6 +252,9 @@ const ProviderFinder: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-2 ms-3 text-sm text-gray-600">
                                     <FaClock className="text-brandBlue" />
+                                    {new Intl.DateTimeFormat("en-US", {
+                                        timeStyle: "short",
+                                    }).format(new Date(slot.slots[0].time))}
                                 </div>
                             </div>
 

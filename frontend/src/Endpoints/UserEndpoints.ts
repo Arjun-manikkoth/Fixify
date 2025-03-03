@@ -24,5 +24,6 @@ const userRoutes = {
     cancel_booking: "/cancel_booking",
     chats: "/chats",
     reviews: "/reviews",
+    report: "/report",
 };
 export default userRoutes;

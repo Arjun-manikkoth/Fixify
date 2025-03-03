@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaCommentDots, FaMapMarkerAlt, FaStar } from "react-icons/fa";
+import { FaCommentDots, FaMapMarkerAlt, FaStar, FaFlag } from "react-icons/fa";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import PaymentModal from "./Modals/PaymentModal";
 import { getChatsApi as getProviderChats, paymentRequestApi } from "../../Api/ProviderApis";
@@ -10,6 +10,9 @@ import PaymentFormModal from "./Modals/PaymentFormModal";
 import ChatModal from "./Modals/ChatModal";
 import { stripePaymentApi, cancelBookingApi } from "../../Api/UserApis";
 import Ratings from "./Modals/Ratings";
+import ReportModal from "./Modals/ReportModal";
+import { reportProviderApi } from "../../Api/UserApis";
+import { reportUserApi } from "../../Api/ProviderApis";
 
 interface IBookingDetail {
     _id: string;
@@ -78,6 +81,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     const [forceRender, setForceRender] = useState<number>(0);
     const [showChat, setShowChat] = useState<boolean>(false);
     const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
+    const [reportModal, setReportModal] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -229,13 +233,21 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                             </div>
                         </div>
 
-                        {/* Right Side: Chat Button */}
-                        <button
-                            onClick={() => setShowChat(true)}
-                            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
-                        >
-                            <FaCommentDots /> Chat Now
-                        </button>
+                        {/* Right Side: Chat and Report Buttons */}
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setShowChat(true)}
+                                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
+                            >
+                                <FaCommentDots /> Chat Now
+                            </button>
+                            <button
+                                onClick={() => setReportModal(true)}
+                                className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                            >
+                                <FaFlag /> Report
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -391,6 +403,16 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     />
                 )}
 
+                {reportModal && (
+                    <ReportModal
+                        isOpen={reportModal}
+                        onClose={() => setReportModal(false)}
+                        reportedId={role === "user" ? booking.user._id : booking.provider._id}
+                        reporterId={role === "provider" ? booking.user._id : booking.provider._id}
+                        reportedRole={role === "provider" ? "user" : "provider"}
+                        reportApi={role === "provider" ? reportProviderApi : reportUserApi}
+                    />
+                )}
                 {showReviewForm && (
                     <Ratings
                         booking_id={booking._id}

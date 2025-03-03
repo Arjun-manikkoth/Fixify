@@ -910,7 +910,7 @@ class BookingRepository implements IBookingRepository {
             const bookingStatusCounts = {
                 completed: 0,
                 cancelled: 0,
-                pending: 0,
+                confirmed: 0,
             };
 
             statusCountsResult.forEach((statusCount: { _id: string; count: number }) => {
@@ -918,8 +918,8 @@ class BookingRepository implements IBookingRepository {
                     bookingStatusCounts.completed = statusCount.count;
                 } else if (statusCount._id === "cancelled") {
                     bookingStatusCounts.cancelled = statusCount.count;
-                } else if (statusCount._id === "pending") {
-                    bookingStatusCounts.pending = statusCount.count;
+                } else if (statusCount._id === "confirmed") {
+                    bookingStatusCounts.confirmed = statusCount.count;
                 }
             });
 

@@ -15,7 +15,6 @@ import { adminDashboardTilesApi, adminDashboardRevenueApi } from "../../Api/Admi
 import { toast } from "react-toastify";
 
 const AdminDashboard: React.FC = () => {
-    // State to hold the fetched data
     const [dashboardData, setDashboardData] = useState({
         totalSiteFee: 0,
         totalCompletedBookings: 0,
@@ -24,21 +23,15 @@ const AdminDashboard: React.FC = () => {
         bookingStatusCounts: {
             completed: 0,
             cancelled: 0,
-            pending: 0,
+            confirmed: 0,
         },
-        mostBookedServices: [], // Store most booked services
+        mostBookedServices: [],
     });
 
-    // State for revenue data
     const [revenueData, setRevenueData] = useState([{ period: "", revenue: 0 }]);
-
-    // State to handle loading and error states
     const [loading, setLoading] = useState(true);
-
-    // State for revenue filter
     const [revenueFilter, setRevenueFilter] = useState<string>("monthly");
 
-    // Fetch dashboard tiles data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -56,7 +49,6 @@ const AdminDashboard: React.FC = () => {
         fetchData();
     }, []);
 
-    // Fetch revenue data with filter
     useEffect(() => {
         const fetchRevenueData = async () => {
             try {
@@ -78,17 +70,13 @@ const AdminDashboard: React.FC = () => {
         return <div className="p-6 pt-24 px-12">Loading...</div>;
     }
 
-    // Data for the pie chart
     const pieChartData = [
         { name: "Completed", value: dashboardData.bookingStatusCounts.completed },
         { name: "Cancelled", value: dashboardData.bookingStatusCounts.cancelled },
-        { name: "Pending", value: dashboardData.bookingStatusCounts.pending },
+        { name: "Confirmed", value: dashboardData.bookingStatusCounts.confirmed },
     ];
 
-    // Data for the bar chart (Top 5 Most Booked Services)
     const mostBookedServicesData = dashboardData.mostBookedServices.slice(0, 5);
-
-    // Colors for the pie chart segments
     const COLORS = ["#1E60AA", "#FF5252", "#FFA500"];
 
     return (
@@ -126,7 +114,7 @@ const AdminDashboard: React.FC = () => {
                                 data={pieChartData}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={90} // Increased for a proper ring shape
+                                innerRadius={90}
                                 outerRadius={140}
                                 fill="#8884d8"
                                 dataKey="value"
@@ -189,7 +177,7 @@ const AdminDashboard: React.FC = () => {
                     </button>
                     <button
                         className={`px-4 py-2 rounded ${
-                            revenueFilter === "daily"
+                            revenueFilter === "yearly"
                                 ? "bg-blue-500 text-white"
                                 : "bg-gray-200 text-gray-700"
                         }`}
@@ -202,17 +190,17 @@ const AdminDashboard: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={revenueData}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey={"period"} />
+                            <XAxis dataKey="period" />
                             <YAxis />
                             <Tooltip />
-                            <Bar dataKey="revenue" fill="#1E60AA" />
+                            <Bar dataKey="revenue" fill="#1E60AA" barSize={30} />{" "}
+                            {/* Fixed bar size */}
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (
                     <p className="text-gray-500 text-center">No revenue data available</p>
                 )}
             </div>
-
             {/* Bar Chart for Most Booked Services */}
             <div className="bg-white rounded-lg shadow-md p-6 mt-8">
                 <h3 className="text-lg font-semibold text-center mb-4">
@@ -220,12 +208,14 @@ const AdminDashboard: React.FC = () => {
                 </h3>
                 {mostBookedServicesData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={mostBookedServicesData} layout="vertical">
+                        <BarChart data={mostBookedServicesData}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" />
-                            <YAxis dataKey="serviceName" type="category" width={120} />
+                            <XAxis dataKey="serviceName" type="category" />{" "}
+                            {/* Service names on X-axis */}
+                            <YAxis type="number" /> {/* Count values on Y-axis */}
                             <Tooltip />
-                            <Bar dataKey="count" fill="#1E60AA" />
+                            <Bar dataKey="count" fill="#1E60AA" barSize={30} />{" "}
+                            {/* Fixed bar size */}
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (
