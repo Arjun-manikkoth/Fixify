@@ -101,53 +101,6 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Pie Chart for Booking Status */}
-            <div className="bg-white rounded-lg shadow-md p-6 flex flex-col lg:flex-row items-center">
-                <h3 className="text-lg font-semibold mb-4 w-full text-center">
-                    Booking Status Chart
-                </h3>
-
-                <div className="w-full lg:w-2/3 h-80 flex justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={pieChartData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={90}
-                                outerRadius={140}
-                                fill="#8884d8"
-                                dataKey="value"
-                                labelLine={false}
-                            >
-                                {pieChartData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={COLORS[index % COLORS.length]}
-                                    />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* Legend on the Right Side */}
-                <div className="w-full lg:w-1/3 flex flex-col space-y-4 mt-4 lg:mt-0 lg:ml-6">
-                    {pieChartData.map((entry, index) => (
-                        <div key={entry.name} className="flex items-center">
-                            <div
-                                className="w-4 h-4 rounded-full mr-2"
-                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                            ></div>
-                            <span className="text-sm font-medium text-gray-700">
-                                {entry.name}: {entry.value}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             {/* Bar Chart for Revenue */}
             <div className="bg-white rounded-lg shadow-md p-6 mt-8">
                 <h3 className="text-lg font-semibold text-center mb-8">
@@ -201,6 +154,54 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-gray-500 text-center">No revenue data available</p>
                 )}
             </div>
+
+            {/* Pie Chart for Booking Status */}
+            <div className="bg-white rounded-lg shadow-md p-6 flex flex-col lg:flex-row items-center">
+                <h3 className="text-lg font-semibold mb-4 w-full text-center">
+                    Booking Status Chart
+                </h3>
+
+                <div className="w-full lg:w-2/3 h-80 flex justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieChartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={90}
+                                outerRadius={140}
+                                fill="#8884d8"
+                                dataKey="value"
+                                labelLine={false}
+                            >
+                                {pieChartData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={COLORS[index % COLORS.length]}
+                                    />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Legend on the Right Side */}
+                <div className="w-full lg:w-1/3 flex flex-col space-y-4 mt-4 lg:mt-0 lg:ml-6">
+                    {pieChartData.map((entry, index) => (
+                        <div key={entry.name} className="flex items-center">
+                            <div
+                                className="w-4 h-4 rounded-full mr-2"
+                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                            ></div>
+                            <span className="text-sm font-medium text-gray-700">
+                                {entry.name}: {entry.value}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Bar Chart for Most Booked Services */}
             <div className="bg-white rounded-lg shadow-md p-6 mt-8">
                 <h3 className="text-lg font-semibold text-center mb-4">
