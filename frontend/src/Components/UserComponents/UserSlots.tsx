@@ -118,16 +118,37 @@ const ProviderFinder: React.FC = () => {
             errors.forEach((err, index) => setTimeout(() => toast.error(err), index * 100));
             return;
         }
+        if (formData.date && formData.time) {
+            if (new Date(formData.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
+                toast.error("Choose a valid date");
+                return;
+            }
 
-        // if (new Date(formData.date).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
-        //     toast.error("Choose a valid date");
-        //     return;
-        // }
+            const selectedTime = formData.time;
 
-        // if (new Date().getTime() > new Date(formData.time).getTime()) {
-        //     toast.error("Choose a valid time");
-        //     return;
-        // }
+            // Combine date and time
+            const selectedDate = new Date(formData.date);
+            const [time, period] = selectedTime.split(" ");
+            const [hours, minutes] = time.split(":");
+
+            // Convert hours to 24-hour format
+            let hours24 = parseInt(hours, 10);
+            if (period === "PM" && hours24 !== 12) {
+                hours24 += 12;
+            } else if (period === "AM" && hours24 === 12) {
+                hours24 = 0;
+            }
+
+            // Set the time to the selectedDate object
+            selectedDate.setHours(hours24, parseInt(minutes, 10), 0, 0);
+
+            const currentDateTime = new Date();
+
+            if (selectedDate < currentDateTime) {
+                toast.error("Invalid date and time: The selected date and time is in the past.");
+                return;
+            }
+        }
 
         setLoading(true);
         try {
