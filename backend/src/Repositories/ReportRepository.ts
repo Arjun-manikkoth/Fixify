@@ -7,13 +7,14 @@ class ReportRepository implements IReportRepository {
     //
     async addReport(data: IReportData): Promise<IReport | null> {
         try {
-            const { reporterId, reportedId, reportedRole, reason } = data;
+            const { reporterId, reportedId, reportedRole, reason, bookingId } = data;
 
             const report = new Report({
-                reporterId: reporterId,
-                reportedId: reportedId,
-                reportedRole: reportedRole,
+                reporter_id: reporterId,
+                reported_id: reportedId,
+                reported_role: reportedRole,
                 reason: reason,
+                booking_id: bookingId,
             });
 
             return await report.save();
@@ -27,7 +28,7 @@ class ReportRepository implements IReportRepository {
         try {
             const exists = await Report.findOne({
                 booking_id: data.bookingId,
-                reporterId: data.reporterId,
+                reporter_id: data.reporterId,
             });
             return exists ? true : false;
         } catch (error: any) {

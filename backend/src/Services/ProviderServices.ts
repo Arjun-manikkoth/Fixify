@@ -29,9 +29,9 @@ import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
+import IReportRepository from "../Interfaces/Report/IReportRepository";
 import { uploadImages } from "../Utils/Cloudinary";
-import { upload } from "../Utils/Multer";
-import { describe } from "node:test";
+import { IReportData } from "../Interfaces/Report/IReport";
 
 interface IResponse {
     success: boolean;
@@ -82,7 +82,8 @@ class ProviderService implements IProviderService {
         private bookingRepository: IBookingRepository,
         private paymentRepository: IPaymentRepository,
         private chatRepository: IChatRepository,
-        private userRepository: IUserRepository
+        private userRepository: IUserRepository,
+        private reportRepository: IReportRepository
     ) {}
     //get all services
     async getServices(): Promise<IServices[] | null> {
@@ -1458,6 +1459,43 @@ class ProviderService implements IProviderService {
                   };
         } catch (error: any) {
             console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    // reports account
+    async report(data: IReportData): Promise<IResponse> {
+        try {
+            const duplicateExists = await this.reportRepository.duplicateReport(data);
+
+            if (duplicateExists) {
+                return {
+                    success: false,
+                    message: "Already reported",
+                    data: null,
+                };
+            }
+
+            const reportResponse = await this.reportRepository.addReport(data);
+
+            return reportResponse
+                ? {
+                      success: true,
+                      message: "Reported successfully",
+                      data: null,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to report",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
             return {
                 success: false,
                 message: "Internal server error",

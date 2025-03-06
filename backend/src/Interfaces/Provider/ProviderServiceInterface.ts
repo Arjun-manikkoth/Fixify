@@ -14,6 +14,7 @@ import { IServices } from "../../Models/ProviderModels/ServiceModel";
 import { IUpdateProfile } from "./SignIn";
 import { IProvider } from "../../Models/ProviderModels/ProviderModel";
 import { IResponse } from "../../Services/AdminServices";
+import { IReportData } from "../Report/IReport";
 
 interface IProviderService {
     createProvider(providerData: SignUp): Promise<ISignUpResponse | null>;
@@ -43,5 +44,6 @@ interface IProviderService {
     intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse>;
     fetchChat(room_id: string): Promise<IResponse>;
     fetchDashboard(data: IProviderDashboardFilter): Promise<IResponse>;
+    report(data: IReportData): Promise<IResponse>;
 }
 export default IProviderService;

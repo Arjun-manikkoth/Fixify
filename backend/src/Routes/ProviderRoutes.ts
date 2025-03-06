@@ -13,6 +13,7 @@ import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ChatRepository from "../Repositories/ChatRepository";
 import UserRepository from "../Repositories/UserRepository";
+import ReportRepository from "../Repositories/ReportRepository";
 import { upload } from "../Utils/Multer";
 
 const providerRepository = new ProviderRepository(); // Initialise repository instance
@@ -22,8 +23,9 @@ const approvalRepository = new ApprovalRepository(); //initialise approval repos
 const scheduleRepository = new ScheduleRepository(); //initialise schedule repository
 const bookingRepository = new BookingRepository(); //initialise booking repository
 const paymentRepository = new PaymentRepository(); //initialise payment repository
-const chatRepository = new ChatRepository(); //initialise payment repository
-const userRepository = new UserRepository(); //initialise payment repository
+const chatRepository = new ChatRepository(); //initialise chat repository
+const userRepository = new UserRepository(); //initialise user repository
+const reportRepository = new ReportRepository(); // creates and instance of report repository
 
 const providerService = new ProviderService(
     providerRepository,
@@ -34,7 +36,8 @@ const providerService = new ProviderService(
     bookingRepository,
     paymentRepository,
     chatRepository,
-    userRepository
+    userRepository,
+    reportRepository
 );
 
 // Dependency injection of repository into service
@@ -181,6 +184,11 @@ providerRoute.get("/chats", (req, res) => {
 // Route for fetching dashboard details
 providerRoute.get("/dashboard", (req, res) => {
     providerController.fetchDashboard(req, res);
+});
+
+// Route for reporting user
+providerRoute.post("/report", (req, res) => {
+    providerController.report(req, res);
 });
 
 export default providerRoute;

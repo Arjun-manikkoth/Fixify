@@ -8,12 +8,13 @@ interface ReportModalProps {
     reportedId: string;
     reporterId: string;
     reportedRole: "user" | "provider";
-    booking_id: string;
+    bookingId: string;
     reportApi: (data: {
         reporterId: string;
         reportedId: string;
         reportedRole: string;
         reason: string;
+        bookingId: string;
     }) => any;
 }
 
@@ -24,7 +25,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
     reporterId,
     reportedRole,
     reportApi,
-    booking_id,
+    bookingId,
 }) => {
     const [reason, setReason] = useState("");
 
@@ -49,6 +50,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
                 reportedId,
                 reportedRole,
                 reason,
+                bookingId,
             });
             if (response?.success) {
                 toast.success("Report submitted successfully.");

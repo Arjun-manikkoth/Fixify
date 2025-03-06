@@ -10,6 +10,7 @@ const {
     FORBIDDEN,
     NOT_FOUND,
     GONE,
+    CONFLICT,
     INTERNAL_SERVER_ERROR,
 } = HttpStatus;
 
@@ -995,6 +996,62 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
+            });
+        }
+    }
+
+    // report account
+    async report(req: Request, res: Response): Promise<void> {
+        try {
+            if (
+                !req.body.reason ||
+                !req.body.reportedId ||
+                !req.body.reportedRole ||
+                !req.body.reporterId ||
+                !req.body.bookingId
+            ) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message:
+                        "Reason, reportedId, reporterId, and reporterdRole are required fields",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.providerService.report(req.body);
+
+            if (response.message === "Failed report account") {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            } else if (response.message === "Already reported") {
+                res.status(CONFLICT).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: "Reported successfully",
+                    data: response.data,
+                });
+            } else {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Failed to report",
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in reporting account:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error.",
                 data: null,
             });
         }

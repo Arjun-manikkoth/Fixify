@@ -1135,12 +1135,13 @@ class UserController {
                 !req.body.reason ||
                 !req.body.reportedId ||
                 !req.body.reportedRole ||
-                !req.body.reporterId
+                !req.body.reporterId ||
+                !req.body.bookingId
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message:
-                        "Reason, reportedId, reporterId, and reporterdRole are required fields",
+                        "Reason, reportedId, reporterId, bookingId and reporterdRole are required fields",
                     data: null,
                 });
                 return;

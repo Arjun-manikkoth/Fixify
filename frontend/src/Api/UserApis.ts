@@ -677,6 +677,7 @@ const reportProviderApi = async (data: {
     reportedId: string;
     reportedRole: string;
     reason: string;
+    bookingId: string;
 }) => {
     try {
         const response = await axiosUser.post(`${userRoutes.report}`, data);

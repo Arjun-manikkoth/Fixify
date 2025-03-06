@@ -15,15 +15,15 @@ const ReportSchema: Schema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
-        reporterId: {
+        reporter_id: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
-        reportedId: {
+        reported_id: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
-        reportedRole: {
+        reported_role: {
             type: String,
             enum: ["user", "provider"],
             required: true,
