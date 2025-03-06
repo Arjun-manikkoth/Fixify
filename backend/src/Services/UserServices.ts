@@ -24,6 +24,8 @@ import { createPaymentIntent } from "../Utils/stripeService";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
 import IReviewRepository from "../Interfaces/Review/IReviewRepository";
 import { uploadImages } from "../Utils/Cloudinary";
+import { IReportData } from "../Interfaces/Report/IReport";
+import IReportRepository from "../Interfaces/Report/IReportRepository";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -67,7 +69,8 @@ class UserService implements IUserService {
         private bookingRepository: IBookingRepository,
         private paymentRepository: IPaymentRepository,
         private chatRepository: IChatRepository,
-        private reviewRepository: IReviewRepository
+        private reviewRepository: IReviewRepository,
+        private reportRepository: IReportRepository
     ) {}
 
     /**
@@ -1316,6 +1319,7 @@ class UserService implements IUserService {
     ): Promise<IResponse> {
         try {
             const image_urls = await uploadImages(reviewImages);
+
             if (image_urls.length === 0) {
                 return {
                     success: false,
@@ -1323,9 +1327,11 @@ class UserService implements IUserService {
                     data: null,
                 };
             }
+
             const duplicateExists = await this.reviewRepository.duplicateReviewExists(
                 reviewData.booking_id
             );
+
             if (duplicateExists.success) {
                 return {
                     success: false,
@@ -1358,6 +1364,43 @@ class UserService implements IUserService {
             };
         } catch (error: any) {
             console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    // reports account
+    async report(data: IReportData): Promise<IResponse> {
+        try {
+            const duplicateExists = await this.reportRepository.duplicateReport(data);
+
+            if (duplicateExists) {
+                return {
+                    success: false,
+                    message: "Already reported",
+                    data: null,
+                };
+            }
+
+            const reportResponse = await this.reportRepository.addReport(data);
+
+            return reportResponse
+                ? {
+                      success: true,
+                      message: "Reported successfully",
+                      data: null,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to report",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
             return {
                 success: false,
                 message: "Internal server error",

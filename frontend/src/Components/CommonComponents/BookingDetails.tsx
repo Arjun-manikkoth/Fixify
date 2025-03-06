@@ -410,9 +410,11 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                         reportedId={role === "user" ? booking.user._id : booking.provider._id}
                         reporterId={role === "provider" ? booking.user._id : booking.provider._id}
                         reportedRole={role === "provider" ? "user" : "provider"}
+                        booking_id={booking._id}
                         reportApi={role === "provider" ? reportProviderApi : reportUserApi}
                     />
                 )}
+
                 {showReviewForm && (
                     <Ratings
                         booking_id={booking._id}

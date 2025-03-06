@@ -11,6 +11,10 @@ export interface IReport extends Document {
 
 const ReportSchema: Schema = new Schema(
     {
+        booking_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+        },
         reporterId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
@@ -21,7 +25,7 @@ const ReportSchema: Schema = new Schema(
         },
         reportedRole: {
             type: String,
-            enum: ["User", "Provider"],
+            enum: ["user", "provider"],
             required: true,
         },
         reason: {

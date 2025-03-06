@@ -8,6 +8,7 @@ interface ReportModalProps {
     reportedId: string;
     reporterId: string;
     reportedRole: "user" | "provider";
+    booking_id: string;
     reportApi: (data: {
         reporterId: string;
         reportedId: string;
@@ -23,6 +24,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
     reporterId,
     reportedRole,
     reportApi,
+    booking_id,
 }) => {
     const [reason, setReason] = useState("");
 
@@ -48,11 +50,11 @@ const ReportModal: React.FC<ReportModalProps> = ({
                 reportedRole,
                 reason,
             });
-            if (response.success) {
+            if (response?.success) {
                 toast.success("Report submitted successfully.");
                 onClose();
             } else {
-                toast.error("Failed to submit report.");
+                toast.error(response.message);
             }
         } catch (error) {
             toast.error("Error submitting report.");

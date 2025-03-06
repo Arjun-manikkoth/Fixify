@@ -679,7 +679,7 @@ const reportProviderApi = async (data: {
     reason: string;
 }) => {
     try {
-        const response = await axiosUser.post(`${userRoutes.chats}`, data);
+        const response = await axiosUser.post(`${userRoutes.report}`, data);
 
         return {
             success: true,

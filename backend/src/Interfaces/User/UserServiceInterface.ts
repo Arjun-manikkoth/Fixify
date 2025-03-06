@@ -7,6 +7,7 @@ import { ISignInResponse, IRefreshTokenResponse } from "../../Services/UserServi
 import { IUser } from "../../Models/UserModels/UserModel";
 import { IResponse } from "../../Services/AdminServices";
 import { IAddAddress, IReviewData } from "./SignUpInterface";
+import { IReportData } from "../Report/IReport";
 
 interface IUserService {
     createUser(userData: SignUp): Promise<ISignUpResponse | null>;
@@ -41,5 +42,6 @@ interface IUserService {
         reviewData: IReviewData,
         reviewImages: Express.Multer.File[]
     ): Promise<IResponse>;
+    report(data: IReportData): Promise<IResponse>;
 }
 export default IUserService;

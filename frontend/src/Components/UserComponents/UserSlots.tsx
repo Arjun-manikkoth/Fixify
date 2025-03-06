@@ -173,7 +173,7 @@ const ProviderFinder: React.FC = () => {
     };
 
     return (
-        <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-5xl mx-auto">
+        <div className="p-9  me-12 rounded-2xl shadow-lg">
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                     <select
