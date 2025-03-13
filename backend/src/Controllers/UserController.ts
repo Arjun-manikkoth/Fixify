@@ -1,6 +1,7 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
+import { getIO } from "../Utils/Socket";
 
 const {
     OK,
@@ -63,7 +64,7 @@ class UserController {
             }
 
             const response = await this.UserService.authenticateUser(req.body);
-            console.log(response, "user sign in response");
+
             if (response?.success && response?.accessToken && response?.refreshToken) {
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
@@ -337,6 +338,17 @@ class UserController {
             const status = await this.UserService.editProfile(req.body, image);
 
             if (status) {
+                console.log(req.body.id, "userid");
+
+                // Emit notification event
+                // console.log(getIO(), "getiO");
+                // getIO().emit("receiveNotification", {
+                //     receiverId: req.body.id,
+                //     message: `New booking request from ${req.body.id}`,
+                //     type: "booking",
+                // });
+                // getIO().to(req.body.id).emit("updateNotificationCount", 3);
+
                 res.status(OK).json({
                     success: true,
                     message: "Profile updated successfully",
@@ -351,6 +363,7 @@ class UserController {
             }
         } catch (error: any) {
             console.log(error.message);
+
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",

@@ -1,8 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
-console.log(process.env.REACT_APP_FIXIFY_URL, "backend url");
-const socket = io(process.env.REACT_APP_FIXIFY_URL as string);
-
+import socket from "../../../Socket/Socket";
 // Define TypeScript interfaces
 interface ChatModalProps {
     senderId: string;

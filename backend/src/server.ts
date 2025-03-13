@@ -8,29 +8,26 @@ import providerRoute from "./Routes/ProviderRoutes";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import adminRoute from "./Routes/AdminRoutes";
-import { Server } from "socket.io";
 import configureSockets from "./Utils/Socket";
+import { initializeSocket, getIO } from "./Utils/Socket";
 
 const app: Express = express();
 
 //Db connection
 connectDB();
 
-//socket io connection
+// Create HTTP server
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
-    },
-});
+
+// Initialize Socket.IO
+const io = initializeSocket(server);
 
 // Initialize WebSockets
 configureSockets(io);
 
 // CORS configuration
 const corsOptions = {
-    origin: "http://localhost:3000",
+    origin: process.env.FRONT_END_URL,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorisation"],
     credentials: true, // Allow (cookies, authentication)
@@ -55,7 +52,7 @@ app.use("/users", userRoute);
 //provider router
 app.use("/providers", providerRoute);
 
-//admin routeer
+//admin router
 app.use("/admins", adminRoute);
 
 //port configuration

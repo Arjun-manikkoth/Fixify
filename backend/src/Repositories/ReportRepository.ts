@@ -4,7 +4,7 @@ import { IReportData } from "../Interfaces/Report/IReport";
 import Report, { IReport } from "../Models/CommonModels/ReportModel";
 
 class ReportRepository implements IReportRepository {
-    //
+    //creates new report
     async addReport(data: IReportData): Promise<IReport | null> {
         try {
             const { reporterId, reportedId, reportedRole, reason, bookingId } = data;
@@ -23,7 +23,7 @@ class ReportRepository implements IReportRepository {
             return null;
         }
     }
-    //
+    //checks duplicate report exists
     async duplicateReport(data: IReportData): Promise<boolean | null> {
         try {
             const exists = await Report.findOne({

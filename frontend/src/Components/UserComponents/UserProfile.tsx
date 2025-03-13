@@ -4,7 +4,7 @@ import { RootState } from "../../Redux/Store";
 import { toast } from "react-toastify";
 import { useRef } from "react";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
-import { cloudinaryApi, getUserData, updateProfile } from "../../Api/UserApis";
+import { getUserData, updateProfile } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../Redux/UserSlice";
 import { profileData } from "../../Interfaces/UserInterfaces/SignInInterface";
