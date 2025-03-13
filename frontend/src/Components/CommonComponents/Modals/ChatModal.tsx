@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import socket from "../../../Socket/Socket";
+
 // Define TypeScript interfaces
 interface ChatModalProps {
+    profile_url: string;
     senderId: string;
     receiverId: string;
     name: string;
@@ -18,6 +20,7 @@ interface Message {
 }
 
 const ChatModal: React.FC<ChatModalProps> = ({
+    profile_url,
     senderId,
     receiverId,
     isOpen,
@@ -27,6 +30,8 @@ const ChatModal: React.FC<ChatModalProps> = ({
 }) => {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
+    const [isOnline, setIsOnline] = useState(false); // Track online status
+    const [isTyping, setIsTyping] = useState(false); // Track typing status
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const roomId =
@@ -34,32 +39,96 @@ const ChatModal: React.FC<ChatModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            socket.emit("joinRoom", roomId);
+            // Register the sender as online
+            socket.emit("registerUser", senderId);
 
+            // Fetch chat history
             getChatsApi(roomId).then((response) => {
                 if (response.success) {
                     setMessages(response.data);
                 }
             });
 
+            // Listen for incoming messages
             socket.on("receiveMessage", (data: Message) => {
                 setMessages((prev) => {
                     data.timestamp = new Date().toISOString();
-
                     return [...prev, data];
                 });
             });
 
+            // Listen for the list of active users
+            socket.on("activeUsers", (activeUserIds: string[]) => {
+                if (activeUserIds.includes(receiverId)) {
+                    setIsOnline(true);
+                }
+            });
+
+            // Listen for online status updates for the RECEIVER (User B)
+            socket.on("userOnline", (userId: string) => {
+                if (userId === receiverId) {
+                    setIsOnline(true);
+                }
+            });
+
+            socket.on("userOffline", (userId: string) => {
+                if (userId === receiverId) {
+                    setIsOnline(false);
+                }
+            });
+
+            // Listen for typing events
+            socket.on("typing", () => {
+                setIsTyping(true);
+            });
+
+            // Listen for stop typing events
+            socket.on("stopTyping", () => {
+                console.log("stoptyping listened");
+                setIsTyping(false);
+            });
+
             return () => {
+                // Cleanup listeners
                 socket.off("receiveMessage");
+                socket.off("activeUsers");
+                socket.off("userOnline");
+                socket.off("userOffline");
+                socket.off("typing");
+                socket.off("stopTyping");
             };
         }
-    }, [isOpen, roomId]);
+    }, [isOpen, roomId, receiverId, senderId]);
 
     // Scroll to bottom whenever messages update
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
+    // Handle typing events
+    useEffect(() => {
+        let typingTimeout: NodeJS.Timeout;
+
+        if (message.trim()) {
+            // Emit typing event when the user is typing
+            socket.emit("typing", receiverId);
+
+            // Set a timeout to emit stopTyping after a delay (e.g., 1 second)
+            typingTimeout = setTimeout(() => {
+                socket.emit("stopTyping", receiverId);
+            }, 1000);
+        } else {
+            // If the message is empty, emit stopTyping immediately
+            socket.emit("stopTyping", receiverId);
+        }
+
+        // Cleanup the timeout when the component unmounts or message changes
+        return () => {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+        };
+    }, [message, roomId, senderId]);
 
     const sendMessage = () => {
         if (message.trim()) {
@@ -76,13 +145,31 @@ const ChatModal: React.FC<ChatModalProps> = ({
     };
 
     if (!isOpen) return null;
-
+    console.log(isTyping, "typing status");
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white w-[400px] p-4 rounded-xl shadow-lg flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white w-full max-w-md p-4 rounded-xl shadow-lg flex flex-col">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center border-b pb-2">
-                    <h2 className="text-lg font-semibold text-gray-700 mx-2">Chat : {name}</h2>
+                    <div className="flex items-center space-x-2">
+                        <img
+                            src={profile_url}
+                            alt="profile.jpg"
+                            className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-700">{name}</h2>
+                            <div className="text-sm text-gray-500">
+                                {isOnline ? (
+                                    <span className="flex items-center">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                                        Online
+                                    </span>
+                                ) : null}
+                                {isTyping && <span className="ml-2 text-blue-500">Typing...</span>}
+                            </div>
+                        </div>
+                    </div>
                     <button onClick={onClose} className="text-red-500 text-xl font-bold">
                         &times;
                     </button>

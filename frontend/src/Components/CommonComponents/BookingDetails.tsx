@@ -394,6 +394,7 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
 
                 {showChat && (
                     <ChatModal
+                        profile_url={role === "user" ? booking.user.url : booking.provider.url}
                         senderId={role === "user" ? booking.user._id : booking.provider._id}
                         receiverId={role === "user" ? booking.provider._id : booking.user._id}
                         name={role === "user" ? booking.provider.name : booking.user.name}

@@ -23,12 +23,24 @@ export const getIO = () => {
 };
 
 const configureSockets = (io: Server) => {
+    const activeUsers = new Map<string, string>(); // userId -> socketId
+
     io.on("connection", (socket) => {
-        console.log("User connected:", socket.id);
+        // Track user when they connect
+        socket.on("registerUser", (userId: string) => {
+            // Add user to activeUsers (overwrite if already exists)
+            activeUsers.set(userId, socket.id);
+
+            // Notify all clients that this user is online
+            io.emit("userOnline", userId);
+
+            // Send the list of active users to the newly connected user
+            const activeUserIds = Array.from(activeUsers.keys());
+            socket.emit("activeUsers", activeUserIds);
+        });
 
         // Join a room (For chat)
         socket.on("joinRoom", (roomId) => {
-            console.log("user chat connected", roomId);
             socket.join(roomId);
         });
 
@@ -36,39 +48,54 @@ const configureSockets = (io: Server) => {
         socket.on("sendMessage", (data) => {
             const { roomId, message, sender, receiver } = data;
 
-            // Send message to everyone in the roomd
+            // Send message to everyone in the room
             io.to(roomId).emit("receiveMessage", { message, sender });
 
             // Store message in MongoDB
             saveMessageToDB(roomId, sender, receiver, message);
         });
 
-        // ** Handle Notifications **
+        // Handle typing events
+        socket.on("typing", (receiverId) => {
+            io.to(receiverId).emit("typing"); // Notify receiver that the user is typing
+        });
+
+        // Handle stop typing events
+        socket.on("stopTyping", (receiverId) => {
+            io.to(receiverId).emit("stopTyping"); // Notify receiver that the user stopped typing
+        });
+
+        // Handle notifications
         socket.on("joinNotifications", (userId) => {
-            console.log("user notifications connected", userId);
             socket.join(userId); // Join a personal notification room
         });
 
         socket.on("sendNotification", ({ receiverId, message, type }) => {
-            console.log("send notifications triggered");
             // Send notification to the specific user
             io.to(receiverId).emit("receiveNotification", { message, type });
 
             // Store notification in the database
             saveNotificationToDB(receiverId, message, type);
 
-            const unreadCount = countUnreadNotifications(receiverId);
-            console.log("unread count", unreadCount);
-
-            io.to(receiverId).emit("updateNotificationCount", unreadCount);
+            // Update unread notification count
+            countUnreadNotifications(receiverId).then((unreadCount) => {
+                io.to(receiverId).emit("updateNotificationCount", unreadCount);
+            });
         });
 
+        // Handle user disconnect
         socket.on("disconnect", () => {
-            console.log("User disconnected:", socket.id);
+            // Find the user associated with this socket and mark them as offline
+            for (const [userId, socketId] of activeUsers.entries()) {
+                if (socketId === socket.id) {
+                    activeUsers.delete(userId);
+                    io.emit("userOffline", userId); // Notify all clients that the user is offline
+                    break;
+                }
+            }
         });
     });
 };
-
 // Save chat message in the database
 const saveMessageToDB = async (
     room_id: string,
@@ -77,7 +104,6 @@ const saveMessageToDB = async (
     message: string
 ) => {
     try {
-        console.log("saving messages to db");
         const newMessage = new Chat({ room_id, sender, receiver, message });
         await newMessage.save();
     } catch (err) {
@@ -88,7 +114,6 @@ const saveMessageToDB = async (
 // Save notifications in MongoDB
 const saveNotificationToDB = async (receiver_id: string, message: string, type: string) => {
     try {
-        console.log("saving notifications to db");
         const newNotification = new Notification({ receiver_id, message, type });
         await newNotification.save();
     } catch (err) {
