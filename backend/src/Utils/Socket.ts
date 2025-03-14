@@ -83,6 +83,14 @@ const configureSockets = (io: Server) => {
             });
         });
 
+        // Handle user disconnect (manual)
+        socket.on("disconnectUser", (userId: string) => {
+            if (activeUsers.has(userId)) {
+                activeUsers.delete(userId);
+                io.emit("userOffline", userId); // Notify all clients that the user is offline
+            }
+        });
+
         // Handle user disconnect
         socket.on("disconnect", () => {
             // Find the user associated with this socket and mark them as offline

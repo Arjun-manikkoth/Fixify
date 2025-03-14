@@ -37,6 +37,14 @@ const ChatModal: React.FC<ChatModalProps> = ({
     const roomId =
         senderId < receiverId ? `${senderId}-${receiverId}` : `${receiverId}-${senderId}`;
 
+    const handleClose = () => {
+        // Emit disconnectUser event to notify the server
+        socket.emit("disconnectUser", senderId);
+
+        // Call the original onClose function
+        onClose();
+    };
+
     useEffect(() => {
         if (isOpen) {
             // Register the sender as online
@@ -170,7 +178,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
                             </div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="text-red-500 text-xl font-bold">
+                    <button onClick={handleClose} className="text-red-500 text-xl font-bold">
                         &times;
                     </button>
                 </div>
