@@ -408,10 +408,10 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     <ReportModal
                         isOpen={reportModal}
                         onClose={() => setReportModal(false)}
-                        reportedId={role === "user" ? booking.user._id : booking.provider._id}
-                        reporterId={role === "provider" ? booking.user._id : booking.provider._id}
-                        reportedRole={role === "provider" ? "user" : "provider"}
-                        bookingId={booking._id}
+                        reported_id={role === "user" ? booking.user._id : booking.provider._id}
+                        reporter_id={role === "provider" ? booking.user._id : booking.provider._id}
+                        reported_role={role === "provider" ? "user" : "provider"}
+                        booking_id={booking._id}
                         reportApi={role === "user" ? reportProviderApi : reportUserApi}
                     />
                 )}

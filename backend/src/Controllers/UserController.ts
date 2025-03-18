@@ -1,7 +1,6 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
-import { getIO } from "../Utils/Socket";
 
 const {
     OK,
@@ -374,7 +373,7 @@ class UserController {
     // Fetch user profile data
     async getUser(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID is a required field",
@@ -382,7 +381,7 @@ class UserController {
                 return;
             }
 
-            const status = await this.UserService.getUserData(req.query.id as string);
+            const status = await this.UserService.getUserData(req.params.id as string);
 
             if (status) {
                 res.status(OK).json({
@@ -590,6 +589,7 @@ class UserController {
     async createAddress(req: Request, res: Response): Promise<void> {
         try {
             const { address } = req.body;
+            const { id } = req.params;
 
             if (!address) {
                 res.status(BAD_REQUEST).json({
@@ -599,7 +599,7 @@ class UserController {
                 return;
             }
 
-            const status = await this.UserService.createAddress(address);
+            const status = await this.UserService.createAddress({ id, ...address });
 
             if (status?.success) {
                 res.status(CREATED).json({
@@ -793,6 +793,7 @@ class UserController {
                 });
                 return;
             }
+            console.log(req.query, "req.query");
 
             const response = await this.UserService.getSlots({
                 service_id: req.query.service_id as string,
@@ -834,7 +835,7 @@ class UserController {
     async requestSlots(req: Request, res: Response): Promise<void> {
         try {
             if (
-                !req.body.data.user_id ||
+                !req.params.id ||
                 !req.body.data.slot_id ||
                 !req.body.data.time ||
                 !req.body.data.address ||
@@ -848,7 +849,10 @@ class UserController {
                 return;
             }
 
-            const response = await this.UserService.requestBooking(req.body.data);
+            const response = await this.UserService.requestBooking({
+                user_id: req.params.id,
+                ...req.body.data,
+            });
 
             if (response.success) {
                 res.status(OK).json({
@@ -894,7 +898,7 @@ class UserController {
     // Fetch all bookings for user with ID
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id || !req.query.page) {
+            if (!req.params.id || !req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID and page number are required fields",
@@ -904,7 +908,7 @@ class UserController {
             }
 
             const response = await this.UserService.fetchBookings(
-                req.query.id as string,
+                req.params.id as string,
                 Number(req.query.page)
             );
 
@@ -934,7 +938,7 @@ class UserController {
     // Fetch booking details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID is a required field",
@@ -943,7 +947,7 @@ class UserController {
                 return;
             }
 
-            const response = await this.UserService.fetchBookingDetail(req.query.id as string);
+            const response = await this.UserService.fetchBookingDetail(req.params.id as string);
 
             if (response.success) {
                 res.status(OK).json({
@@ -1011,7 +1015,7 @@ class UserController {
     // Cancel booking based on the time
     async cancelBooking(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.body.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID is a required field",
@@ -1020,7 +1024,7 @@ class UserController {
                 return;
             }
 
-            const response = await this.UserService.cancelBooking(req.body.id);
+            const response = await this.UserService.cancelBooking(req.params.id);
 
             if (response.success) {
                 res.status(OK).json({
@@ -1048,7 +1052,7 @@ class UserController {
     // Fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Room ID is a required field",
@@ -1057,7 +1061,7 @@ class UserController {
                 return;
             }
 
-            const response = await this.UserService.fetchChat(req.query.id as string);
+            const response = await this.UserService.fetchChat(req.params.id as string);
 
             if (response.success) {
                 res.status(OK).json({
@@ -1090,7 +1094,7 @@ class UserController {
                 !req.body.review ||
                 !req.body.description ||
                 !req.files ||
-                !req.body.booking_id ||
+                !req.params.id ||
                 !req.body.provider_id
             ) {
                 res.status(BAD_REQUEST).json({
@@ -1102,7 +1106,7 @@ class UserController {
             }
 
             const response = await this.UserService.processReviewCreation(
-                req.body,
+                { ...req.body, booking_id: req.params.id },
                 req.files as Express.Multer.File[]
             );
 
@@ -1146,10 +1150,10 @@ class UserController {
         try {
             if (
                 !req.body.reason ||
-                !req.body.reportedId ||
-                !req.body.reportedRole ||
-                !req.body.reporterId ||
-                !req.body.bookingId
+                !req.body.reported_id ||
+                !req.body.reported_role ||
+                !req.body.reporter_id ||
+                !req.params.id
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
@@ -1160,7 +1164,10 @@ class UserController {
                 return;
             }
 
-            const response = await this.UserService.report(req.body);
+            const response = await this.UserService.report({
+                ...req.body,
+                bookingId: req.params.id,
+            });
 
             if (response.message === "Failed report account") {
                 res.status(INTERNAL_SERVER_ERROR).json({

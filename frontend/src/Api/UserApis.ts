@@ -3,6 +3,7 @@ import { SignIn } from "../Interfaces/UserInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/UserInterfaces/SignUpInterface";
 import userRoutes from "../Endpoints/UserEndpoints";
 import axios from "axios";
+import { baseUrl } from "../Constants/Constants";
 
 interface ISignUpResponse {
     success: boolean;
@@ -144,7 +145,7 @@ const forgotOtpVerifyApi = async (otp: string, email: string) => {
 //api logouts user clears access and refresh tokens
 const logoutUser = async () => {
     try {
-        const response = await axiosUser.get(userRoutes.logout);
+        const response = await axiosUser.get(userRoutes.sign_out);
 
         return {
             success: true,
@@ -165,8 +166,18 @@ const logoutUser = async () => {
 const refreshTokenApi = async () => {
     try {
         const response = await axiosUser.post(userRoutes.refresh_token);
+        return {
+            success: true,
+            message: response.data.message,
+            data: null,
+        };
     } catch (error: any) {
         console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
     }
 };
 
@@ -193,31 +204,6 @@ const googleAuthApi = async (code: string) => {
     }
 };
 
-//api to store images in cloudinary
-const cloudinaryApi = async (file: File) => {
-    try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "profile_cloudinary");
-        formData.append("cloud_name", "dxdghkyag");
-        const response = await axios.post(
-            "https://api.cloudinary.com/v1_1/dxdghkyag/image/upload",
-            formData
-        );
-
-        return {
-            success: true,
-            url: response.data.url,
-        };
-    } catch (error: any) {
-        console.log(error.message);
-        return {
-            success: false,
-            url: "",
-        };
-    }
-};
-
 //api to update the profile data
 const updateProfile = async (data: {
     id: string;
@@ -228,15 +214,13 @@ const updateProfile = async (data: {
     try {
         const formData = new FormData();
 
-        formData.append("id", data.id);
-
         if (data.image) {
             formData.append("image", data.image);
         }
         formData.append("userName", data.userName);
         formData.append("mobileNo", data.mobileNo);
 
-        const response = await axiosUser.patch(userRoutes.update_profile, formData);
+        const response = await axiosUser.patch(`/${data.id}${userRoutes.profile}`, formData);
         return {
             success: true,
             message: "Profile updated Sucessfully",
@@ -254,7 +238,7 @@ const updateProfile = async (data: {
 //api to get user data with id
 const getUserData = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.get_details}?id=${id}`);
+        const response = await axiosUser.get(`${userRoutes.users}/${id}`);
 
         return {
             success: true,
@@ -373,9 +357,8 @@ const addAddressApi = async (
     },
     id: string
 ) => {
-    address.id = id;
     try {
-        const response = await axiosUser.post(`${userRoutes.add_address}`, { address });
+        const response = await axiosUser.post(`/${id}${userRoutes.addresses}`, { address });
 
         return {
             success: true,
@@ -395,7 +378,7 @@ const addAddressApi = async (
 //api to fetch all addresses
 const getAddressesApi = async (id: string | null) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.get_addresses}/${id}`);
+        const response = await axiosUser.get(`/${id}${userRoutes.addresses}`);
 
         return {
             success: true,
@@ -415,7 +398,7 @@ const getAddressesApi = async (id: string | null) => {
 //api delete addresses
 const deleteAddressApi = async (id: string | null) => {
     try {
-        const response = await axiosUser.patch(`${userRoutes.delete_address}/${id}`);
+        const response = await axiosUser.delete(`/${id}${userRoutes.addresses}`);
 
         return {
             success: true,
@@ -435,7 +418,7 @@ const deleteAddressApi = async (id: string | null) => {
 //get addresss
 const getAddressApi = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.get_address}/${id}`);
+        const response = await axiosUser.get(`${userRoutes.addresses}/${id}`);
 
         return {
             success: true,
@@ -466,7 +449,7 @@ const updateAddressApi = async (
     }
 ) => {
     try {
-        const response = await axiosUser.patch(`${userRoutes.edit_address}/${id}`, { address });
+        const response = await axiosUser.patch(`${userRoutes.addresses}/${id}`, { address });
 
         return {
             success: true,
@@ -514,7 +497,7 @@ const checkAvailabilityApi = async (data: ICheckSlot) => {
 //api to send request to book slots
 const bookingRequestApi = async (data: ISlotRequest) => {
     try {
-        const response = await axiosUser.patch(`${userRoutes.slots}`, { data });
+        const response = await axiosUser.patch(`/${data.user_id}${userRoutes.slots}`, { data });
 
         return {
             success: true,
@@ -534,7 +517,7 @@ const bookingRequestApi = async (data: ISlotRequest) => {
 //api get bookings
 const fetchBookingsApi = async (id: string, page: number) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.bookings}`, { params: { id, page } });
+        const response = await axiosUser.get(`/${id}${userRoutes.bookings}`, { params: { page } });
 
         return {
             success: true,
@@ -554,7 +537,7 @@ const fetchBookingsApi = async (id: string, page: number) => {
 //api get booking details
 const fetchBookingDetailsApi = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.booking_details}`, { params: { id } });
+        const response = await axiosUser.get(`${userRoutes.bookings}/${id}`);
 
         return {
             success: true,
@@ -594,7 +577,10 @@ const stripePaymentApi = async (id: string, amount: number) => {
 //cancel booking
 const cancelBookingApi = async (id: string) => {
     try {
-        const response = await axiosUser.patch(`${userRoutes.cancel_booking}`, { id });
+        const response = await axiosUser.patch(
+            `${userRoutes.bookings}/${id}${userRoutes.cancel_booking}`,
+            { id }
+        );
 
         return {
             success: true,
@@ -614,7 +600,7 @@ const cancelBookingApi = async (id: string) => {
 //get chatting history
 const getChatsApi = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.chats}`, { params: { id } });
+        const response = await axiosUser.get(`/${id}${userRoutes.chats}`);
 
         return {
             success: true,
@@ -654,7 +640,10 @@ const reviewApi = async (review: {
             formData.append("images", image);
         });
 
-        const response = await axiosUser.post(`${userRoutes.reviews}`, formData);
+        const response = await axiosUser.post(
+            `${userRoutes.bookings}/${review.booking_id}${userRoutes.reviews}`,
+            formData
+        );
 
         return {
             success: true,
@@ -673,14 +662,17 @@ const reviewApi = async (review: {
 
 //report account api
 const reportProviderApi = async (data: {
-    reporterId: string;
-    reportedId: string;
-    reportedRole: string;
+    reporter_id: string;
+    reported_id: string;
+    reported_role: string;
     reason: string;
-    bookingId: string;
+    booking_id: string;
 }) => {
     try {
-        const response = await axiosUser.post(`${userRoutes.report}`, data);
+        const response = await axiosUser.post(
+            `${userRoutes.bookings}/${data.booking_id}${userRoutes.report}`,
+            data
+        );
 
         return {
             success: true,
@@ -705,7 +697,6 @@ export {
     logoutUser,
     refreshTokenApi,
     googleAuthApi,
-    cloudinaryApi,
     updateProfile,
     getUserData,
     forgotPasswordApi,

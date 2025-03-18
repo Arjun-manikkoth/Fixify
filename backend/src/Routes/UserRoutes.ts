@@ -42,39 +42,115 @@ const userController = new UserController(userService); // Dependency injection 
 // Initialize user router instance
 const userRoute: Router = express.Router();
 
+//--------------------------------------------Auth Routes-----------------------------------------------------
+
+// Route for user login (sign-in)
+userRoute.post("/sign-in", (req, res) => {
+    userController.signIn(req, res);
+});
+
 // Route for user registration (sign-up)
-userRoute.post("/sign_up", (req, res) => {
+userRoute.post("/sign-up", (req, res) => {
     userController.signUp(req, res);
 });
 
+// Route for oauth
+userRoute.patch("/o-auth", (req, res) => {
+    userController.googleAuth(req, res);
+});
+
 // Route for OTP verification during sign-up
-userRoute.post("/otp_verify", (req, res) => {
+userRoute.post("/verify-otp", (req, res) => {
     userController.otpVerify(req, res);
 });
 
 // Route to resend OTP during sign-up/sign-in
-userRoute.post("/otp_resend", (req, res) => {
+userRoute.post("/resend-otp", (req, res) => {
     userController.otpResend(req, res);
 });
 
-// Route for user login (sign-in)
-userRoute.post("/sign_in", (req, res) => {
-    userController.signIn(req, res);
-});
-
 // Route for user logout
-userRoute.get("/sign_out", (req, res) => {
+userRoute.get("/sign-out", (req, res) => {
     userController.signOut(req, res);
 });
 
 // Route for refresh token
-userRoute.post("/refresh_token", (req, res) => {
+userRoute.post("/refresh-token", (req, res) => {
     userController.refreshToken(req, res);
+});
+
+//----------------------------------------------Password routes-----------------------------------------------
+
+// Route for forgot password mail verify
+userRoute.post("/forgot-password", (req, res) => {
+    userController.forgotPassword(req, res);
+});
+
+// Route for forgot password otp verify
+userRoute.post("/verify-forgot-password-otp", (req, res) => {
+    userController.forgotPasswordOtpVerify(req, res);
+});
+
+// Route for updating the new password
+userRoute.patch("/reset-password", (req, res) => {
+    userController.resetPassword(req, res);
+});
+
+// Route for confirming old password
+userRoute.post("/:id/confirm-password", (req, res) => {
+    userController.confirmPassword(req, res);
+});
+
+//----------------------------------------------Address routes-----------------------------------------------
+
+// Route for add new address
+userRoute.post("/:id/addresses", (req, res) => {
+    userController.createAddress(req, res);
+});
+
+// Route for getting all addresses
+userRoute.get("/:id/addresses", (req, res) => {
+    userController.getAddresses(req, res);
+});
+
+// Route for delete address
+userRoute.delete("/:id/addresses", (req, res) => {
+    userController.deleteAddresses(req, res);
+});
+
+// Route for fetching user single address
+userRoute.get("/addresses/:id", (req, res) => {
+    userController.getAddress(req, res);
+});
+
+// Route for updating single address
+userRoute.patch("/addresses/:id", (req, res) => {
+    userController.updateAddress(req, res);
+});
+
+//---------------------------------------------Slot routes-----------------------------------------------
+
+// Route for finding provider slots
+userRoute.get("/slots", (req, res) => {
+    userController.fetchSlots(req, res);
+});
+
+// Route for sending booking request
+userRoute.patch("/:id/slots", (req, res) => {
+    userController.requestSlots(req, res);
+});
+
+//----------------------------------------------Profile routes-----------------------------------------------
+
+// Route for fetching user data with id
+userRoute.get("/:id", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
+    console.log("user data fetch route triggered");
+    userController.getUser(req, res);
 });
 
 // Route for update profile
 userRoute.patch(
-    "/update_profile",
+    "/:id/profile",
     verifyToken,
     verifyRole(["user"]),
     checkBlockedStatus,
@@ -84,103 +160,49 @@ userRoute.patch(
     }
 );
 
-// Route for oauth
-userRoute.patch("/o_auth", (req, res) => {
-    userController.googleAuth(req, res);
-});
-
-// Route for fetching user data with id
-userRoute.get("/", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
-    userController.getUser(req, res);
-});
-
-// Route for forgot password mail verify
-userRoute.post("/forgot_password", (req, res) => {
-    userController.forgotPassword(req, res);
-});
-
-// Route for forgot password otp verify
-userRoute.post("/forgot_otp_verify", (req, res) => {
-    userController.forgotPasswordOtpVerify(req, res);
-});
-
-// Route for updating the new password
-userRoute.patch("/reset_password", (req, res) => {
-    userController.resetPassword(req, res);
-});
-
-// Route for confirming old password
-userRoute.post("/confirm_password/:id", (req, res) => {
-    userController.confirmPassword(req, res);
-});
-
-// Route for confirming old password
-userRoute.post("/add_address", (req, res) => {
-    userController.createAddress(req, res);
-});
-
-// Route for getting all addresses
-userRoute.get("/addresses/:id", (req, res) => {
-    userController.getAddresses(req, res);
-});
-
-// Route for delete address
-userRoute.patch("/addresses/:id", (req, res) => {
-    userController.deleteAddresses(req, res);
-});
-
-// Route for fetching user address data
-userRoute.get("/address/:id", (req, res) => {
-    userController.getAddress(req, res);
-});
-
-// Route for fetching user address data
-userRoute.patch("/edit_address/:id", (req, res) => {
-    userController.updateAddress(req, res);
-});
-
-// Route for listing provider slots
-userRoute.get("/slots", (req, res) => {
-    userController.fetchSlots(req, res);
-});
-
-// Route for listing provider slots requests
-userRoute.patch("/slots", (req, res) => {
-    userController.requestSlots(req, res);
-});
+//---------------------------------------------Booking routes-----------------------------------------------
 
 // Route for listing bookings
-userRoute.get("/bookings", (req, res) => {
+userRoute.get("/:id/bookings", (req, res) => {
+    console.log("booking listing api called");
     userController.getBookings(req, res);
 });
 
 // Route for booking detail
-userRoute.get("/booking_details", (req, res) => {
+userRoute.get("/bookings/:id", (req, res) => {
     userController.getBookingDetails(req, res);
 });
 
-// Route for booking detail
+// Route for cancel booking
+userRoute.patch("/bookings/:id/cancel", (req, res) => {
+    userController.cancelBooking(req, res);
+});
+
+//---------------------------------------------payment routes-----------------------------------------------
+
+// Route for online payment
 userRoute.post("/create-payment-intent", (req, res) => {
     userController.createStripePayment(req, res);
 });
 
-// Route for cancel booking
-userRoute.patch("/cancel_booking", (req, res) => {
-    userController.cancelBooking(req, res);
-});
+//---------------------------------------------Chat routes-----------------------------------------------
 
 // Route for fetching chats
-userRoute.get("/chats", (req, res) => {
+userRoute.get("/:id/chats", (req, res) => {
     userController.fetchChat(req, res);
 });
 
+//---------------------------------------------Review routes-----------------------------------------------
+
 // Route for adding review
-userRoute.post("/reviews", upload.array("images", 3), (req, res) => {
+userRoute.post("/bookings/:id/reviews", upload.array("images", 3), (req, res) => {
     userController.addReview(req, res);
 });
 
+//---------------------------------------------Report routes-----------------------------------------------
+
 // Route for reporting provider
-userRoute.post("/report", (req, res) => {
+userRoute.post("/bookings/:id/report", (req, res) => {
     userController.report(req, res);
 });
 

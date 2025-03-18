@@ -47,6 +47,8 @@ const ChatModal: React.FC<ChatModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
+            //join the chat room
+            socket.emit("joinRoom", roomId);
             // Register the sender as online
             socket.emit("registerUser", senderId);
 

@@ -5,27 +5,27 @@ import { toast } from "react-toastify";
 interface ReportModalProps {
     isOpen: boolean;
     onClose: () => void;
-    reportedId: string;
-    reporterId: string;
-    reportedRole: "user" | "provider";
-    bookingId: string;
+    reported_id: string;
+    reporter_id: string;
+    reported_role: "user" | "provider";
+    booking_id: string;
     reportApi: (data: {
-        reporterId: string;
-        reportedId: string;
-        reportedRole: string;
+        reporter_id: string;
+        reported_id: string;
+        reported_role: string;
         reason: string;
-        bookingId: string;
+        booking_id: string;
     }) => any;
 }
 
 const ReportModal: React.FC<ReportModalProps> = ({
     isOpen,
     onClose,
-    reportedId,
-    reporterId,
-    reportedRole,
+    reported_id,
+    reporter_id,
+    reported_role,
     reportApi,
-    bookingId,
+    booking_id,
 }) => {
     const [reason, setReason] = useState("");
 
@@ -46,11 +46,11 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
         try {
             const response = await reportApi({
-                reporterId,
-                reportedId,
-                reportedRole,
+                reporter_id,
+                reported_id,
+                reported_role,
                 reason,
-                bookingId,
+                booking_id,
             });
             if (response?.success) {
                 toast.success("Report submitted successfully.");
@@ -68,7 +68,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                <h3 className="text-lg font-semibold mb-4">Report {reportedRole}</h3>
+                <h3 className="text-lg font-semibold mb-4">Report {reported_role}</h3>
                 <select
                     className="w-full p-2 border border-gray-300 rounded mb-4"
                     value={reason}

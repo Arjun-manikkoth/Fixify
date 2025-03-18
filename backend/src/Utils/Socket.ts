@@ -28,6 +28,7 @@ const configureSockets = (io: Server) => {
     io.on("connection", (socket) => {
         // Track user when they connect
         socket.on("registerUser", (userId: string) => {
+            console.log("user registered", userId);
             // Add user to activeUsers (overwrite if already exists)
             activeUsers.set(userId, socket.id);
 
@@ -41,6 +42,7 @@ const configureSockets = (io: Server) => {
 
         // Join a room (For chat)
         socket.on("joinRoom", (roomId) => {
+            console.log("joined room ", roomId);
             socket.join(roomId);
         });
 

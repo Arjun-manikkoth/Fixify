@@ -2,7 +2,6 @@ import axiosProvider from "../Axios/ProviderInstance";
 import { SignIn } from "../Interfaces/ProviderInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
-import { cloudinaryApi } from "./UserApis";
 
 interface ISignUpResponse {
     success: boolean;
@@ -220,24 +219,7 @@ const getProviderData = async (id: string) => {
         };
     }
 };
-//api to store multiple images in cloudinary
-const uploadImagesToCloudinary = async (files: File[]) => {
-    try {
-        const uploadedUrls = [];
-        for (const file of files) {
-            const response = await cloudinaryApi(file);
-            if (response.success) {
-                uploadedUrls.push(response.url);
-            } else {
-                console.error("Failed to upload:", file.name);
-            }
-        }
-        return uploadedUrls; // Array of successfully uploaded URLs
-    } catch (error) {
-        console.log("Error uploading files:", error);
-        return [];
-    }
-};
+
 //api to register provider data for approval
 const registerProvider = async (
     provider_id: string,
@@ -571,11 +553,11 @@ const providerDashboardApi = async (id: string, revenueBy: string, hoursBy: stri
 
 //report account api
 const reportUserApi = async (data: {
-    reporterId: string;
-    reportedId: string;
-    reportedRole: string;
+    reporter_id: string;
+    reported_id: string;
+    reported_role: string;
     reason: string;
-    bookingId: string;
+    booking_id: string;
 }) => {
     try {
         const response = await axiosProvider.post(`${providerRoutes.report}`, data);
@@ -605,7 +587,6 @@ export {
     getServices,
     googleAuthApi,
     updateProfile,
-    uploadImagesToCloudinary,
     getProviderData,
     registerProvider,
     forgotPasswordApi,

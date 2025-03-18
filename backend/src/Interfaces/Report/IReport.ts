@@ -1,7 +1,7 @@
 export interface IReportData {
     reason: string;
-    reportedId: string;
-    reportedRole: string;
-    reporterId: string;
-    bookingId: string;
+    reported_id: string;
+    reported_role: string;
+    reporter_id: string;
+    booking_id: string;
 }
