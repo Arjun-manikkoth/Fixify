@@ -47,6 +47,7 @@ export interface ISelectedSlot {
     slot_id: string;
     time: string;
     date: string;
+    technician_id: string;
 }
 
 const ProviderFinder: React.FC = () => {
@@ -70,6 +71,7 @@ const ProviderFinder: React.FC = () => {
         slot_id: "",
         time: "",
         date: "",
+        technician_id: "",
     });
     const [chosenAddress, setChosenAddress] = useState<IAddress | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -151,6 +153,7 @@ const ProviderFinder: React.FC = () => {
         }
 
         setLoading(true);
+
         try {
             const res = await checkAvailabilityApi({
                 service_id: formData.service_id,
@@ -159,6 +162,7 @@ const ProviderFinder: React.FC = () => {
                 date: formData.date,
                 time: formData.time,
             });
+
             setSlotData(res.data);
         } catch (error: any) {
             toast.error(error.message || "Failed to fetch slots");
@@ -167,9 +171,14 @@ const ProviderFinder: React.FC = () => {
         }
     };
 
-    const handleBookingRequest = (id: string, time: string, date: string) => {
+    const handleBookingRequest = (
+        id: string,
+        time: string,
+        date: string,
+        technician_id: string
+    ) => {
         setRequestModal(true);
-        setSelectedSlot({ slot_id: id, time: time, date: date });
+        setSelectedSlot({ slot_id: id, time: time, date: date, technician_id: technician_id });
     };
 
     return (
@@ -299,7 +308,12 @@ const ProviderFinder: React.FC = () => {
                                 <button
                                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all duration-200 ease-in-out"
                                     onClick={() =>
-                                        handleBookingRequest(slot._id, formData.time, formData.date)
+                                        handleBookingRequest(
+                                            slot._id,
+                                            formData.time,
+                                            formData.date,
+                                            slot.technician._id
+                                        )
                                     }
                                 >
                                     Request Booking

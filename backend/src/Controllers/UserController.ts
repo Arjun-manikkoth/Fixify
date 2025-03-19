@@ -1,6 +1,8 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
+import { sendNotfication } from "../Utils/Socket";
+import { getIO } from "../Utils/Socket";
 
 const {
     OK,
@@ -320,7 +322,7 @@ class UserController {
     // Update user profile data
     async updateProfile(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
+            if (!req.body.userName || !req.body.mobileNo || !req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Name, mobile number, and ID are required fields",
@@ -334,20 +336,12 @@ class UserController {
                 image = req.file;
             }
 
-            const status = await this.UserService.editProfile(req.body, image);
+            const status = await this.UserService.editProfile(
+                { id: req.params.id, ...req.body },
+                image
+            );
 
             if (status) {
-                console.log(req.body.id, "userid");
-
-                // Emit notification event
-                // console.log(getIO(), "getiO");
-                // getIO().emit("receiveNotification", {
-                //     receiverId: req.body.id,
-                //     message: `New booking request from ${req.body.id}`,
-                //     type: "booking",
-                // });
-                // getIO().to(req.body.id).emit("updateNotificationCount", 3);
-
                 res.status(OK).json({
                     success: true,
                     message: "Profile updated successfully",
@@ -836,6 +830,7 @@ class UserController {
         try {
             if (
                 !req.params.id ||
+                !req.body.data.technician_id ||
                 !req.body.data.slot_id ||
                 !req.body.data.time ||
                 !req.body.data.address ||
@@ -843,7 +838,8 @@ class UserController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User ID, slot ID, time, address, and description are required fields",
+                    message:
+                        "User ID, slot ID, technician ID ,time, address, and description are required fields",
                     data: null,
                 });
                 return;

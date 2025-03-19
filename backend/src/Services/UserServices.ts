@@ -26,6 +26,7 @@ import IReviewRepository from "../Interfaces/Review/IReviewRepository";
 import { uploadImages } from "../Utils/Cloudinary";
 import { IReportData } from "../Interfaces/Report/IReport";
 import IReportRepository from "../Interfaces/Report/IReportRepository";
+import { sendNotfication } from "../Utils/Socket";
 
 //interface for signup response
 export interface ISignUpResponse {
@@ -666,6 +667,7 @@ class UserService implements IUserService {
             if (!status) {
                 return null;
             } else {
+                await sendNotfication(data.id, "Profile was updated", "Profile");
                 return status;
             }
         } catch (error: any) {
@@ -864,6 +866,7 @@ class UserService implements IUserService {
             const hashedPassword = await hashPassword(password);
 
             const updateStatus = await this.userRepository.updatePassword(email, hashedPassword);
+
             return updateStatus
                 ? {
                       success: true,
@@ -1131,7 +1134,13 @@ class UserService implements IUserService {
             }
 
             const slots = await this.scheduleRepository.bookingRequestAdd(bookingData);
-
+            if (slots.success) {
+                await sendNotfication(
+                    bookingData.technician_id,
+                    `New booking request at ${bookingData.time}`,
+                    "Booking request"
+                );
+            }
             return slots.success
                 ? {
                       success: true,
@@ -1272,6 +1281,13 @@ class UserService implements IUserService {
                 booking_id,
                 "cancelled"
             );
+
+            await sendNotfication(
+                booking.data.provider_id,
+                `Booking at ${booking.data.time} has been cancelled`,
+                "Booking"
+            );
+
             return {
                 success: true,
                 message: "Booking cancelled successfully",
@@ -1386,7 +1402,9 @@ class UserService implements IUserService {
             }
 
             const reportResponse = await this.reportRepository.addReport(data);
-
+            if (reportResponse) {
+                await sendNotfication(data.reporter_id, "Report has been sent", "report");
+            }
             return reportResponse
                 ? {
                       success: true,

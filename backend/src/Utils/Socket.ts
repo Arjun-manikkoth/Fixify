@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
-import Chat from "../Models/CommonModels/ChatModel";
 import Notification from "../Models/CommonModels/Notifications";
+import Chat from "../Models/CommonModels/ChatModel";
 
 let io: Server;
 
@@ -23,13 +23,14 @@ export const getIO = () => {
 };
 
 const configureSockets = (io: Server) => {
+    //storing online users
     const activeUsers = new Map<string, string>(); // userId -> socketId
 
     io.on("connection", (socket) => {
         // Track user when they connect
+
         socket.on("registerUser", (userId: string) => {
-            console.log("user registered", userId);
-            // Add user to activeUsers (overwrite if already exists)
+            // Add user to activeUsers
             activeUsers.set(userId, socket.id);
 
             // Notify all clients that this user is online
@@ -42,7 +43,6 @@ const configureSockets = (io: Server) => {
 
         // Join a room (For chat)
         socket.on("joinRoom", (roomId) => {
-            console.log("joined room ", roomId);
             socket.join(roomId);
         });
 
@@ -67,24 +67,6 @@ const configureSockets = (io: Server) => {
             io.to(receiverId).emit("stopTyping"); // Notify receiver that the user stopped typing
         });
 
-        // Handle notifications
-        socket.on("joinNotifications", (userId) => {
-            socket.join(userId); // Join a personal notification room
-        });
-
-        socket.on("sendNotification", ({ receiverId, message, type }) => {
-            // Send notification to the specific user
-            io.to(receiverId).emit("receiveNotification", { message, type });
-
-            // Store notification in the database
-            saveNotificationToDB(receiverId, message, type);
-
-            // Update unread notification count
-            countUnreadNotifications(receiverId).then((unreadCount) => {
-                io.to(receiverId).emit("updateNotificationCount", unreadCount);
-            });
-        });
-
         // Handle user disconnect (manual)
         socket.on("disconnectUser", (userId: string) => {
             if (activeUsers.has(userId)) {
@@ -104,8 +86,15 @@ const configureSockets = (io: Server) => {
                 }
             }
         });
+
+        // --------------------- Notification Events ---------------------
+        // listens for user join for notifications
+        socket.on("joinNotifications", (userId) => {
+            socket.join(userId);
+        });
     });
 };
+
 // Save chat message in the database
 const saveMessageToDB = async (
     room_id: string,
@@ -121,27 +110,23 @@ const saveMessageToDB = async (
     }
 };
 
-// Save notifications in MongoDB
-const saveNotificationToDB = async (receiver_id: string, message: string, type: string) => {
+const sendNotfication = async (receiver_id: string, message: string, type: string) => {
     try {
+        //saves notifications to db
         const newNotification = new Notification({ receiver_id, message, type });
         await newNotification.save();
-    } catch (err) {
-        console.error("Error saving notification:", err);
-    }
-};
 
-// Save notifications in MongoDB
-const countUnreadNotifications = async (receiverId: string) => {
-    try {
         // Send real-time notification count update
         const unreadCount = await Notification.countDocuments({
-            receiver_id: receiverId,
+            receiver_id: receiver_id,
             is_read: false,
         });
-    } catch (err) {
-        console.error("Error saving notification:", err);
+
+        // send notification to the client
+        getIO().to(receiver_id).emit("updateNotificationCount", unreadCount);
+    } catch (error: any) {
+        console.log(error.message);
     }
 };
 
-export default configureSockets;
+export { configureSockets, sendNotfication };

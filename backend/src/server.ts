@@ -8,7 +8,7 @@ import providerRoute from "./Routes/ProviderRoutes";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import adminRoute from "./Routes/AdminRoutes";
-import configureSockets from "./Utils/Socket";
+import { configureSockets } from "./Utils/Socket";
 import { initializeSocket, getIO } from "./Utils/Socket";
 
 const app: Express = express();

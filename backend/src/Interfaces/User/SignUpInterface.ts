@@ -58,6 +58,7 @@ export interface Address {
 
 export interface IBookingRequestData {
     user_id: string;
+    technician_id: string;
     description: string;
     address: Address;
     slot_id: string;
