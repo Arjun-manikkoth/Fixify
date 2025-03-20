@@ -59,6 +59,20 @@ userRoute.patch("/o-auth", (req, res) => {
     userController.googleAuth(req, res);
 });
 
+// Route for user logout
+userRoute.get("/sign-out", (req, res) => {
+    userController.signOut(req, res);
+});
+
+//--------------------------------------------------------Token routes--------------------------------------------------------
+
+// Route for refresh token
+userRoute.post("/refresh-token", (req, res) => {
+    userController.refreshToken(req, res);
+});
+
+//--------------------------------------------------------Otp routes--------------------------------------------------------
+
 // Route for OTP verification during sign-up
 userRoute.post("/verify-otp", (req, res) => {
     userController.otpVerify(req, res);
@@ -67,16 +81,6 @@ userRoute.post("/verify-otp", (req, res) => {
 // Route to resend OTP during sign-up/sign-in
 userRoute.post("/resend-otp", (req, res) => {
     userController.otpResend(req, res);
-});
-
-// Route for user logout
-userRoute.get("/sign-out", (req, res) => {
-    userController.signOut(req, res);
-});
-
-// Route for refresh token
-userRoute.post("/refresh-token", (req, res) => {
-    userController.refreshToken(req, res);
 });
 
 //----------------------------------------------Password routes-----------------------------------------------
@@ -144,7 +148,6 @@ userRoute.patch("/:id/slots", (req, res) => {
 
 // Route for fetching user data with id
 userRoute.get("/:id", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
-    console.log("user data fetch route triggered");
     userController.getUser(req, res);
 });
 

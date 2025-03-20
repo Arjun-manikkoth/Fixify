@@ -9,7 +9,7 @@ import LoadingSpinner from "../LoadingSpinner";
 
 interface SignInProps {
     title: string;
-    signInApi: (formData: FormState) => Promise<SignInResponse>;
+    signInApi: (formData: FormState) => Promise<any>;
     setReduxAction: (data: any) => any;
     role: "user" | "provider";
     navigateTo: string;
@@ -29,17 +29,6 @@ interface SignInProps {
 interface FormState {
     email: string;
     password: string;
-}
-
-interface SignInResponse {
-    success: boolean;
-    message: string;
-    email?: string;
-    id?: string;
-    name?: string;
-    phone?: string;
-    service_id?: string;
-    url?: string;
 }
 
 const SignInModal: React.FC<SignInProps> = ({
@@ -106,20 +95,20 @@ const SignInModal: React.FC<SignInProps> = ({
 
                 if (role === "provider") {
                     reduxState = {
-                        email: response.email,
-                        id: response.id,
-                        service_id: response.service_id,
-                        name: response.name,
-                        url: response.url,
-                        phone: response.phone,
+                        email: response.data.email,
+                        id: response.data.id,
+                        service_id: response.data.service_id,
+                        name: response.data.name,
+                        url: response.data.url,
+                        phone: response.data.phone,
                     };
                 } else if (role === "user") {
                     reduxState = {
-                        email: response.email,
-                        id: response.id,
-                        name: response.name,
-                        phone: response.phone,
-                        url: response.url,
+                        email: response.data.email,
+                        id: response.data.id,
+                        name: response.data.name,
+                        phone: response.data.phone,
+                        url: response.data.url,
                     };
                 }
 

@@ -29,6 +29,12 @@ class ProviderController {
             });
         } catch (error: any) {
             console.log(error.message);
+
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
         }
     }
 
@@ -63,6 +69,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: provider?.message || "Sign up failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -70,6 +77,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -81,6 +89,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,password are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -107,41 +116,58 @@ class ProviderController {
                     .json({
                         success: true,
                         message: response.message,
-                        email: response.email,
-                        id: response._id,
-                        url: response.url,
-                        service_id: response.service_id,
-                        name: response.name,
-                        phone: response.mobileNo,
+                        data: {
+                            email: response.email,
+                            id: response._id,
+                            url: response.url,
+                            service_id: response.service_id,
+                            name: response.name,
+                            phone: response.mobileNo,
+                        },
                     });
             } else {
                 // Error handling based on error messages
                 switch (response?.message) {
                     case "Account does not exist":
-                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Invalid Credentials":
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
+                            data: null,
                         });
                         break;
                     case "Didn't complete otp verification":
-                        res.status(FORBIDDEN).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Please Sign in With Google":
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
+                            data: null,
                         });
                         break;
                     case "Account blocked by admin":
-                        res.status(FORBIDDEN).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
+                            data: null,
                         });
                         break;
                 }
@@ -151,6 +177,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -162,6 +189,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,otp are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -178,6 +206,7 @@ class ProviderController {
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     case "Otp is expired":
@@ -187,12 +216,14 @@ class ProviderController {
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
                             message: "Provider not found",
+                            data: null,
                         });
                         break;
                 }
@@ -202,6 +233,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -213,6 +245,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required feild",
+                    data: null,
                 });
                 return;
             }
@@ -220,12 +253,17 @@ class ProviderController {
 
             if (status) {
                 // Sends for successfully sent mail
-                res.status(OK).json({ success: true, message: "Otp sent Successfully" });
+                res.status(OK).json({
+                    success: true,
+                    message: "Otp sent Successfully",
+                    data: null,
+                });
             } else {
                 // Sends for failed OTP
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
                     message: "Otp Cannot be send at this moment",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -233,6 +271,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -250,12 +289,13 @@ class ProviderController {
                 secure: false,
             });
 
-            res.status(OK).json({ success: true, message: "Signed Out Successfully" });
+            res.status(OK).json({ success: true, message: "Signed Out Successfully", data: null });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -267,7 +307,11 @@ class ProviderController {
 
             if (!token) {
                 // If the cookie is deleted or expired
-                res.status(UNAUTHORIZED).json({ success: false, message: "Refresh Token missing" });
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: "Refresh Token missing",
+                    data: null,
+                });
             } else {
                 // Checks the validity of refresh token and returns access token
                 const response = await this.providerService.refreshTokenCheck(token);
@@ -282,9 +326,17 @@ class ProviderController {
                                 ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                                 : 15 * 60 * 1000, // 15 minutes
                         })
-                        .json({ success: true, message: "Access token sent successfully" });
+                        .json({
+                            success: true,
+                            message: "Access token sent successfully",
+                            data: null,
+                        });
                 } else {
-                    res.status(UNAUTHORIZED).json({ success: true, message: response.message });
+                    res.status(UNAUTHORIZED).json({
+                        success: false,
+                        message: response.message,
+                        data: null,
+                    });
                 }
             }
         } catch (error: any) {
@@ -292,6 +344,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -303,6 +356,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Google signin code is required feild",
+                    data: null,
                 });
                 return;
             }
@@ -330,28 +384,36 @@ class ProviderController {
                     .json({
                         success: true,
                         message: response.message,
-                        email: response.email,
-                        id: response._id,
-                        url: response.url,
-                        name: response.name,
-                        phone: response.mobileNo,
+                        data: {
+                            email: response.email,
+                            id: response._id,
+                            url: response.url,
+                            name: response.name,
+                            phone: response.mobileNo,
+                        },
                     });
             } else {
                 // Error handling based on error messages
                 switch (response?.message) {
                     case "Google Sign In failed":
-                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Account blocked by admin":
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
+                            data: null,
                         });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
+                            data: null,
                         });
                         break;
                 }
@@ -361,6 +423,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -368,10 +431,11 @@ class ProviderController {
     // Update provider profile data
     async updateProfile(req: Request, res: Response) {
         try {
-            if (!req.body.userName || !req.body.mobileNo || !req.body.id) {
+            if (!req.body.userName || !req.body.mobileNo || !req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Name,mobile no and id are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -382,7 +446,11 @@ class ProviderController {
                 image = req.file;
             }
 
-            const status = await this.providerService.editProfile(req.body, image);
+            const status = await this.providerService.editProfile(
+                { ...req.body, id: req.params.id },
+                image
+            );
+
             if (status) {
                 res.status(OK).json({
                     success: true,
@@ -401,6 +469,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -408,18 +477,19 @@ class ProviderController {
     // Fetch provider profile data
     async fetchProfile(req: Request, res: Response) {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
+                    data: null,
                 });
                 return;
             }
-            const status = await this.providerService.getProfileData(req.query.id as string);
+            const status = await this.providerService.getProfileData(req.params.id as string);
 
             res.status(OK).json({
                 success: true,
-                message: "Data fetched successfully",
+                message: "Profile fetched successfully",
                 data: status,
             });
         } catch (error: any) {
@@ -427,6 +497,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -434,8 +505,25 @@ class ProviderController {
     // Register provider data
     async registerProfile(req: Request, res: Response) {
         try {
+            if (
+                !req.params.id ||
+                !req.body.description ||
+                !req.body.expertise_id ||
+                !req.body.aadharImage ||
+                !req.body.workImages
+            ) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message:
+                        "provider ID , description, expertise ID ,aadhar Image and workImages are a required feild",
+                    data: null,
+                });
+                return;
+            }
+
             const response = await this.providerService.registerProvider({
                 ...req.body,
+                provider_id: req.params.id,
                 ...(req.files as Express.Multer.File[]),
             });
             if (response.success === true) {
@@ -447,12 +535,17 @@ class ProviderController {
             } else {
                 switch (response?.message) {
                     case "Already requested for approval":
-                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Cannot register at this moment",
+                            data: null,
                         });
                         break;
                 }
@@ -462,6 +555,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -473,6 +567,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required feild",
+                    data: null,
                 });
                 return;
             }
@@ -508,6 +603,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -519,6 +615,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and otp are a required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -530,7 +627,7 @@ class ProviderController {
 
             if (otpStatus.success) {
                 // Sends on a successful verification
-                res.status(OK).json({ success: true, message: otpStatus.message });
+                res.status(OK).json({ success: true, message: otpStatus.message, data: null });
             } else {
                 // Error handling based on error messages
                 switch (otpStatus.message) {
@@ -538,21 +635,28 @@ class ProviderController {
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     case "Otp is expired":
-                        res.status(GONE).json({ success: false, message: otpStatus.message });
+                        res.status(GONE).json({
+                            success: false,
+                            message: otpStatus.message,
+                            data: null,
+                        });
                         break;
                     case "Otp error":
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
                             message: "Account not found",
+                            data: null,
                         });
                         break;
                 }
@@ -562,6 +666,7 @@ class ProviderController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -573,6 +678,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and password are a required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -611,6 +717,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and password are a required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -651,16 +758,17 @@ class ProviderController {
     // Create a schedule for the day with location
     async createSchedule(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.body.id || !req.body.address || !req.body.date) {
+            if (!req.params.id || !req.body.address || !req.body.date) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id,address and date are required feilds",
+                    data: null,
                 });
                 return;
             }
 
             const response = await this.providerService.addSchedule(
-                req.body.id,
+                req.params.id,
                 req.body.date,
                 req.body.address
             );
@@ -697,15 +805,16 @@ class ProviderController {
     // Get schedule for a day with date
     async getSchedule(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id || !req.query.date) {
+            if (!req.params.id || !req.query.date) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and date are required feilds",
+                    data: null,
                 });
                 return;
             }
             const schedule = await this.providerService.getSchedule(
-                req.query.id as string,
+                req.params.id as string,
                 req.query.date as string
             );
             if (schedule.success) {
@@ -725,20 +834,26 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "An internal server error occurred",
+                data: null,
+            });
         }
     }
 
     // Get all booking requests
     async getBookingRequests(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
+                    data: null,
                 });
                 return;
             }
-            const requestData = await this.providerService.getAllRequests(req.query.id as string);
+            const requestData = await this.providerService.getAllRequests(req.params.id);
 
             if (requestData.success) {
                 res.status(OK).json({
@@ -759,15 +874,20 @@ class ProviderController {
             }
         } catch (error: any) {
             console.log(error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "An internal server error occurred",
+                data: null,
+            });
         }
     }
 
     // Change the booking request status
     async updateBookingRequestStatus(req: Request, res: Response): Promise<void> {
         try {
-            const { id, status } = req.body;
+            const { status } = req.body;
 
-            if (!id || !status) {
+            if (!req.params.id || !status) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Booking request ID and status are required",
@@ -776,7 +896,10 @@ class ProviderController {
                 return;
             }
 
-            const requestData = await this.providerService.changeBookingRequestStatus(id, status);
+            const requestData = await this.providerService.changeBookingRequestStatus(
+                req.params.id,
+                status
+            );
 
             if (!requestData.success) {
                 const statusCode =
@@ -809,7 +932,7 @@ class ProviderController {
     // Fetch all bookings for provider with ID
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id || !req.query.page) {
+            if (!req.params.id || !req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and page are required fields",
@@ -818,7 +941,7 @@ class ProviderController {
                 return;
             }
             const response = await this.providerService.fetchBookings(
-                req.query.id as string,
+                req.params.id,
                 Number(req.query.page)
             );
 
@@ -848,7 +971,7 @@ class ProviderController {
     // Fetch booking details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required field",
@@ -856,7 +979,7 @@ class ProviderController {
                 });
                 return;
             }
-            const response = await this.providerService.fetchBookingDetail(req.query.id as string);
+            const response = await this.providerService.fetchBookingDetail(req.params.id as string);
 
             if (response.success) {
                 res.status(OK).json({
@@ -884,7 +1007,7 @@ class ProviderController {
     // Create payment request for the work
     async createPaymentRequest(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.body.id || !req.body.amount || !req.body.method) {
+            if (!req.params.id || !req.body.amount || !req.body.method) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id,amount and payment method are required fields",
@@ -892,8 +1015,9 @@ class ProviderController {
                 });
                 return;
             }
+
             const response = await this.providerService.intiatePaymentRequest(
-                req.body.id,
+                req.params.id,
                 req.body.amount,
                 req.body.method
             );
@@ -924,7 +1048,7 @@ class ProviderController {
     // Fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required field",
@@ -933,7 +1057,7 @@ class ProviderController {
                 return;
             }
 
-            const response = await this.providerService.fetchChat(req.query.id as string);
+            const response = await this.providerService.fetchChat(req.params.id);
 
             if (response.success) {
                 res.status(OK).json({
@@ -962,7 +1086,7 @@ class ProviderController {
     // Fetch dashboard details
     async fetchDashboard(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id || !req.query.revenueBy || !req.query.hoursBy) {
+            if (!req.params.id || !req.query.revenueBy || !req.query.hoursBy) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id,revenue filter and working hours filters are required fields",
@@ -972,7 +1096,7 @@ class ProviderController {
             }
 
             const response = await this.providerService.fetchDashboard({
-                provider_id: req.query.id as string,
+                provider_id: req.params.id as string,
                 revenueBy: req.query.revenueBy as string,
                 hoursBy: req.query.hoursBy as string,
             });
@@ -1006,10 +1130,10 @@ class ProviderController {
         try {
             if (
                 !req.body.reason ||
-                !req.body.reportedId ||
-                !req.body.reportedRole ||
-                !req.body.reporterId ||
-                !req.body.bookingId
+                !req.body.reported_id ||
+                !req.body.reported_role ||
+                !req.body.reporter_id ||
+                !req.params.id
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
@@ -1020,7 +1144,10 @@ class ProviderController {
                 return;
             }
 
-            const response = await this.providerService.report(req.body);
+            const response = await this.providerService.report({
+                ...req.body,
+                bookingId: req.params.id,
+            });
 
             if (response.message === "Failed report account") {
                 res.status(INTERNAL_SERVER_ERROR).json({

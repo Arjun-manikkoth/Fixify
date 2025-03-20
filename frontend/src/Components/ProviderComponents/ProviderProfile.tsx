@@ -86,8 +86,8 @@ const ProviderProfile: React.FC = () => {
         if (provider.id) {
             setLoading(true); // Start loading
             getServices()
-                .then((data) => {
-                    setServices(data.services);
+                .then((response) => {
+                    setServices(response.data);
                 })
                 .catch((error) => {
                     console.log(error.message);

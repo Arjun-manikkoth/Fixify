@@ -81,8 +81,8 @@ const ProviderFinder: React.FC = () => {
 
     useEffect(() => {
         getServices()
-            .then((data) => {
-                if (data.success) setServices(data.services);
+            .then((response) => {
+                if (response.success) setServices(response.data);
             })
             .catch(() => {});
     }, []);

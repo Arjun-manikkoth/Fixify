@@ -46,44 +46,57 @@ const providerController = new ProviderController(providerService); // Dependenc
 // // Initialize provider router instance
 const providerRoute: Router = express.Router();
 
+//--------------------------------------------Auth Routes-----------------------------------------------------
+
 // // Route for provider registration (sign-up)
-providerRoute.post("/sign_up", (req, res) => {
+providerRoute.post("/sign-up", (req, res) => {
     providerController.signUp(req, res);
 });
 
-// // Route for OTP verification during sign-up
-providerRoute.post("/otp_verify", (req, res) => {
-    providerController.otpVerify(req, res);
-});
-
-// // Route to resend OTP during sign-up/sign-in
-providerRoute.post("/otp_resend", (req, res) => {
-    providerController.otpResend(req, res);
-});
-
 // // Route for provider login (sign-in)
-providerRoute.post("/sign_in", (req, res) => {
+providerRoute.post("/sign-in", (req, res) => {
     providerController.signIn(req, res);
 });
 
+// Route for oauth
+providerRoute.patch("/o-auth", (req, res) => {
+    providerController.googleAuth(req, res);
+});
+
 // // Route for provider logout
-providerRoute.get("/sign_out", (req, res) => {
+providerRoute.get("/sign-out", (req, res) => {
     providerController.signOut(req, res);
 });
 
 // // Route for refresh token
-providerRoute.post("/refresh_token", (req, res) => {
+providerRoute.post("/refresh-token", (req, res) => {
     providerController.refreshToken(req, res);
 });
+
+//--------------------------------------------------------Otp routes--------------------------------------------------------
+
+// // Route for OTP verification during sign-up
+providerRoute.post("/verify-otp", (req, res) => {
+    providerController.otpVerify(req, res);
+});
+
+// // Route to resend OTP during sign-up/sign-in
+providerRoute.post("/resend-otp", (req, res) => {
+    providerController.otpResend(req, res);
+});
+
+//--------------------------------------------------------Service routes--------------------------------------------------------
 
 //route to get all services
 providerRoute.get("/services", (req, res) => {
     providerController.getAllServices(req, res);
 });
 
+//---------------------------------------------------------Profile routes-----------------------------------------------
+
 // Route for update profile
 providerRoute.patch(
-    "/update_profile",
+    "/:id/profile",
     verifyToken,
     verifyRole(["provider"]),
     checkBlockedStatus,
@@ -93,14 +106,9 @@ providerRoute.patch(
     }
 );
 
-// Route for oauth
-providerRoute.patch("/o_auth", (req, res) => {
-    providerController.googleAuth(req, res);
-});
-
 //get provider profile data
 providerRoute.get(
-    "/profile",
+    "/:id/profile",
     verifyToken,
     verifyRole(["provider"]),
     checkBlockedStatus,
@@ -109,9 +117,11 @@ providerRoute.get(
     }
 );
 
+//----------------------------------------------Register routes-------------------------------------------------
+
 //provider register for approval
 providerRoute.post(
-    "/register",
+    "/:id/register",
     upload.fields([
         { name: "aadharImage", maxCount: 1 },
         { name: "workImages", maxCount: 2 },
@@ -121,73 +131,81 @@ providerRoute.post(
     }
 );
 
+//----------------------------------------------Password routes-----------------------------------------------
+
 // Route for forgot password mail verify
-providerRoute.post("/forgot_password", (req, res) => {
+providerRoute.post("/forgot-password", (req, res) => {
     providerController.forgotPassword(req, res);
 });
 
 // Route for forgot password otp verify
-providerRoute.post("/forgot_otp_verify", (req, res) => {
+providerRoute.post("/verify-forgot-password-otp", (req, res) => {
     providerController.forgotPasswordOtpVerify(req, res);
 });
 
 // Route for updating the new password
-providerRoute.patch("/reset_password", (req, res) => {
+providerRoute.patch("/reset-password", (req, res) => {
     providerController.resetPassword(req, res);
 });
 
 // Route for confirming old password
-providerRoute.post("/confirm_password/:id", (req, res) => {
+providerRoute.post("/:id/confirm-password", (req, res) => {
     providerController.confirmPassword(req, res);
 });
 
+//----------------------------------------------------Schedule routes------------------------------------------------------------
+
 // Route for creating the schedule
-providerRoute.post("/schedule", (req, res) => {
+providerRoute.post("/:id/schedules", (req, res) => {
     providerController.createSchedule(req, res);
 });
 
 // Route for fetching the schedule
-providerRoute.get("/schedule", (req, res) => {
+providerRoute.get("/:id/schedules", (req, res) => {
     providerController.getSchedule(req, res);
 });
 
+//-----------------------------------------------------Booking routes-------------------------------------------------------------
+
 // Route for fetching the booking requests
-providerRoute.get("/booking_requests", (req, res) => {
+providerRoute.get("/:id/booking-requests", (req, res) => {
     providerController.getBookingRequests(req, res);
 });
 
-// Route for fetching the booking requests
-providerRoute.patch("/booking_requests", (req, res) => {
+// Route for updating the booking requests
+providerRoute.patch("/booking-requests/:id", (req, res) => {
     providerController.updateBookingRequestStatus(req, res);
 });
 
 // Route for listing bookings
-providerRoute.get("/bookings", (req, res) => {
+providerRoute.get("/:id/bookings", (req, res) => {
     providerController.getBookings(req, res);
 });
 
 // Route for booking detail
-providerRoute.get("/booking_details", (req, res) => {
+providerRoute.get("/bookings/:id", (req, res) => {
     providerController.getBookingDetails(req, res);
 });
 
-// Route for booking detail
-providerRoute.post("/payments", (req, res) => {
+//-------------------------------------------------Payment routes-------------------------------------------------------
+
+// Route for booking payments (Cash payment and Online payment request)
+providerRoute.post("/bookings/:id/payments", (req, res) => {
     providerController.createPaymentRequest(req, res);
 });
 
 // Route for fetching chats
-providerRoute.get("/chats", (req, res) => {
+providerRoute.get("/:id/chats", (req, res) => {
     providerController.fetchChat(req, res);
 });
 
 // Route for fetching dashboard details
-providerRoute.get("/dashboard", (req, res) => {
+providerRoute.get("/:id/dashboard", (req, res) => {
     providerController.fetchDashboard(req, res);
 });
 
 // Route for reporting user
-providerRoute.post("/report", (req, res) => {
+providerRoute.post("/bookings/:id/report", (req, res) => {
     providerController.report(req, res);
 });
 

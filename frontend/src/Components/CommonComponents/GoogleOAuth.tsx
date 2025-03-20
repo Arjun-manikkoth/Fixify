@@ -15,6 +15,7 @@ const GoogleOAuth: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const modal = useContext(ModalContext);
+
     const responseGoogle = async (
         authResult: Omit<CodeResponse, "error" | "error_description" | "error_uri">
     ): Promise<void> => {
@@ -50,12 +51,12 @@ const GoogleOAuth: React.FC = () => {
                     if (result?.success === true) {
                         dispatch(
                             setProvider({
-                                id: result.id,
+                                id: result.data.id,
                                 service_id: null,
-                                name: result.name,
-                                email: result.email,
-                                phone: result.phone,
-                                url: result.url,
+                                name: result.data.name,
+                                email: result.data.email,
+                                phone: result.data.phone,
+                                url: result.data.url,
                             })
                         );
 

@@ -12,10 +12,10 @@ interface IServiceData {
     is_active: boolean;
 }
 
-interface IServiceResponse {
+interface IResponse {
     success: boolean;
     message: string;
-    services: IServiceData[] | [];
+    data: IServiceData[] | [];
 }
 
 interface SignUpModalProps {
@@ -25,7 +25,7 @@ interface SignUpModalProps {
     ) => void;
     closeModal: () => void;
     handleSignUp: (formData: any) => Promise<any>;
-    getServices?: () => Promise<IServiceResponse>;
+    getServices?: () => Promise<IResponse>;
 }
 
 interface FormState {
@@ -64,8 +64,8 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
     useEffect(() => {
         if (role === "provider" && getServices) {
             setLoading(true);
-            getServices().then((data) => {
-                if (data.success) setServices(data.services);
+            getServices().then((response) => {
+                if (response.success) setServices(response.data);
             });
             setLoading(false);
         }

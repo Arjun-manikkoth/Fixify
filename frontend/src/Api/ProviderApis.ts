@@ -3,16 +3,6 @@ import { SignIn } from "../Interfaces/ProviderInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
 
-interface ISignUpResponse {
-    success: boolean;
-    message: string;
-    email?: string | null;
-    service_id?: string | null;
-    id?: string | null;
-    name?: string;
-    phone?: string;
-}
-
 interface IAddress {
     city: string;
     latitude: number;
@@ -31,30 +21,30 @@ const signInApi = async (formData: SignIn) => {
         return {
             success: true,
             message: "Sucessfully signed Into Account",
-            email: response.data.email,
-            name: response.data.name,
-            service_id: response.data.service_id,
-            id: response.data.id,
-            url: response.data.url,
-            phone: response.data.phone,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
         return {
             success: false,
             message: error.response.data.message,
+            data: null,
         };
     }
 };
 
-const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
+const signUpApi = async (formData: SignUp) => {
     try {
         const response = await axiosProvider.post(providerRoutes.sign_up, formData);
 
-        return { success: true, message: "Sucessfully Created Account", email: response.data.data };
+        return { success: true, message: "Sucessfully Created Account", data: response.data.data };
     } catch (error: any) {
         console.log(error.message);
-        return { success: false, message: error.response.data.message || "something went wrong" };
+        return {
+            success: false,
+            message: error.response.data.message || "something went wrong",
+            data: null,
+        };
     }
 };
 
@@ -99,7 +89,7 @@ const otpResendApi = async (email: string) => {
 
 const logoutProvider = async () => {
     try {
-        const response = await axiosProvider.get(providerRoutes.logout);
+        const response = await axiosProvider.get(providerRoutes.sign_out);
 
         return {
             success: true,
@@ -121,6 +111,11 @@ const refreshTokenApi = async () => {
         const response = await axiosProvider.post(providerRoutes.refresh_token);
     } catch (error: any) {
         console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
     }
 };
 
@@ -132,14 +127,14 @@ const getServices = async () => {
         return {
             success: true,
             message: response.data.message,
-            services: response.data.data,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
         return {
             success: false,
             message: "Cannot fetch services at this moment",
-            services: [],
+            data: null,
         };
     }
 };
@@ -152,18 +147,14 @@ const googleAuthApi = async (code: string) => {
         return {
             success: true,
             message: "Sucessfully signed Into Account",
-            email: response.data.email,
-            name: response.data.name,
-            id: response.data.id,
-            url: response.data.url,
-            service_id: response.data.service_id,
-            phone: response.data.phone,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
         return {
             success: false,
             message: error.response.data.message,
+            data: null,
         };
     }
 };
@@ -177,15 +168,16 @@ const updateProfile = async (data: {
     try {
         const formData = new FormData();
 
-        formData.append("id", data.id);
-
         if (data.image) {
             formData.append("image", data.image);
         }
         formData.append("userName", data.userName);
         formData.append("mobileNo", data.mobileNo);
 
-        const response = await axiosProvider.patch(providerRoutes.update_profile, formData);
+        const response = await axiosProvider.patch(
+            `/${data.id}${providerRoutes.profile}`,
+            formData
+        );
         return {
             success: true,
             message: "Profile updated Sucessfully",
@@ -203,7 +195,7 @@ const updateProfile = async (data: {
 //api to fetch provider data with id
 const getProviderData = async (id: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.get_profile_details}?id=${id}`);
+        const response = await axiosProvider.get(`/${id}${providerRoutes.profile}`);
 
         return {
             success: true,
@@ -231,8 +223,6 @@ const registerProvider = async (
     try {
         const formData = new FormData();
 
-        formData.append("provider_id", provider_id);
-
         if (aadharImage) {
             formData.append("aadharImage", aadharImage);
         }
@@ -245,11 +235,14 @@ const registerProvider = async (
         formData.append("description", description);
         formData.append("expertise_id", expertise_id);
 
-        const response = await axiosProvider.post(providerRoutes.register, formData);
+        const response = await axiosProvider.post(
+            `/${provider_id}${providerRoutes.register}`,
+            formData
+        );
 
         return {
             success: true,
-            message: "Provider registration request successfull",
+            message: "Provider registration requested",
             data: response.data.data,
         };
     } catch (error: any) {
@@ -288,7 +281,7 @@ const forgotOtpVerifyApi = async (otp: string, email: string) => {
             otp: otp,
             email: email,
         });
-        console.log(response.data.message);
+
         return {
             success: true,
             message: response.data.message,
@@ -330,7 +323,7 @@ const resetPasswordApi = async (email: string, password: string) => {
 //api to validate the current password
 const confirmPasswordApi = async (id: string | null, password: string) => {
     try {
-        const response = await axiosProvider.post(`${providerRoutes.confirm_password}/${id}`, {
+        const response = await axiosProvider.post(`/${id}${providerRoutes.confirm_password}`, {
             password,
         });
 
@@ -352,9 +345,7 @@ const confirmPasswordApi = async (id: string | null, password: string) => {
 //api to create slots with location for a day
 const createScheduleApi = async (id: string | null, date: string, address: ILocation) => {
     try {
-        console.log(address, "at provider api");
-        const response = await axiosProvider.post(`${providerRoutes.schedule}`, {
-            id,
+        const response = await axiosProvider.post(`/${id}${providerRoutes.schedules}`, {
             date,
             address,
         });
@@ -377,8 +368,8 @@ const createScheduleApi = async (id: string | null, date: string, address: ILoca
 //api to get schedules for a day
 const getScheduleApi = async (id: string | null, date: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.schedule}`, {
-            params: { id, date },
+        const response = await axiosProvider.get(`${id}${providerRoutes.schedules}`, {
+            params: { date },
         });
 
         return {
@@ -399,9 +390,7 @@ const getScheduleApi = async (id: string | null, date: string) => {
 //api to list all booking requests
 const bookingRequestListApi = async (id: string | null) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.booking_request}`, {
-            params: { id },
-        });
+        const response = await axiosProvider.get(`${id}${providerRoutes.booking_request}`);
 
         return {
             success: true,
@@ -421,8 +410,7 @@ const bookingRequestListApi = async (id: string | null) => {
 //api to change booking requests status
 const bookingRequestStatusApi = async (id: string | null, status: string) => {
     try {
-        const response = await axiosProvider.patch(`${providerRoutes.booking_request}`, {
-            id,
+        const response = await axiosProvider.patch(`${providerRoutes.booking_request}/${id}`, {
             status,
         });
 
@@ -444,8 +432,8 @@ const bookingRequestStatusApi = async (id: string | null, status: string) => {
 //api get bookings
 const fetchBookingsApi = async (id: string, page: number) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.bookings}`, {
-            params: { id, page },
+        const response = await axiosProvider.get(`/${id}${providerRoutes.bookings}`, {
+            params: { page },
         });
 
         return {
@@ -466,9 +454,7 @@ const fetchBookingsApi = async (id: string, page: number) => {
 //api get booking details
 const fetchBookingDetailsApi = async (id: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.booking_details}`, {
-            params: { id },
-        });
+        const response = await axiosProvider.get(`${providerRoutes.bookings}/${id}`, {});
 
         return {
             success: true,
@@ -488,11 +474,13 @@ const fetchBookingDetailsApi = async (id: string) => {
 //api to initiate payment request
 const paymentRequestApi = async (id: string, amount: number, method: string) => {
     try {
-        const response = await axiosProvider.post(`${providerRoutes.payments}`, {
-            id,
-            amount,
-            method,
-        });
+        const response = await axiosProvider.post(
+            `${providerRoutes.bookings}/${id}${providerRoutes.payments}`,
+            {
+                amount,
+                method,
+            }
+        );
 
         return {
             success: true,
@@ -512,7 +500,7 @@ const paymentRequestApi = async (id: string, amount: number, method: string) => 
 //get chatting history
 const getChatsApi = async (id: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.chats}`, { params: { id } });
+        const response = await axiosProvider.get(`/${id}${providerRoutes.chats}`);
 
         return {
             success: true,
@@ -532,8 +520,8 @@ const getChatsApi = async (id: string) => {
 //get provider  dashboard
 const providerDashboardApi = async (id: string, revenueBy: string, hoursBy: string) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.dashboard}`, {
-            params: { id, revenueBy, hoursBy },
+        const response = await axiosProvider.get(`/${id}${providerRoutes.dashboard}`, {
+            params: { revenueBy, hoursBy },
         });
 
         return {
@@ -560,7 +548,10 @@ const reportUserApi = async (data: {
     booking_id: string;
 }) => {
     try {
-        const response = await axiosProvider.post(`${providerRoutes.report}`, data);
+        const response = await axiosProvider.post(
+            `${providerRoutes.bookings}/${data.booking_id}${providerRoutes.report}`,
+            data
+        );
 
         return {
             success: true,

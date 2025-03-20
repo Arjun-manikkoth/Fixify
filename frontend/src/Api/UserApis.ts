@@ -3,6 +3,7 @@ import { SignIn } from "../Interfaces/UserInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/UserInterfaces/SignUpInterface";
 import userRoutes from "../Endpoints/UserEndpoints";
 import axios from "axios";
+import { baseUrl } from "../Constants/Constants";
 
 interface ISignUpResponse {
     success: boolean;
@@ -38,7 +39,6 @@ export interface ISlotRequest {
     user_id: string;
     description: string;
     address: ILocation;
-    technician_id: string;
 }
 export interface ICheckSlot {
     service_id: string;
@@ -238,7 +238,7 @@ const updateProfile = async (data: {
 //api to get user data with id
 const getUserData = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.users}${id}`);
+        const response = await axiosUser.get(`${userRoutes.users}/${id}`);
 
         return {
             success: true,
