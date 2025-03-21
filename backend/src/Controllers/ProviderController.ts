@@ -51,6 +51,7 @@ class ProviderController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email,password,username,mobile no and service id are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -198,7 +199,7 @@ class ProviderController {
 
             if (otpStatus.success) {
                 // Sends on a successful verification
-                res.status(OK).json({ success: true, message: otpStatus.message });
+                res.status(OK).json({ success: true, message: otpStatus.message, data: null });
             } else {
                 // Error handling based on error messages
                 switch (otpStatus.message) {
@@ -210,7 +211,11 @@ class ProviderController {
                         });
                         break;
                     case "Otp is expired":
-                        res.status(GONE).json({ success: false, message: otpStatus.message });
+                        res.status(GONE).json({
+                            success: false,
+                            message: otpStatus.message,
+                            data: null,
+                        });
                         break;
                     case "Otp error":
                         res.status(INTERNAL_SERVER_ERROR).json({

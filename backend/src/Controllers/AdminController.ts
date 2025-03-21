@@ -14,6 +14,7 @@ class AdminController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and Password are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -40,28 +41,37 @@ class AdminController {
                     .json({
                         success: true,
                         message: response.message,
-                        email: response.email,
-                        id: response._id,
+                        data: { email: response.email, id: response._id },
                     });
             } else {
                 // Error handling based on error messages
                 switch (response?.message) {
                     case "Account does not exist":
-                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Invalid Credentials":
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
+                            data: null,
                         });
                         break;
                     case "Didn't complete otp verification":
-                        res.status(FORBIDDEN).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
+                            data: null,
                         });
                         break;
                 }
@@ -71,6 +81,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -88,12 +99,13 @@ class AdminController {
                 secure: false,
             });
 
-            res.status(OK).json({ success: true, message: "Signed Out Successfully" });
+            res.status(OK).json({ success: true, message: "Signed Out Successfully", data: null });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -105,7 +117,11 @@ class AdminController {
 
             if (!token) {
                 // If the cookie is deleted or expired
-                res.status(UNAUTHORIZED).json({ success: false, message: "Refresh Token missing" });
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: "Refresh Token missing",
+                    data: null,
+                });
             } else {
                 // Checks the validity of refresh token and returns access token
                 const response = await this.AdminService.refreshTokenCheck(token);
@@ -122,7 +138,11 @@ class AdminController {
                         })
                         .json({ success: true, message: "Access token sent successfully" });
                 } else {
-                    res.status(UNAUTHORIZED).json({ success: true, message: response.message });
+                    res.status(UNAUTHORIZED).json({
+                        success: true,
+                        message: response.message,
+                        data: null,
+                    });
                 }
             }
         } catch (error: any) {
@@ -130,6 +150,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -141,6 +162,7 @@ class AdminController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Page,filter are required feilds",
+                    data: null,
                 });
                 return;
             }
@@ -168,6 +190,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -175,23 +198,27 @@ class AdminController {
     // Block user
     async blockUser(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
+                    data: null,
                 });
                 return;
             }
-            const status = await this.AdminService.userBlock(req.query.id as string);
+            const status = await this.AdminService.userBlock(req.params.id);
+
             if (status) {
                 res.status(OK).json({
                     success: true,
                     message: "User blocked successully",
+                    data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
                     message: "User blocking failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -199,6 +226,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -206,23 +234,27 @@ class AdminController {
     // Unblock user
     async unBlockUser(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
+                    data: null,
                 });
                 return;
             }
-            const status = await this.AdminService.userUnBlock(req.query.id as string);
+            const status = await this.AdminService.userUnBlock(req.params.id as string);
+
             if (status) {
                 res.status(OK).json({
                     success: true,
                     message: "User Unblocked successully",
+                    data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
                     message: "User Unblocking failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -230,6 +262,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -269,6 +302,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -303,6 +337,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -310,7 +345,7 @@ class AdminController {
     // Block provider
     async blockProvider(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
@@ -318,16 +353,19 @@ class AdminController {
                 });
                 return;
             }
-            const status = await this.AdminService.providerBlock(req.query.id as string);
+            const status = await this.AdminService.providerBlock(req.params.id);
+
             if (status) {
                 res.status(OK).json({
                     success: true,
                     message: "Provider blocked successfully",
+                    data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
                     message: "Provider blocking failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -335,6 +373,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -342,7 +381,7 @@ class AdminController {
     // Unblock provider
     async unBlockProvider(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.query.id) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id is a required feild",
@@ -350,16 +389,19 @@ class AdminController {
                 });
                 return;
             }
-            const status = await this.AdminService.providerUnBlock(req.query.id as string);
+            const status = await this.AdminService.providerUnBlock(req.params.id);
+
             if (status) {
                 res.status(OK).json({
                     success: true,
                     message: "Provider Unblocked successully",
+                    data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
                     message: "Provider Unblocking failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -367,6 +409,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -382,7 +425,7 @@ class AdminController {
                 });
                 return;
             }
-            const status = await this.AdminService.getApprovalDetails(req.params.id as string);
+            const status = await this.AdminService.getApprovalDetails(req.params.id);
             if (status) {
                 res.status(OK).json({
                     success: true,
@@ -401,6 +444,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -408,7 +452,7 @@ class AdminController {
     // Update approval detail status
     async approvalStatusUpdate(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.params.id || !req.params.status) {
+            if (!req.params.id || !req.body.status) {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Id and status are required feilds",
@@ -417,8 +461,8 @@ class AdminController {
                 return;
             }
             const status = await this.AdminService.approvalStatusChange(
-                req.params.id as string,
-                req.params.status as string
+                req.params.id,
+                req.body.status
             );
             if (status) {
                 res.status(OK).json({
@@ -438,6 +482,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -469,6 +514,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -584,6 +630,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -600,10 +647,7 @@ class AdminController {
                 return;
             }
 
-            const response = await this.AdminService.updateService(
-                req.params.id as string,
-                req.body.data
-            );
+            const response = await this.AdminService.updateService(req.params.id, req.body.data);
 
             if (response.success) {
                 res.status(OK).json({
@@ -629,6 +673,7 @@ class AdminController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }

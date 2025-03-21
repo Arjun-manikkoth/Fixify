@@ -24,7 +24,7 @@ const signInApi = async (formData: SignIn) => {
 //admin logout api
 const logoutAdmin = async () => {
     try {
-        const response = await axiosAdmin.get(adminRoutes.logout);
+        const response = await axiosAdmin.get(adminRoutes.sign_out);
 
         return {
             success: true,
@@ -43,8 +43,18 @@ const logoutAdmin = async () => {
 const refreshTokenApi = async () => {
     try {
         const response = await axiosAdmin.post(adminRoutes.refresh_token);
+        return {
+            success: true,
+            message: response.data.message,
+            data: null,
+        };
     } catch (error: any) {
         console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
     }
 };
 
@@ -90,7 +100,7 @@ const getProviders = async (page: number, filter: string, search: string | numbe
 //user blocking api
 const blockUser = async (id: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.user_block}?id=${id}`);
+        const response = await axiosAdmin.patch(`${adminRoutes.users}/${id}${adminRoutes.block}`);
 
         return { success: true, message: "User blocked successfully", data: response.data };
     } catch (error: any) {
@@ -105,7 +115,7 @@ const blockUser = async (id: string) => {
 //user unblocking api
 const unBlockUser = async (id: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.user_unblock}?id=${id}`);
+        const response = await axiosAdmin.patch(`${adminRoutes.users}/${id}${adminRoutes.unblock}`);
 
         return { success: true, message: "User Unblocked successfully", data: response.data };
     } catch (error: any) {
@@ -121,7 +131,9 @@ const unBlockUser = async (id: string) => {
 //provider blocking api
 const blockProvider = async (id: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.provider_block}?id=${id}`);
+        const response = await axiosAdmin.patch(
+            `${adminRoutes.providers}/${id}${adminRoutes.block}`
+        );
 
         return { success: true, message: "Provider blocked successfully", data: response.data };
     } catch (error: any) {
@@ -136,7 +148,9 @@ const blockProvider = async (id: string) => {
 //provider unblocking api
 const unBlockProvider = async (id: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.provider_unblock}?id=${id}`);
+        const response = await axiosAdmin.patch(
+            `${adminRoutes.providers}/${id}${adminRoutes.unblock}`
+        );
 
         return { success: true, message: "Provider Unblocked successfully", data: response.data };
     } catch (error: any) {
@@ -172,7 +186,7 @@ const getProvidersForApproval = async (page: number) => {
 //approvals api
 const approvalsDetails = async (id: string) => {
     try {
-        const response = await axiosAdmin.get(`${adminRoutes.approval_details}/${id}`);
+        const response = await axiosAdmin.get(`${adminRoutes.approvals}/${id}`);
 
         return {
             success: true,
@@ -191,7 +205,7 @@ const approvalsDetails = async (id: string) => {
 //approvals status change api
 const approvalStatusChange = async (id: string, status: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.approval_update}/${id}/${status}`);
+        const response = await axiosAdmin.patch(`${adminRoutes.approvals}/${id}`, { status });
 
         return {
             success: true,
@@ -212,7 +226,7 @@ const approvalStatusChange = async (id: string, status: string) => {
 const getServices = async (page: number, filter: string, search: string | number) => {
     try {
         const response = await axiosAdmin.get(
-            `${adminRoutes.get_services}?page=${page}&filter=${filter}&search=${search}`
+            `${adminRoutes.services}?page=${page}&filter=${filter}&search=${search}`
         );
 
         return {
@@ -233,7 +247,7 @@ const getServices = async (page: number, filter: string, search: string | number
 //list unlist service
 const listUnlistService = async (id: string, status: string) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.manage_service}/${id}`, {
+        const response = await axiosAdmin.patch(`${adminRoutes.services}/${id}/status`, {
             status: status,
         });
 
@@ -255,7 +269,7 @@ const listUnlistService = async (id: string, status: string) => {
 //create  service
 const addService = async (data: { serviceName: string; description: string }) => {
     try {
-        const response = await axiosAdmin.post(adminRoutes.add_service, {
+        const response = await axiosAdmin.post(adminRoutes.services, {
             data: data,
         });
 
@@ -278,7 +292,7 @@ const addService = async (data: { serviceName: string; description: string }) =>
 //edit  service
 const editService = async (id: string, data: { serviceName: string; description: string }) => {
     try {
-        const response = await axiosAdmin.patch(`${adminRoutes.update_service}/${id}`, {
+        const response = await axiosAdmin.patch(`${adminRoutes.services}/${id}`, {
             data: data,
         });
 
@@ -301,7 +315,7 @@ const editService = async (id: string, data: { serviceName: string; description:
 //get service
 const getService = async (id: string) => {
     try {
-        const response = await axiosAdmin.get(`${adminRoutes.update_service}/${id}`);
+        const response = await axiosAdmin.get(`${adminRoutes.services}/${id}`);
 
         return {
             success: true,
