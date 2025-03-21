@@ -27,11 +27,11 @@ const GoogleOAuth: React.FC = () => {
                     if (result?.success === true) {
                         dispatch(
                             setUser({
-                                email: result.email,
-                                id: result.id,
-                                name: result.name,
-                                phone: result.phone,
-                                url: result.url,
+                                email: result.data.email,
+                                id: result.data.id,
+                                name: result.data.name,
+                                phone: result.data.phone,
+                                url: result.data.url,
                             })
                         );
 

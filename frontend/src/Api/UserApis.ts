@@ -3,16 +3,6 @@ import { SignIn } from "../Interfaces/UserInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/UserInterfaces/SignUpInterface";
 import userRoutes from "../Endpoints/UserEndpoints";
 import axios from "axios";
-import { baseUrl } from "../Constants/Constants";
-
-interface ISignUpResponse {
-    success: boolean;
-    message: string;
-    email?: string | null;
-    id?: string | null;
-    name?: string;
-    phone?: string;
-}
 
 export interface IRegion {
     latittude: number;
@@ -55,11 +45,7 @@ const signInApi = async (formData: SignIn) => {
         return {
             success: true,
             message: "Sucessfully signed Into Account",
-            email: response.data.email,
-            name: response.data.name,
-            id: response.data.id,
-            url: response.data.url,
-            phone: response.data.phone,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
@@ -70,14 +56,18 @@ const signInApi = async (formData: SignIn) => {
     }
 };
 //api sends signup data to the server
-const signUpApi = async (formData: SignUp): Promise<ISignUpResponse> => {
+const signUpApi = async (formData: SignUp) => {
     try {
         const response = await axiosUser.post(userRoutes.sign_up, formData);
 
-        return { success: true, message: "Sucessfully Created Account", email: response.data.data };
+        return { success: true, message: "Sucessfully Created Account", data: response.data.data };
     } catch (error: any) {
         console.log(error.message);
-        return { success: false, message: error.response.data.message || "something went wrong" };
+        return {
+            success: false,
+            message: error.response.data.message || "something went wrong",
+            data: null,
+        };
     }
 };
 //api to send otp to server for account verification
@@ -126,7 +116,7 @@ const forgotOtpVerifyApi = async (otp: string, email: string) => {
             otp: otp,
             email: email,
         });
-        console.log(response.data.message);
+
         return {
             success: true,
             message: response.data.message,
@@ -189,11 +179,7 @@ const googleAuthApi = async (code: string) => {
         return {
             success: true,
             message: "Sucessfully signed Into Account",
-            email: response.data.email,
-            name: response.data.name,
-            id: response.data.id,
-            url: response.data.url,
-            phone: response.data.phone,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
