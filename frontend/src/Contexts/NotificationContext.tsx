@@ -22,7 +22,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     // Fetch initial unread count from backend
     useEffect(() => {
-        console.log("notifications context mounted");
         const fetchUnreadCount = async () => {
             try {
                 const response = await axios.get(`/api/notifications/unread-count/${id}`);

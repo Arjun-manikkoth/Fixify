@@ -147,7 +147,7 @@ userRoute.patch("/:id/slots", (req, res) => {
 //----------------------------------------------Profile routes-----------------------------------------------
 
 // Route for fetching user data with id
-userRoute.get("/:id", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
+userRoute.get("/:id/profile", verifyToken, verifyRole(["user"]), checkBlockedStatus, (req, res) => {
     userController.getUser(req, res);
 });
 

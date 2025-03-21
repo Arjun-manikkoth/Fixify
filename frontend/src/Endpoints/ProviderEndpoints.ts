@@ -8,7 +8,6 @@ const providerRoutes = {
     get_services: "/services",
     o_auth: "/o-auth",
     profile: "/profile",
-    providers: "/",
     register: "/register",
     forgot_password: "/forgot-password",
     confirm_password: "/confirm-password",

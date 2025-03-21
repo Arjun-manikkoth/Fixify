@@ -224,7 +224,7 @@ const updateProfile = async (data: {
 //api to get user data with id
 const getUserData = async (id: string) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.users}/${id}`);
+        const response = await axiosUser.get(`/${id}${userRoutes.profile}`);
 
         return {
             success: true,
