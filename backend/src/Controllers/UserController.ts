@@ -1,8 +1,6 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
-import { sendNotfication } from "../Utils/Socket";
-import { getIO } from "../Utils/Socket";
 
 const {
     OK,
@@ -26,6 +24,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email, password, username, and mobile number are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -42,6 +41,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: user?.message || "Sign up failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -49,6 +49,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -60,6 +61,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and password are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -85,32 +87,44 @@ class UserController {
                     .json({
                         success: true,
                         message: response.message,
-                        email: response.email,
-                        id: response._id,
-                        name: response.name,
-                        phone: response.mobileNo,
-                        url: response.url,
+                        data: {
+                            email: response.email,
+                            id: response._id,
+                            name: response.name,
+                            phone: response.mobileNo,
+                            url: response.url,
+                        },
                     });
             } else {
                 switch (response?.message) {
                     case "Account does not exist":
-                        res.status(NOT_FOUND).json({ success: false, message: response.message });
+                        res.status(NOT_FOUND).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Invalid Credentials":
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
+                            data: null,
                         });
                         break;
                     case "Didn't complete OTP verification":
                     case "Please Sign in With Google":
                     case "Account blocked by admin":
-                        res.status(FORBIDDEN).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
+                            data: null,
                         });
                         break;
                 }
@@ -120,6 +134,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -131,6 +146,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and OTP are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -138,13 +154,14 @@ class UserController {
             const otpStatus = await this.UserService.otpCheck(req.body.otp, req.body.email);
 
             if (otpStatus.success) {
-                res.status(OK).json({ success: true, message: otpStatus.message });
+                res.status(OK).json({ success: true, message: otpStatus.message, data: null });
             } else {
                 switch (otpStatus.message) {
                     case "Invalid OTP":
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     case "OTP is expired":
@@ -154,10 +171,15 @@ class UserController {
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     default:
-                        res.status(NOT_FOUND).json({ success: false, message: "User not found" });
+                        res.status(NOT_FOUND).json({
+                            success: false,
+                            message: "User not found",
+                            data: null,
+                        });
                         break;
                 }
             }
@@ -166,6 +188,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -177,6 +200,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required field",
+                    data: null,
                 });
                 return;
             }
@@ -184,11 +208,16 @@ class UserController {
             const status = await this.UserService.otpResend(req.body.email);
 
             if (status) {
-                res.status(OK).json({ success: true, message: "OTP sent successfully" });
+                res.status(OK).json({
+                    success: true,
+                    message: "OTP sent successfully",
+                    data: null,
+                });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: "OTP cannot be sent at this moment",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -196,6 +225,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -206,12 +236,13 @@ class UserController {
             res.clearCookie("accessToken", { httpOnly: true, secure: false });
             res.clearCookie("refreshToken", { httpOnly: true, secure: false });
 
-            res.status(OK).json({ success: true, message: "Signed out successfully" });
+            res.status(OK).json({ success: true, message: "Signed out successfully", data: null });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -225,6 +256,7 @@ class UserController {
                 res.status(UNAUTHORIZED).json({
                     success: false,
                     message: "Refresh token missing",
+                    data: null,
                 });
                 return;
             }
@@ -240,15 +272,20 @@ class UserController {
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
                     })
-                    .json({ success: true, message: "Access token sent successfully" });
+                    .json({ success: true, message: "Access token sent successfully", data: null });
             } else {
-                res.status(UNAUTHORIZED).json({ success: false, message: response.message });
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
             }
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -260,6 +297,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Google sign-in code is required",
+                    data: null,
                 });
                 return;
             }
@@ -286,26 +324,37 @@ class UserController {
                     .json({
                         success: true,
                         message: response.message,
-                        email: response.email,
-                        id: response._id,
-                        name: response.name,
-                        phone: response.mobileNo,
-                        url: response.url,
-                        cookie: response.accessToken,
-                        cookie2: response.refreshToken,
+                        data: {
+                            email: response.email,
+                            id: response._id,
+                            name: response.name,
+                            phone: response.mobileNo,
+                            url: response.url,
+                            cookie: response.accessToken,
+                            cookie2: response.refreshToken,
+                        },
                     });
             } else {
                 switch (response?.message) {
                     case "Google Sign In failed":
-                        res.status(BAD_REQUEST).json({ success: false, message: response.message });
+                        res.status(BAD_REQUEST).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     case "Account blocked by admin":
-                        res.status(FORBIDDEN).json({ success: false, message: response.message });
+                        res.status(FORBIDDEN).json({
+                            success: false,
+                            message: response.message,
+                            data: null,
+                        });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: "Internal server error",
+                            data: null,
                         });
                         break;
                 }
@@ -315,6 +364,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -326,6 +376,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Name, mobile number, and ID are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -360,6 +411,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -371,6 +423,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID is a required field",
+                    data: null,
                 });
                 return;
             }
@@ -395,6 +448,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -406,6 +460,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email is a required field",
+                    data: null,
                 });
                 return;
             }
@@ -442,6 +497,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -453,6 +509,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and OTP are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -467,21 +524,28 @@ class UserController {
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     case "OTP is expired":
-                        res.status(GONE).json({ success: false, message: otpStatus.message });
+                        res.status(GONE).json({
+                            success: false,
+                            message: otpStatus.message,
+                            data: null,
+                        });
                         break;
                     case "OTP error":
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
+                            data: null,
                         });
                         break;
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
                             message: "Account not found",
+                            data: null,
                         });
                         break;
                 }
@@ -491,6 +555,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -502,6 +567,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Email and password are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -541,6 +607,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "ID and password are required fields",
+                    data: null,
                 });
                 return;
             }
@@ -589,6 +656,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Address is required",
+                    data: null,
                 });
                 return;
             }
@@ -608,11 +676,13 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: status.message,
+                    data: null,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: status?.message || "Address creation failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -620,6 +690,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -633,6 +704,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "User ID is required",
+                    data: null,
                 });
                 return;
             }
@@ -657,6 +729,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -668,6 +741,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Address ID is required",
+                    data: null,
                 });
                 return;
             }
@@ -692,6 +766,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -705,6 +780,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Address ID is required",
+                    data: null,
                 });
                 return;
             }
@@ -729,6 +805,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -743,6 +820,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: "Address and ID are required",
+                    data: null,
                 });
                 return;
             }
@@ -759,6 +837,7 @@ class UserController {
                 res.status(BAD_REQUEST).json({
                     success: false,
                     message: status?.message || "Address update failed",
+                    data: null,
                 });
             }
         } catch (error: any) {
@@ -766,6 +845,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
@@ -821,6 +901,7 @@ class UserController {
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",
+                data: null,
             });
         }
     }
