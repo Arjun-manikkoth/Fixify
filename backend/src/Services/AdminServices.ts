@@ -21,6 +21,7 @@ import { IPaginatedServices } from "../Interfaces/Service/IServices";
 import { IAddService } from "../Interfaces/Admin/SignInInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
+import { sendNotfication } from "../Utils/Socket";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -339,6 +340,11 @@ class AdminService implements IAdminService {
                                 </div>
                             </body>
                             </html>`
+                        );
+                        sendNotfication(
+                            providerData._id.toString(),
+                            "Your request has been approved successfully.You can now work as a fixify technician",
+                            "Approval"
                         );
                     }
                 } else if (providerData) {

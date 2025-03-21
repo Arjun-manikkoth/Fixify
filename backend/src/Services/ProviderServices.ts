@@ -16,7 +16,6 @@ import {
 } from "../Interfaces/Provider/SignIn";
 import { ISignIn } from "../Interfaces/Provider/SignIn";
 import { IUpdateProfile } from "../Interfaces/Provider/SignIn";
-import { IProviderRegistration } from "../Interfaces/Provider/SignIn";
 import { IServices } from "../Models/ProviderModels/ServiceModel";
 import { IProvider } from "../Models/ProviderModels/ProviderModel";
 import IProviderRepository from "../Interfaces/Provider/ProviderRepositoryInterface";
@@ -32,6 +31,7 @@ import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
 import IReportRepository from "../Interfaces/Report/IReportRepository";
 import { uploadImages } from "../Utils/Cloudinary";
 import { IReportData } from "../Interfaces/Report/IReport";
+import { sendNotfication } from "../Utils/Socket";
 
 interface IResponse {
     success: boolean;
@@ -710,6 +710,7 @@ class ProviderService implements IProviderService {
             if (!status) {
                 return null;
             } else {
+                await sendNotfication(data.id, "Profile was updated", "Profile");
                 return status;
             }
         } catch (error: any) {
@@ -792,6 +793,7 @@ class ProviderService implements IProviderService {
     async forgotPasswordVerify(email: string): Promise<IResponse> {
         try {
             const userData = await this.providerRepository.findProviderByEmail(email);
+
             if (!userData) {
                 return {
                     success: false,
@@ -1022,7 +1024,6 @@ class ProviderService implements IProviderService {
     }
 
     // creates a schedule for a day with a selected location with timely slots
-
     async addSchedule(id: string, date: string, address: IAddress): Promise<IResponse> {
         try {
             const providerData = await this.providerRepository.getProviderDataWithId(id);
@@ -1170,6 +1171,12 @@ class ProviderService implements IProviderService {
                     providerName: requestData.data[0].technician.name,
                     bookingUrl: `https://fixify.com/users/${userData._id}/bookings/${bookingStatus._id}.`,
                 };
+                if (userData._id)
+                    await sendNotfication(
+                        userData._id.toString(),
+                        `Your booking for ${bookingDetails.time} has been confirmed.`,
+                        "Booking"
+                    );
 
                 await sentMail(
                     userData?.email as string,
