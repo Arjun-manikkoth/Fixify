@@ -15,6 +15,7 @@ const AdminSignIn = () => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const admin = useSelector((state: RootState) => state.admin);
 
     if (admin.id) {
@@ -61,8 +62,8 @@ const AdminSignIn = () => {
                 //for a successfull response storing the authenticated adminss data in redux store by calling dispatch function
                 dispatch(
                     setAdmin({
-                        email: response.email,
-                        id: response.id,
+                        email: response.data.email,
+                        id: response.data.id,
                     })
                 );
                 // navigates to admins home after success full login

@@ -9,14 +9,14 @@ const signInApi = async (formData: SignIn) => {
         return {
             success: true,
             message: "Sucessfully signed Into Account",
-            email: response.data.email,
-            id: response.data.id,
+            data: response.data.data,
         };
     } catch (error: any) {
         console.log(error.message);
         return {
             success: false,
             message: error.response.data.message,
+            data: null,
         };
     }
 };
@@ -29,12 +29,14 @@ const logoutAdmin = async () => {
         return {
             success: true,
             message: response.data.message,
+            data: null,
         };
     } catch (error: any) {
         console.log(error.message);
         return {
             success: false,
             message: error.response.data.message,
+            data: null,
         };
     }
 };
