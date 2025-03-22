@@ -53,7 +53,10 @@ class NotificationRepository implements INotificationRepository {
     //mark notification status to read
     async markNotification(id: string): Promise<IResponse> {
         try {
-            const updatedStatus = await Notification.updateOne({ _id: id });
+            const updatedStatus = await Notification.updateOne(
+                { _id: id },
+                { $set: { is_read: true } }
+            );
 
             return updatedStatus.modifiedCount == 1
                 ? {
