@@ -675,6 +675,48 @@ const reportProviderApi = async (data: {
     }
 };
 
+//count unread notifications api
+const countNotificationsApiUser = async (id: string) => {
+    try {
+        const response = await axiosUser.get(
+            `/${id}${userRoutes.notifications}${userRoutes.count}`
+        );
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
+//count unread notifications api
+const fetchNotifications = async (id: string, page: number) => {
+    try {
+        const response = await axiosUser.get(`/${id}${userRoutes.notifications}?page=${page}`);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -704,4 +746,6 @@ export {
     getChatsApi,
     reviewApi,
     reportProviderApi,
+    countNotificationsApiUser,
+    fetchNotifications,
 };

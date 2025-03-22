@@ -45,5 +45,7 @@ interface IProviderService {
     fetchChat(room_id: string): Promise<IResponse>;
     fetchDashboard(data: IProviderDashboardFilter): Promise<IResponse>;
     report(data: IReportData): Promise<IResponse>;
+    fetchUnreadNotificationsCount(id: string): Promise<IResponse>;
+    fetchNotifications(id: string, page: number): Promise<IResponse>;
 }
 export default IProviderService;

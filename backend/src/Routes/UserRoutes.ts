@@ -13,6 +13,7 @@ import PaymentRepository from "../Repositories/PaymentRepository";
 import ChatRepository from "../Repositories/ChatRepository";
 import ReviewRepository from "../Repositories/ReviewRepository";
 import ReportRepository from "../Repositories/ReportRepository";
+import NotificationRepository from "../Repositories/NotificationRepository";
 import { upload } from "../Utils/Multer";
 
 const userRepository = new UserRepository(); // Initialize repository instance
@@ -24,6 +25,7 @@ const paymentRepository = new PaymentRepository(); // creates and instance of pa
 const chatRepository = new ChatRepository(); // creates and instance of chat repository
 const reviewRepository = new ReviewRepository(); // creates and instance of review repository
 const reportRepository = new ReportRepository(); // creates and instance of report repository
+const notificationRepository = new NotificationRepository(); // creates and instance of notification repository
 const userService = new UserServices(
     userRepository,
     otpRepository,
@@ -33,7 +35,8 @@ const userService = new UserServices(
     paymentRepository,
     chatRepository,
     reviewRepository,
-    reportRepository
+    reportRepository,
+    notificationRepository
 );
 
 // Dependency injection of repository into service
@@ -207,6 +210,18 @@ userRoute.post("/bookings/:id/reviews", upload.array("images", 3), (req, res) =>
 // Route for reporting provider
 userRoute.post("/bookings/:id/report", (req, res) => {
     userController.report(req, res);
+});
+
+//---------------------------------------------Notification routes-----------------------------------------------
+
+// Route for fetching notification count
+userRoute.get("/:id/notifications/count", (req, res) => {
+    userController.fetchNotificationsCount(req, res);
+});
+
+// Route for fetching notification count
+userRoute.get("/:id/notifications", (req, res) => {
+    userController.fetchNotifications(req, res);
 });
 
 export default userRoute;

@@ -19,6 +19,7 @@ import { IBookingRequestData, IReviewData } from "../Interfaces/User/SignUpInter
 import { IAddressRepository } from "../Interfaces/Address/IAddressRepository";
 import IScheduleRepository from "../Interfaces/Schedule/ScheduleRepositoryInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
+import INotificationRepository from "../Interfaces/Notification/INotificationRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import { createPaymentIntent } from "../Utils/stripeService";
 import IChatRepository from "../Interfaces/Chat/IChatRepository";
@@ -71,7 +72,8 @@ class UserService implements IUserService {
         private paymentRepository: IPaymentRepository,
         private chatRepository: IChatRepository,
         private reviewRepository: IReviewRepository,
-        private reportRepository: IReportRepository
+        private reportRepository: IReportRepository,
+        private notificationRepository: INotificationRepository
     ) {}
 
     /**
@@ -1414,6 +1416,60 @@ class UserService implements IUserService {
                 : {
                       success: false,
                       message: "Failed to report",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    //fetch unread notifications count
+    async fetchUnreadNotificationsCount(id: string): Promise<IResponse> {
+        try {
+            const response = await this.notificationRepository.unreadNotificationCount(id);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: "Fetched unread count successfully",
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to fetch unread count",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
+
+    //fetch unread notifications
+    async fetchNotifications(id: string, page: number): Promise<IResponse> {
+        try {
+            const response = await this.notificationRepository.getNotifications(id, page);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: "Fetched notifications successfully",
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to fetch notifications",
                       data: null,
                   };
         } catch (error: any) {

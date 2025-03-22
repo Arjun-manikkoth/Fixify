@@ -33,7 +33,6 @@ class BookingRepository implements IBookingRepository {
     //find all bookings related to user
     async getBookingsWithUserId(id: string, page: number): Promise<IResponse> {
         try {
-            console.log(id, page, "id and page");
             const limit = 8;
             const skip = (page - 1) * limit;
 
@@ -99,7 +98,7 @@ class BookingRepository implements IBookingRepository {
                 { $skip: skip }, // Skip previous documents
                 { $limit: limit }, // Limit results per page
             ]);
-            console.log(bookings, "bookings");
+
             const totalBookings = await Booking.countDocuments({
                 user_id: new mongoose.Types.ObjectId(id),
             });

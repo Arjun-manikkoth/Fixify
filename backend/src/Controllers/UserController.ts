@@ -1280,6 +1280,82 @@ class UserController {
             });
         }
     }
+
+    // fetch notifications count
+    async fetchNotificationsCount(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.params.id) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "User id is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.UserService.fetchUnreadNotificationsCount(req.params.id);
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: "Fetched notification count successfully",
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "Internal server error.",
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching count:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
+    // fetch notifications
+    async fetchNotifications(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.params.id || !req.query.page) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "User id , page no are required feilds",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.UserService.fetchNotifications(
+                req.params.id,
+                Number(req.query.page)
+            );
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: "Fetched notifications successfully",
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "Internal server error.",
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching notifications:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
 }
 
 export default UserController;

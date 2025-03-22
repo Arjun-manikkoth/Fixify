@@ -1,8 +1,9 @@
 import { createContext, useState, useEffect } from "react";
 import socket from "../Socket/Socket";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "../Redux/Store";
+import { countNotificationsApiUser } from "../Api/UserApis";
+import { countNotificationsApiProvider } from "../Api/ProviderApis";
 
 interface INotificationContext {
     unreadCount: number;
@@ -16,7 +17,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const provider = useSelector((state: RootState) => state.provider);
 
-    const id = user.id ? user.id : provider.id;
+    const id = user.id ? user.id : provider.id || "";
 
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -24,15 +25,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     useEffect(() => {
         const fetchUnreadCount = async () => {
             try {
-                const response = await axios.get(`/api/notifications/unread-count/${id}`);
-                // setUnreadCount(response.data.unreadCount);
+                const response = user.id
+                    ? await countNotificationsApiUser(id)
+                    : await countNotificationsApiProvider(id);
+                setUnreadCount(response.data);
             } catch (error) {
                 console.error("Error fetching unread count:", error);
             }
         };
 
         if (id) {
-            //fetchUnreadCount();
+            fetchUnreadCount();
             socket.emit("joinNotifications", id);
 
             // Listen for real-time notification updates

@@ -43,5 +43,7 @@ interface IUserService {
         reviewImages: Express.Multer.File[]
     ): Promise<IResponse>;
     report(data: IReportData): Promise<IResponse>;
+    fetchUnreadNotificationsCount(id: string): Promise<IResponse>;
+    fetchNotifications(id: string, page: number): Promise<IResponse>;
 }
 export default IUserService;

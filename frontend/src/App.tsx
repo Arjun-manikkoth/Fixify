@@ -25,6 +25,7 @@ import AdminBookingsPage from "./Pages/Admin/AdminBookingsPage";
 import ProviderDashboardPage from "./Pages/Provider/ProviderDashboard";
 import AdminSalesListingPage from "./Pages/Admin/AdminSalesListingPage";
 import AdminDashboardPage from "./Pages/Admin/AdminDashboardPage";
+import UserNotificationsPage from "./Pages/User/UserNotificationsPage";
 
 const App: FC = () => {
     return (
@@ -50,6 +51,9 @@ const App: FC = () => {
 
                         {/*user booking details page*/}
                         <Route path="/users/bookings/:id" Component={UserBookingDetailsPage} />
+
+                        {/*user notifications page*/}
+                        <Route path="/users/notifications" Component={UserNotificationsPage} />
                     </Route>
 
                     {/*provider protected component wrapper*/}

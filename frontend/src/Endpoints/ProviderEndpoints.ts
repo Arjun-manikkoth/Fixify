@@ -9,6 +9,8 @@ const providerRoutes = {
     o_auth: "/o-auth",
     profile: "/profile",
     register: "/register",
+    notifications: "/notifications",
+    count: "/count",
     forgot_password: "/forgot-password",
     confirm_password: "/confirm-password",
     forgot_otp_verify: "/verify-forgot-password-otp",

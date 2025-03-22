@@ -1,5 +1,5 @@
 import React from "react";
-import { FiUser, FiBook, FiMapPin, FiLogOut, FiSearch } from "react-icons/fi";
+import { FiUser, FiBook, FiMapPin, FiLogOut, FiSearch, FiBellOff } from "react-icons/fi";
 import { clearUser } from "../../Redux/UserSlice";
 import { logoutUser } from "../../Api/UserApis";
 import { useDispatch } from "react-redux";
@@ -54,6 +54,14 @@ const UserSidebar: React.FC = () => {
                     >
                         <FiMapPin className="text-xl text-black" />
                         <span className="text-black text-lg font-semibold">Addresses</span>
+                    </li>
+
+                    <li
+                        className="ps-12 py-5 hover:bg-customBlueHover cursor-pointer flex items-center space-x-4"
+                        onClick={() => handleNavigation("/users/notifications")}
+                    >
+                        <FiBellOff className="text-xl text-black" />
+                        <span className="text-black text-lg font-semibold">Notifications</span>
                     </li>
                     <li
                         onClick={handleLogout}

@@ -2,6 +2,7 @@ import axiosProvider from "../Axios/ProviderInstance";
 import { SignIn } from "../Interfaces/ProviderInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
+import userRoutes from "../Endpoints/UserEndpoints";
 
 interface IAddress {
     city: string;
@@ -568,6 +569,27 @@ const reportUserApi = async (data: {
     }
 };
 
+//count unread notifications api
+const countNotificationsApiProvider = async (id: string) => {
+    try {
+        const response = await axiosProvider.get(
+            `/${id}${providerRoutes.notifications}${providerRoutes.count}`
+        );
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
 export {
     signInApi,
     signUpApi,
@@ -594,4 +616,5 @@ export {
     getChatsApi,
     providerDashboardApi,
     reportUserApi,
+    countNotificationsApiProvider,
 };
