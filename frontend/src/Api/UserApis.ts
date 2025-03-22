@@ -717,6 +717,25 @@ const fetchNotifications = async (id: string, page: number) => {
     }
 };
 
+//mark notification api
+const markNotificationAsRead = async (id: string) => {
+    try {
+        const response = await axiosUser.patch(`${userRoutes.notifications}/${id}`);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
 export {
     signInApi,
     signUpApi,
@@ -748,4 +767,5 @@ export {
     reportProviderApi,
     countNotificationsApiUser,
     fetchNotifications,
+    markNotificationAsRead,
 };

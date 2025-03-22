@@ -49,6 +49,32 @@ class NotificationRepository implements INotificationRepository {
             };
         }
     }
+
+    //mark notification status to read
+    async markNotification(id: string): Promise<IResponse> {
+        try {
+            const updatedStatus = await Notification.updateOne({ _id: id });
+
+            return updatedStatus.modifiedCount == 1
+                ? {
+                      success: true,
+                      message: "Updated message notification",
+                      data: null,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to update notification",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default NotificationRepository;

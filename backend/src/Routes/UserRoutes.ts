@@ -219,8 +219,13 @@ userRoute.get("/:id/notifications/count", (req, res) => {
     userController.fetchNotificationsCount(req, res);
 });
 
-// Route for fetching notification count
+// Route for fetching notifications
 userRoute.get("/:id/notifications", (req, res) => {
+    userController.fetchNotifications(req, res);
+});
+
+// Route for marking notification
+userRoute.patch("/notifications/:id", (req, res) => {
     userController.fetchNotifications(req, res);
 });
 

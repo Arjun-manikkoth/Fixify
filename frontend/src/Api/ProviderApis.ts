@@ -2,7 +2,6 @@ import axiosProvider from "../Axios/ProviderInstance";
 import { SignIn } from "../Interfaces/ProviderInterfaces/SignInInterface";
 import { SignUp } from "../Interfaces/ProviderInterfaces/SignUpInterface";
 import providerRoutes from "../Endpoints/ProviderEndpoints";
-import userRoutes from "../Endpoints/UserEndpoints";
 
 interface IAddress {
     city: string;
@@ -590,6 +589,47 @@ const countNotificationsApiProvider = async (id: string) => {
         };
     }
 };
+
+//count unread notifications api
+const fetchNotifications = async (id: string, page: number) => {
+    try {
+        const response = await axiosProvider.get(`${providerRoutes.notifications}/${id}`);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
+//mark notification api
+const markNotificationAsRead = async (id: string) => {
+    try {
+        const response = await axiosProvider.patch(`${providerRoutes.notifications}/${id}`);
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     signUpApi,
@@ -617,4 +657,6 @@ export {
     providerDashboardApi,
     reportUserApi,
     countNotificationsApiProvider,
+    fetchNotifications,
+    markNotificationAsRead,
 };

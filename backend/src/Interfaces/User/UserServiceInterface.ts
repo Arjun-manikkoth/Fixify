@@ -45,5 +45,6 @@ interface IUserService {
     report(data: IReportData): Promise<IResponse>;
     fetchUnreadNotificationsCount(id: string): Promise<IResponse>;
     fetchNotifications(id: string, page: number): Promise<IResponse>;
+    markNotification(id: string): Promise<IResponse>;
 }
 export default IUserService;

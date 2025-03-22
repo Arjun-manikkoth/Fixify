@@ -5,11 +5,12 @@ import Pagination from "../CommonComponents/Pagination";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
 import { fetchNotifications as fetchUserNotifications } from "../../Api/UserApis";
-import { fetchNotifications as fetchProviderNotifications } from "../../Api/UserApis";
-//import { markNotificationAsRead } from "../../Api/UserApis"; // Add this API function
+import { fetchNotifications as fetchProviderNotifications } from "../../Api/ProviderApis";
+import { markNotificationAsRead as markNotificationAsReadUser } from "../../Api/UserApis";
+import { markNotificationAsRead as markNotificationAsReadProvider } from "../../Api/ProviderApis";
 
 interface Notification {
-    _id: number;
+    _id: string;
     receiver_id: string;
     type: string;
     message: string;
@@ -52,21 +53,25 @@ const Notifications: React.FC = () => {
     }, [page, userId, providerId]);
 
     // Function to mark a notification as read
-    const handleMarkAsRead = async (notificationId: number) => {
+    const handleMarkAsRead = async (notificationId: string) => {
         try {
-            // const response = await markNotificationAsRead(notificationId);
-            // if (response.success) {
-            //     // Update the notification's `is_read` status in the state
-            //     setNotifications((prevNotifications) =>
-            //         prevNotifications.map((notification) =>
-            //             notification._id === notificationId
-            //                 ? { ...notification, is_read: true }
-            //                 : notification
-            //         )
-            //     );
-            // } else {
-            //     console.error("Failed to mark notification as read");
-            // }
+            const markNotificationApi = userId
+                ? markNotificationAsReadUser
+                : markNotificationAsReadProvider;
+
+            const response = await markNotificationApi(notificationId);
+            if (response.success) {
+                // Update the notification's `is_read` status in the state
+                setNotifications((prevNotifications) =>
+                    prevNotifications.map((notification) =>
+                        notification._id === notificationId
+                            ? { ...notification, is_read: true }
+                            : notification
+                    )
+                );
+            } else {
+                console.error("Failed to mark notification as read");
+            }
         } catch (error) {
             console.error("Error marking notification as read:", error);
         }

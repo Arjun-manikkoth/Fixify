@@ -1482,6 +1482,32 @@ class UserService implements IUserService {
             };
         }
     }
+    //mark notifications as read
+    async markNotification(id: string): Promise<IResponse> {
+        try {
+            const response = await this.notificationRepository.markNotifications(id);
+
+            return response.success
+                ? {
+                      success: true,
+                      message: "Updated notification successfully",
+                      data: response.data,
+                  }
+                : {
+                      success: false,
+                      message: "Failed to update notification",
+                      data: null,
+                  };
+        } catch (error: any) {
+            console.log(error.message);
+
+            return {
+                success: false,
+                message: "Internal server error",
+                data: null,
+            };
+        }
+    }
 }
 
 export default UserService;
