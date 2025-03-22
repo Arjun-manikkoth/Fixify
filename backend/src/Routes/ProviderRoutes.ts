@@ -219,4 +219,9 @@ providerRoute.get("/:id/notifications/count", (req, res) => {
     providerController.fetchNotificationsCount(req, res);
 });
 
+// Route for marking notification
+providerRoute.patch("/notifications/:id", (req, res) => {
+    providerController.markNotification(req, res);
+});
+
 export default providerRoute;

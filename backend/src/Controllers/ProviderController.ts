@@ -1231,10 +1231,10 @@ class ProviderController {
     // fetch notifications
     async fetchNotifications(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.params.id || !req.query.page) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id , page no are required feilds",
+                    message: "Notification id is a required feild",
                     data: null,
                 });
                 return;
@@ -1260,6 +1260,43 @@ class ProviderController {
             }
         } catch (error: any) {
             console.error("Error in fetching notifications:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error.",
+                data: null,
+            });
+        }
+    }
+
+    // mark notifications
+    async markNotification(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.params.id) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Notification id is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.providerService.markNotification(req.params.id);
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "Internal server error.",
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in updating notification:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error.",

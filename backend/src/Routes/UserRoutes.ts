@@ -226,7 +226,7 @@ userRoute.get("/:id/notifications", (req, res) => {
 
 // Route for marking notification
 userRoute.patch("/notifications/:id", (req, res) => {
-    userController.fetchNotifications(req, res);
+    userController.markNotification(req, res);
 });
 
 export default userRoute;

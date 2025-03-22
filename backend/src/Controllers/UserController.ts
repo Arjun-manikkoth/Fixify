@@ -1357,13 +1357,13 @@ class UserController {
         }
     }
 
-    // fetch notifications
+    // mark notifications
     async markNotification(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id",
+                    message: "Notification id is a required feild",
                     data: null,
                 });
                 return;
