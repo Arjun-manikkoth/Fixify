@@ -1485,7 +1485,7 @@ class UserService implements IUserService {
     //mark notifications as read
     async markNotification(id: string): Promise<IResponse> {
         try {
-            const response = await this.notificationRepository.markNotifications(id);
+            const response = await this.notificationRepository.markNotification(id);
 
             return response.success
                 ? {
