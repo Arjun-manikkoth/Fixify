@@ -8,6 +8,7 @@ import { countNotificationsApiProvider } from "../Api/ProviderApis";
 interface INotificationContext {
     unreadCount: number;
     setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
+    refreshCount: () => void;
 }
 
 export const NotificationContext = createContext<null | INotificationContext>(null);
@@ -20,6 +21,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const id = user.id ? user.id : provider.id || "";
 
     const [unreadCount, setUnreadCount] = useState(0);
+
+    const [forceFetch, setForceFetch] = useState(0);
 
     // Fetch initial unread count from backend
     useEffect(() => {
@@ -40,7 +43,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
             // Listen for real-time notification updates
             socket.on("updateNotificationCount", (count) => {
-                console.log("notification count updaed", count);
                 setUnreadCount(count);
             });
         }
@@ -48,10 +50,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return () => {
             socket.off("updateNotificationCount");
         };
-    }, []);
+    }, [forceFetch]);
+
+    const refreshCount = () => {
+        setForceFetch((prev) => prev + 1);
+    };
 
     return (
-        <NotificationContext.Provider value={{ unreadCount, setUnreadCount }}>
+        <NotificationContext.Provider value={{ unreadCount, setUnreadCount, refreshCount }}>
             {children}
         </NotificationContext.Provider>
     );

@@ -8,6 +8,8 @@ import { fetchNotifications as fetchUserNotifications } from "../../Api/UserApis
 import { fetchNotifications as fetchProviderNotifications } from "../../Api/ProviderApis";
 import { markNotificationAsRead as markNotificationAsReadUser } from "../../Api/UserApis";
 import { markNotificationAsRead as markNotificationAsReadProvider } from "../../Api/ProviderApis";
+import { useContext } from "react";
+import { NotificationContext } from "../../Contexts/NotificationContext";
 
 interface Notification {
     _id: string;
@@ -26,6 +28,8 @@ const Notifications: React.FC = () => {
 
     const userId = useSelector((state: RootState) => state.user.id);
     const providerId = useSelector((state: RootState) => state.provider.id);
+
+    const notification = useContext(NotificationContext);
 
     const id = userId ? userId : providerId || "";
 
@@ -69,6 +73,7 @@ const Notifications: React.FC = () => {
                             : notification
                     )
                 );
+                notification?.refreshCount();
             } else {
                 console.error("Failed to mark notification as read");
             }
