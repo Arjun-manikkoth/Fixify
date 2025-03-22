@@ -128,7 +128,7 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
         setLoading(true);
         const response = await handleSignUp(formData);
         if (response.success) {
-            localStorage.setItem(`${role}Email`, response.data.email || "");
+            localStorage.setItem(`${role}Email`, response.data || "");
 
             openModal(`${role}OtpVerify`);
         } else {
