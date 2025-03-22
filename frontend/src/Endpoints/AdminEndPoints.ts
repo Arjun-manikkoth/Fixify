@@ -5,6 +5,7 @@ const adminRoutes = {
     users: "/users",
     providers: "/providers",
     services: "/services",
+    reports: "/reports",
     block: "/block",
     status: "/status",
     unblock: "/unblock",

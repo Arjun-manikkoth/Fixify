@@ -26,6 +26,7 @@ import ProviderDashboardPage from "./Pages/Provider/ProviderDashboard";
 import AdminSalesListingPage from "./Pages/Admin/AdminSalesListingPage";
 import AdminDashboardPage from "./Pages/Admin/AdminDashboardPage";
 import UserNotificationsPage from "./Pages/User/UserNotificationsPage";
+import AdminReportsPage from "./Pages/Admin/AdminReportsListPage";
 
 const App: FC = () => {
     return (
@@ -96,6 +97,7 @@ const App: FC = () => {
                             path="/admins/approval_details/:id"
                             Component={AdminApprovalDetailsPage}
                         />
+                        <Route path="/admins/reports" Component={AdminReportsPage} />
                     </Route>
                 </Routes>
             </Router>

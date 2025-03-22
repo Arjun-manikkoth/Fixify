@@ -29,7 +29,10 @@ class NotificationRepository implements INotificationRepository {
 
             const skip = (page - 1) * limit;
 
-            const notifications = await Notification.find({ receiver_id: id }).skip(skip);
+            const notifications = await Notification.find({ receiver_id: id })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
 
             const totalNotifications = await Notification.countDocuments({ receiver_id: id });
 

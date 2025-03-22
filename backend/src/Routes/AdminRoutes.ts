@@ -10,6 +10,7 @@ import ApprovalRepository from "../Repositories/ApprovalRepository";
 import ServiceRepository from "../Repositories/ServiceRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
+import ReportRepository from "../Repositories/ReportRepository";
 
 const adminRepository = new AdminRepository(); // Initialize admin repository instance
 const userRepository = new UserRepository(); // Initialize user repository instance
@@ -18,6 +19,7 @@ const approvalRepository = new ApprovalRepository(); // Initialize approval repo
 const serviceRepository = new ServiceRepository(); // Initialize service repository instance
 const bookingRepository = new BookingRepository(); // Initialize booking repository instance
 const paymentRepository = new PaymentRepository(); // Initialize payment repository instance
+const reportRepository = new ReportRepository(); // Initialize report repository instance
 
 const adminService = new AdminService(
     adminRepository,
@@ -26,7 +28,8 @@ const adminService = new AdminService(
     approvalRepository,
     serviceRepository,
     bookingRepository,
-    paymentRepository
+    paymentRepository,
+    reportRepository
 ); // Dependency injection of repository into service
 const adminController = new AdminController(adminService); // Dependency injection of service into controller
 
@@ -152,6 +155,14 @@ adminRoute.get("/revenue", verifyToken, verifyRole(["admin"]), (req, res) => {
 // // Route for sales data listing
 adminRoute.get("/sales", verifyToken, verifyRole(["admin"]), (req, res) => {
     adminController.getSales(req, res);
+});
+
+//---------------------------------------------Report routes-----------------------------------------------------
+
+// // Route for sales data listing
+adminRoute.get("/reports", verifyToken, verifyRole(["admin"]), (req, res) => {
+    console.log("reports");
+    adminController.fetchReportsList(req, res);
 });
 
 export default adminRoute;

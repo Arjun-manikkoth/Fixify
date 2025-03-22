@@ -417,6 +417,26 @@ const adminDashboardRevenueApi = async (period: string) => {
     }
 };
 
+//get admin dashboard revenue api
+const getReportsListApi = async (page: number) => {
+    try {
+        const response = await axiosAdmin.get(`${adminRoutes.reports}`, { params: { page } });
+
+        return {
+            success: true,
+            message: response.data.message,
+            data: response.data.data,
+        };
+    } catch (error: any) {
+        console.log(error.message);
+        return {
+            success: false,
+            message: error.response.data.message,
+            data: null,
+        };
+    }
+};
+
 export {
     signInApi,
     logoutAdmin,
@@ -439,4 +459,5 @@ export {
     adminSalesApi,
     adminDashboardTilesApi,
     adminDashboardRevenueApi,
+    getReportsListApi,
 };

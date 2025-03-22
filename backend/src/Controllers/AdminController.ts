@@ -784,7 +784,7 @@ class AdminController {
         }
     }
 
-    // get dashboard revemue dadta  to display as chart with filter
+    // get dashboard revemue data  to display as chart with filter
     async getRevenue(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.period) {
@@ -813,6 +813,43 @@ class AdminController {
             }
         } catch (error: any) {
             console.error("Error in fetching booking data:", error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Internal server error",
+                data: null,
+            });
+        }
+    }
+
+    //fetches list of all reports
+    async fetchReportsList(req: Request, res: Response): Promise<void> {
+        try {
+            if (!req.query.page) {
+                res.status(BAD_REQUEST).json({
+                    success: false,
+                    message: "Page is a required feild",
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.AdminService.fetchReportsData(Number(req.query.page));
+
+            if (response.success) {
+                res.status(OK).json({
+                    success: true,
+                    message: response.message,
+                    data: response.data,
+                });
+            } else {
+                res.status(INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error("Error in fetching reports data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: "Internal server error",

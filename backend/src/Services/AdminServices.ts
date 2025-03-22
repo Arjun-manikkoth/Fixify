@@ -22,6 +22,7 @@ import { IAddService } from "../Interfaces/Admin/SignInInterface";
 import IBookingRepository from "../Interfaces/Booking/IBookingRepository";
 import IPaymentRepository from "../Interfaces/Payment/PaymentRepositoryInterface";
 import { sendNotfication } from "../Utils/Socket";
+import IReportRepository from "../Interfaces/Report/IReportRepository";
 
 //interface for signin response
 export interface ISignInResponse {
@@ -54,7 +55,8 @@ class AdminService implements IAdminService {
         private approvalRepository: IApprovalRepository,
         private serviceRepository: IServiceRepository,
         private bookingRepository: IBookingRepository,
-        private paymentRepository: IPaymentRepository
+        private paymentRepository: IPaymentRepository,
+        private reportRepository: IReportRepository
     ) {}
 
     //authenticates admin by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
@@ -654,6 +656,32 @@ class AdminService implements IAdminService {
             return {
                 success: false,
                 message: "Failed to fetch dashboard revenue data",
+                data: null,
+            };
+        }
+    }
+
+    async fetchReportsData(page: number): Promise<IResponse> {
+        try {
+            const reportsData = await this.reportRepository.getAllReports(page);
+
+            if (!reportsData.success) {
+                return {
+                    success: false,
+                    message: "Failed to fetch reports data",
+                    data: null,
+                };
+            }
+            return {
+                success: true,
+                message: "Fetched reports data",
+                data: reportsData.data,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return {
+                success: false,
+                message: "Failed to fetch reports data",
                 data: null,
             };
         }

@@ -72,7 +72,6 @@ interface IBookingDetailProps {
 
 const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi }) => {
     const { id } = useParams();
-    const navigate = useNavigate();
 
     const [booking, setBooking] = useState<IBookingDetail | null>(null);
     const [showStripeForm, setStripeForm] = useState<boolean>(false);
@@ -408,8 +407,8 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                     <ReportModal
                         isOpen={reportModal}
                         onClose={() => setReportModal(false)}
-                        reported_id={role === "user" ? booking.user._id : booking.provider._id}
-                        reporter_id={role === "provider" ? booking.user._id : booking.provider._id}
+                        reported_id={role === "provider" ? booking.user._id : booking.provider._id}
+                        reporter_id={role === "provider" ? booking.provider._id : booking.user._id}
                         reported_role={role === "provider" ? "user" : "provider"}
                         booking_id={booking._id}
                         reportApi={role === "user" ? reportProviderApi : reportUserApi}
