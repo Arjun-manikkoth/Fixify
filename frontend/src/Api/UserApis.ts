@@ -455,7 +455,7 @@ const updateAddressApi = async (
 //api to get slots based on the selected location,service,date,time
 const checkAvailabilityApi = async (data: ICheckSlot) => {
     try {
-        const response = await axiosUser.get(`${userRoutes.slots}`, {
+        const response = await axiosUser.get(`/${userRoutes.slots}`, {
             params: {
                 service_id: data.service_id,
                 lat: data.latitude,
