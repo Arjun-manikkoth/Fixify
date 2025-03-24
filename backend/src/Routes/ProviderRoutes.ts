@@ -125,6 +125,8 @@ providerRoute.get(
 //provider register for approval
 providerRoute.post(
     "/:id/register",
+    verifyToken,
+    verifyRole(["provider"]),
     upload.fields([
         { name: "aadharImage", maxCount: 1 },
         { name: "workImages", maxCount: 2 },
@@ -152,75 +154,75 @@ providerRoute.patch("/reset-password", (req, res) => {
 });
 
 // Route for confirming old password
-providerRoute.post("/:id/confirm-password", (req, res) => {
+providerRoute.post("/:id/confirm-password", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.confirmPassword(req, res);
 });
 
 //----------------------------------------------------Schedule routes------------------------------------------------------------
 
 // Route for creating the schedule
-providerRoute.post("/:id/schedules", (req, res) => {
+providerRoute.post("/:id/schedules", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.createSchedule(req, res);
 });
 
 // Route for fetching the schedule
-providerRoute.get("/:id/schedules", (req, res) => {
+providerRoute.get("/:id/schedules", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.getSchedule(req, res);
 });
 
 //-----------------------------------------------------Booking routes-------------------------------------------------------------
 
 // Route for fetching the booking requests
-providerRoute.get("/:id/booking-requests", (req, res) => {
+providerRoute.get("/:id/booking-requests", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.getBookingRequests(req, res);
 });
 
 // Route for updating the booking requests
-providerRoute.patch("/booking-requests/:id", (req, res) => {
+providerRoute.patch("/booking-requests/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.updateBookingRequestStatus(req, res);
 });
 
 // Route for listing bookings
-providerRoute.get("/:id/bookings", (req, res) => {
+providerRoute.get("/:id/bookings", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.getBookings(req, res);
 });
 
 // Route for booking detail
-providerRoute.get("/bookings/:id", (req, res) => {
+providerRoute.get("/bookings/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.getBookingDetails(req, res);
 });
 
 //-------------------------------------------------Payment routes-------------------------------------------------------
 
 // Route for booking payments (Cash payment and Online payment request)
-providerRoute.post("/bookings/:id/payments", (req, res) => {
+providerRoute.post("/bookings/:id/payments", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.createPaymentRequest(req, res);
 });
 
 // Route for fetching chats
-providerRoute.get("/:id/chats", (req, res) => {
+providerRoute.get("/:id/chats", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.fetchChat(req, res);
 });
 
 // Route for fetching dashboard details
-providerRoute.get("/:id/dashboard", (req, res) => {
+providerRoute.get("/:id/dashboard", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.fetchDashboard(req, res);
 });
 
 // Route for reporting user
-providerRoute.post("/bookings/:id/report", (req, res) => {
+providerRoute.post("/bookings/:id/report", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.report(req, res);
 });
 
 //---------------------------------------------Notification routes-----------------------------------------------
 
 // Route for fetching notification count
-providerRoute.get("/:id/notifications/count", (req, res) => {
+providerRoute.get("/:id/notifications/count", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.fetchNotificationsCount(req, res);
 });
 
 // Route for marking notification
-providerRoute.patch("/notifications/:id", (req, res) => {
+providerRoute.patch("/notifications/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
     providerController.markNotification(req, res);
 });
 
