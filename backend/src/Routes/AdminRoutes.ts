@@ -11,6 +11,7 @@ import ServiceRepository from "../Repositories/ServiceRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ReportRepository from "../Repositories/ReportRepository";
+import checkBlockedStatus from "../Middlewares/BlockCheck";
 
 const adminRepository = new AdminRepository(); // Initialize admin repository instance
 const userRepository = new UserRepository(); // Initialize user repository instance
@@ -37,131 +38,110 @@ const adminController = new AdminController(adminService); // Dependency injecti
 const adminRoute: Router = express.Router();
 
 //--------------------------------------------Auth Routes-----------------------------------------------------
+adminRoute.route("/sign-in").post((req, res) => adminController.signIn(req, res));
 
-// // Route for provider login (sign-in)
-adminRoute.post("/sign-in", (req, res) => {
-    adminController.signIn(req, res);
-});
+adminRoute.route("/sign-out").get((req, res) => adminController.signOut(req, res));
 
-// // Route for provider logout
-adminRoute.get("/sign-out", (req, res) => {
-    adminController.signOut(req, res);
-});
+adminRoute.route("/refresh-token").post((req, res) => adminController.refreshToken(req, res));
 
-// // Route for refresh token
-adminRoute.post("/refresh-token", (req, res) => {
-    adminController.refreshToken(req, res);
-});
+//---------------------------------------------User Management-----------------------------------------------------
+adminRoute
+    .route("/users")
+    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.getUsers(req, res)
+    );
 
-//---------------------------------------------User management-----------------------------------------------------
+adminRoute
+    .route("/users/:id/block")
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.blockUser(req, res)
+    );
 
-// // Route for fetching user datas
-adminRoute.get("/users", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getUsers(req, res);
-});
+adminRoute
+    .route("/users/:id/unblock")
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.unBlockUser(req, res)
+    );
 
-// // Route for blocking user
-adminRoute.patch("/users/:id/block", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.blockUser(req, res);
-});
+//--------------------------------------------Approval Management-----------------------------------------------------
+adminRoute
+    .route("/approvals")
+    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.getApprovals(req, res)
+    );
 
-// // Route for unblocking user
-adminRoute.patch("/users/:id/unblock", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.unBlockUser(req, res);
-});
+adminRoute
+    .route("/approvals/:id")
+    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.approvalDetails(req, res)
+    )
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.approvalStatusUpdate(req, res)
+    );
 
-//--------------------------------------------Approval management-----------------------------------------------------
+//--------------------------------------------Provider Management-----------------------------------------------------
 
-// // Route for fetching approval detail datas
-adminRoute.get("/approvals/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.approvalDetails(req, res);
-});
+adminRoute
+    .route("/providers")
+    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.getProviders(req, res)
+    );
 
-// // Route for fetching approval datas
-adminRoute.get("/approvals", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getApprovals(req, res);
-});
+adminRoute
+    .route("/providers/:id/block")
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.blockProvider(req, res)
+    );
 
-// // Route for approval status change
-adminRoute.patch("/approvals/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.approvalStatusUpdate(req, res);
-});
+adminRoute
+    .route("/providers/:id/unblock")
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.unBlockProvider(req, res)
+    );
 
-//--------------------------------------------Provider management-----------------------------------------------------
+//--------------------------------------------Service Routes-----------------------------------------------------
+adminRoute
+    .route("/services")
+    .all(verifyToken, verifyRole(["admin"]), checkBlockedStatus)
+    .get((req, res) => adminController.getAllServices(req, res))
+    .post((req, res) => adminController.addService(req, res));
 
-// // Route for fetching provider datas
-adminRoute.get("/providers", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getProviders(req, res);
-});
+adminRoute
+    .route("/services/:id/status")
+    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+        adminController.changeServiceStatus(req, res)
+    );
 
-// // Route for blocking provider
-adminRoute.patch("/providers/:id/block", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.blockProvider(req, res);
-});
+adminRoute
+    .route("/services/:id")
+    .all(verifyToken, verifyRole(["admin"]), checkBlockedStatus)
+    .get((req, res) => adminController.getService(req, res))
+    .patch((req, res) => adminController.updateService(req, res));
 
-// // Route for unblocking provider
-adminRoute.patch("/providers/:id/unblock", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.unBlockProvider(req, res);
-});
+//--------------------------------------------Booking Routes-----------------------------------------------------
+adminRoute
+    .route("/bookings")
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getBookings(req, res));
 
-//--------------------------------------------Service routes-----------------------------------------------------
+//---------------------------------------------Dashboard Routes-----------------------------------------------------
+adminRoute
+    .route("/dashboard")
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getDashboard(req, res));
 
-// // Route for fetching services
-adminRoute.get("/services", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getAllServices(req, res);
-});
+adminRoute
+    .route("/revenue")
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getRevenue(req, res));
 
-// // Route for changing service status
-adminRoute.patch("/services/:id/status", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.changeServiceStatus(req, res);
-});
+//---------------------------------------------Sales Routes-----------------------------------------------------
+adminRoute
+    .route("/sales")
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getSales(req, res));
 
-// // Route for fetching service detail
-adminRoute.get("/services/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getService(req, res);
-});
-
-// // Route for adding services
-adminRoute.post("/services", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.addService(req, res);
-});
-
-// // Route for updating service data
-adminRoute.patch("/services/:id", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.updateService(req, res);
-});
-
-//--------------------------------------------Booking routes-----------------------------------------------------
-
-// // Route for bookings listing
-adminRoute.get("/bookings", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getBookings(req, res);
-});
-
-//---------------------------------------------Dashboard routes-----------------------------------------------------
-
-// // Route for dashboard tiles listing
-adminRoute.get("/dashboard", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getDashboard(req, res);
-});
-
-// // Route for dashboard tiles listing
-adminRoute.get("/revenue", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getRevenue(req, res);
-});
-
-//---------------------------------------------Sales routes-----------------------------------------------------
-
-// // Route for sales data listing
-adminRoute.get("/sales", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.getSales(req, res);
-});
-
-//---------------------------------------------Report routes-----------------------------------------------------
-
-// // Route for sales data listing
-adminRoute.get("/reports", verifyToken, verifyRole(["admin"]), (req, res) => {
-    adminController.fetchReportsList(req, res);
-});
+//---------------------------------------------Report Routes-----------------------------------------------------
+adminRoute
+    .route("/reports")
+    .get(verifyToken, verifyRole(["admin"]), (req, res) =>
+        adminController.fetchReportsList(req, res)
+    );
 
 export default adminRoute;
