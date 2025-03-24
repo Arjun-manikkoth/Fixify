@@ -26,6 +26,7 @@ const chatRepository = new ChatRepository(); // creates and instance of chat rep
 const reviewRepository = new ReviewRepository(); // creates and instance of review repository
 const reportRepository = new ReportRepository(); // creates and instance of report repository
 const notificationRepository = new NotificationRepository(); // creates and instance of notification repository
+
 const userService = new UserServices(
     userRepository,
     otpRepository,
@@ -104,46 +105,46 @@ userRoute.patch("/reset-password", (req, res) => {
 });
 
 // Route for confirming old password
-userRoute.post("/:id/confirm-password", (req, res) => {
+userRoute.post("/:id/confirm-password", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.confirmPassword(req, res);
 });
 
 //----------------------------------------------Address routes-----------------------------------------------
 
 // Route for add new address
-userRoute.post("/:id/addresses", (req, res) => {
+userRoute.post("/:id/addresses", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.createAddress(req, res);
 });
 
 // Route for getting all addresses
-userRoute.get("/:id/addresses", (req, res) => {
+userRoute.get("/:id/addresses", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.getAddresses(req, res);
 });
 
 // Route for delete address
-userRoute.delete("/:id/addresses", (req, res) => {
+userRoute.delete("/:id/addresses", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.deleteAddresses(req, res);
 });
 
 // Route for fetching user single address
-userRoute.get("/addresses/:id", (req, res) => {
+userRoute.get("/addresses/:id", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.getAddress(req, res);
 });
 
 // Route for updating single address
-userRoute.patch("/addresses/:id", (req, res) => {
+userRoute.patch("/addresses/:id", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.updateAddress(req, res);
 });
 
 //---------------------------------------------Slot routes-----------------------------------------------
 
 // Route for finding provider slots
-userRoute.get("/slots", (req, res) => {
+userRoute.get("/slots", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.fetchSlots(req, res);
 });
 
 // Route for sending booking request
-userRoute.patch("/:id/slots", (req, res) => {
+userRoute.patch("/:id/slots", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.requestSlots(req, res);
 });
 
@@ -169,63 +170,68 @@ userRoute.patch(
 //---------------------------------------------Booking routes-----------------------------------------------
 
 // Route for listing bookings
-userRoute.get("/:id/bookings", (req, res) => {
-    console.log("booking listing api called");
+userRoute.get("/:id/bookings", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.getBookings(req, res);
 });
 
 // Route for booking detail
-userRoute.get("/bookings/:id", (req, res) => {
+userRoute.get("/bookings/:id", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.getBookingDetails(req, res);
 });
 
 // Route for cancel booking
-userRoute.patch("/bookings/:id/cancel", (req, res) => {
+userRoute.patch("/bookings/:id/cancel", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.cancelBooking(req, res);
 });
 
 //---------------------------------------------payment routes-----------------------------------------------
 
 // Route for online payment
-userRoute.post("/create-payment-intent", (req, res) => {
+userRoute.post("/create-payment-intent", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.createStripePayment(req, res);
 });
 
 //---------------------------------------------Chat routes-----------------------------------------------
 
 // Route for fetching chats
-userRoute.get("/:id/chats", (req, res) => {
+userRoute.get("/:id/chats", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.fetchChat(req, res);
 });
 
 //---------------------------------------------Review routes-----------------------------------------------
 
 // Route for adding review
-userRoute.post("/bookings/:id/reviews", upload.array("images", 3), (req, res) => {
-    userController.addReview(req, res);
-});
+userRoute.post(
+    "/bookings/:id/reviews",
+    verifyToken,
+    verifyRole(["user"]),
+    upload.array("images", 3),
+    (req, res) => {
+        userController.addReview(req, res);
+    }
+);
 
 //---------------------------------------------Report routes-----------------------------------------------
 
 // Route for reporting provider
-userRoute.post("/bookings/:id/report", (req, res) => {
+userRoute.post("/bookings/:id/report", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.report(req, res);
 });
 
 //---------------------------------------------Notification routes-----------------------------------------------
 
 // Route for fetching notification count
-userRoute.get("/:id/notifications/count", (req, res) => {
+userRoute.get("/:id/notifications/count", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.fetchNotificationsCount(req, res);
 });
 
 // Route for fetching notifications
-userRoute.get("/:id/notifications", (req, res) => {
+userRoute.get("/:id/notifications", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.fetchNotifications(req, res);
 });
 
 // Route for marking notification
-userRoute.patch("/notifications/:id", (req, res) => {
+userRoute.patch("/notifications/:id", verifyToken, verifyRole(["user"]), (req, res) => {
     userController.markNotification(req, res);
 });
 

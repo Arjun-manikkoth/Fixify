@@ -161,7 +161,6 @@ adminRoute.get("/sales", verifyToken, verifyRole(["admin"]), (req, res) => {
 
 // // Route for sales data listing
 adminRoute.get("/reports", verifyToken, verifyRole(["admin"]), (req, res) => {
-    console.log("reports");
     adminController.fetchReportsList(req, res);
 });
 

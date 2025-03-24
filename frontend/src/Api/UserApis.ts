@@ -736,6 +736,7 @@ const markNotificationAsRead = async (id: string) => {
         };
     }
 };
+
 export {
     signInApi,
     signUpApi,
