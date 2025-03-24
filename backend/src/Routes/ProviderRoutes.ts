@@ -52,81 +52,68 @@ const providerRoute: Router = express.Router();
 //--------------------------------------------Auth Routes-----------------------------------------------------
 
 // // Route for provider registration (sign-up)
-providerRoute.post("/sign-up", (req, res) => {
+providerRoute.route("/sign-up").post((req, res) => {
     providerController.signUp(req, res);
 });
 
 // // Route for provider login (sign-in)
-providerRoute.post("/sign-in", (req, res) => {
+providerRoute.route("/sign-in").post((req, res) => {
     providerController.signIn(req, res);
 });
 
 // Route for oauth
-providerRoute.patch("/o-auth", (req, res) => {
+providerRoute.route("/o-auth").patch((req, res) => {
     providerController.googleAuth(req, res);
 });
 
 // // Route for provider logout
-providerRoute.get("/sign-out", (req, res) => {
+providerRoute.route("/sign-out").get((req, res) => {
     providerController.signOut(req, res);
 });
 
 // // Route for refresh token
-providerRoute.post("/refresh-token", (req, res) => {
+providerRoute.route("/refresh-token").post((req, res) => {
     providerController.refreshToken(req, res);
 });
 
 //--------------------------------------------------------Otp routes--------------------------------------------------------
 
 // // Route for OTP verification during sign-up
-providerRoute.post("/verify-otp", (req, res) => {
+providerRoute.route("/verify-otp").post((req, res) => {
     providerController.otpVerify(req, res);
 });
 
 // // Route to resend OTP during sign-up/sign-in
-providerRoute.post("/resend-otp", (req, res) => {
+providerRoute.route("/resend-otp").post((req, res) => {
     providerController.otpResend(req, res);
 });
 
 //--------------------------------------------------------Service routes--------------------------------------------------------
 
 //route to get all services
-providerRoute.get("/services", (req, res) => {
+providerRoute.route("/services").get((req, res) => {
     providerController.getAllServices(req, res);
 });
 
 //---------------------------------------------------------Profile routes-----------------------------------------------
 
-// Route for update profile
-providerRoute.patch(
-    "/:id/profile",
-    verifyToken,
-    verifyRole(["provider"]),
-    checkBlockedStatus,
-    upload.single("image"),
-    (req, res) => {
+providerRoute
+    .route("/:id/profile")
+    .all(verifyToken, verifyRole(["provider"]), checkBlockedStatus)
+    .patch(upload.single("image"), (req, res) => {
         providerController.updateProfile(req, res);
-    }
-);
-
-//get provider profile data
-providerRoute.get(
-    "/:id/profile",
-    verifyToken,
-    verifyRole(["provider"]),
-    checkBlockedStatus,
-    (req, res) => {
+    })
+    .get((req, res) => {
         providerController.fetchProfile(req, res);
-    }
-);
+    });
 
 //----------------------------------------------Register routes-------------------------------------------------
 
 //provider register for approval
-providerRoute.post(
-    "/:id/register",
+providerRoute.route("/:id/register").post(
     verifyToken,
     verifyRole(["provider"]),
+    checkBlockedStatus,
     upload.fields([
         { name: "aadharImage", maxCount: 1 },
         { name: "workImages", maxCount: 2 },
@@ -139,91 +126,120 @@ providerRoute.post(
 //----------------------------------------------Password routes-----------------------------------------------
 
 // Route for forgot password mail verify
-providerRoute.post("/forgot-password", (req, res) => {
+providerRoute.route("/forgot-password").post((req, res) => {
     providerController.forgotPassword(req, res);
 });
 
 // Route for forgot password otp verify
-providerRoute.post("/verify-forgot-password-otp", (req, res) => {
+providerRoute.route("/verify-forgot-password-otp").post((req, res) => {
     providerController.forgotPasswordOtpVerify(req, res);
 });
 
 // Route for updating the new password
-providerRoute.patch("/reset-password", (req, res) => {
+providerRoute.route("/reset-password").patch((req, res) => {
     providerController.resetPassword(req, res);
 });
 
 // Route for confirming old password
-providerRoute.post("/:id/confirm-password", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.confirmPassword(req, res);
-});
+providerRoute
+    .route("/:id/confirm-password")
+    .post(verifyToken, verifyRole(["provider"]), (req, res) => {
+        providerController.confirmPassword(req, res);
+    });
 
 //----------------------------------------------------Schedule routes------------------------------------------------------------
 
 // Route for creating the schedule
-providerRoute.post("/:id/schedules", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.createSchedule(req, res);
-});
-
-// Route for fetching the schedule
-providerRoute.get("/:id/schedules", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.getSchedule(req, res);
-});
+providerRoute
+    .route("/:id/schedules")
+    .all(verifyToken, verifyRole(["provider"]), checkBlockedStatus)
+    .post((req, res) => {
+        providerController.createSchedule(req, res);
+    })
+    .get((req, res) => {
+        providerController.getSchedule(req, res);
+    });
 
 //-----------------------------------------------------Booking routes-------------------------------------------------------------
 
 // Route for fetching the booking requests
-providerRoute.get("/:id/booking-requests", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.getBookingRequests(req, res);
-});
+providerRoute
+    .route("/:id/booking-requests")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.getBookingRequests(req, res);
+    });
 
 // Route for updating the booking requests
-providerRoute.patch("/booking-requests/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.updateBookingRequestStatus(req, res);
-});
+providerRoute
+    .route("/booking-requests/:id")
+    .patch(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.updateBookingRequestStatus(req, res);
+    });
 
 // Route for listing bookings
-providerRoute.get("/:id/bookings", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.getBookings(req, res);
-});
+providerRoute
+    .route("/:id/bookings")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.getBookings(req, res);
+    });
 
 // Route for booking detail
-providerRoute.get("/bookings/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.getBookingDetails(req, res);
-});
+providerRoute
+    .route("/bookings/:id")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.getBookingDetails(req, res);
+    });
 
 //-------------------------------------------------Payment routes-------------------------------------------------------
 
 // Route for booking payments (Cash payment and Online payment request)
-providerRoute.post("/bookings/:id/payments", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.createPaymentRequest(req, res);
-});
+providerRoute
+    .route("/bookings/:id/payments")
+    .post(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.createPaymentRequest(req, res);
+    });
+
+//---------------------------------------------Chat routes-----------------------------------------------
 
 // Route for fetching chats
-providerRoute.get("/:id/chats", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.fetchChat(req, res);
-});
+providerRoute
+    .route("/:id/chats")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.fetchChat(req, res);
+    });
+
+//---------------------------------------------Dashboard routes-----------------------------------------------
 
 // Route for fetching dashboard details
-providerRoute.get("/:id/dashboard", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.fetchDashboard(req, res);
-});
+providerRoute
+    .route("/:id/dashboard")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.fetchDashboard(req, res);
+    });
+
+//---------------------------------------------Report routes-----------------------------------------------
 
 // Route for reporting user
-providerRoute.post("/bookings/:id/report", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.report(req, res);
-});
+providerRoute
+    .route("/bookings/:id/report")
+    .post(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.report(req, res);
+    });
 
 //---------------------------------------------Notification routes-----------------------------------------------
 
 // Route for fetching notification count
-providerRoute.get("/:id/notifications/count", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.fetchNotificationsCount(req, res);
-});
+providerRoute
+    .route("/:id/notifications/count")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.fetchNotificationsCount(req, res);
+    });
 
 // Route for marking notification
-providerRoute.patch("/notifications/:id", verifyToken, verifyRole(["provider"]), (req, res) => {
-    providerController.markNotification(req, res);
-});
+providerRoute
+    .route("/notifications/:id")
+    .patch(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) => {
+        providerController.markNotification(req, res);
+    });
 
 export default providerRoute;
