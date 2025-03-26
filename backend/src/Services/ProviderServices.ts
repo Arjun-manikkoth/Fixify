@@ -1,6 +1,5 @@
 import { ObjectId } from "mongoose";
 import axios from "axios";
-import { messages } from "../Constants/Messages";
 import { generateOtp, hashOtp, compareOtps } from "../Utils/GenerateOtp";
 import { oAuth2Client } from "../Utils/GoogleConfig";
 import { sentMail } from "../Utils/SendMail";
@@ -33,6 +32,21 @@ import INotificationRepository from "../Interfaces/Notification/INotificationRep
 import { uploadImages } from "../Utils/Cloudinary";
 import { IReportData } from "../Interfaces/Report/IReport";
 import { sendNotfication } from "../Utils/Socket";
+import {
+    AuthMessages,
+    ProfileMessages,
+    PasswordMessages,
+    ServiceMessages,
+    ScheduleMessages,
+    BookingMessages,
+    PaymentMessages,
+    ChatMessages,
+    ReportMessages,
+    NotificationMessages,
+    GeneralMessages,
+    tokenMessages,
+    DashboardMessages,
+} from "../Constants/Messages";
 
 interface IResponse {
     success: boolean;
@@ -73,7 +87,6 @@ export interface IRefreshTokenResponse {
 }
 
 class ProviderService implements IProviderService {
-    //injecting respositories dependency to service
     constructor(
         private providerRepository: IProviderRepository,
         private otpRepository: IOtpRepository,
@@ -87,7 +100,7 @@ class ProviderService implements IProviderService {
         private reportRepository: IReportRepository,
         private notificationRepository: INotificationRepository
     ) {}
-    //get all services
+
     async getServices(): Promise<IServices[] | null> {
         try {
             const services = await this.serviceRepository.getAllServices();
@@ -103,10 +116,9 @@ class ProviderService implements IProviderService {
         }
     }
 
-    //create provider account to db
     async createProvider(data: SignUp): Promise<ISignUpResponse | null> {
         try {
-            const exists = await this.providerRepository.findProviderByEmail(data.email); //checking the registration status of the provider
+            const exists = await this.providerRepository.findProviderByEmail(data.email);
 
             if (!exists) {
                 const hashedPassword = await hashPassword(data.password);
@@ -121,43 +133,35 @@ class ProviderService implements IProviderService {
                     passwordConfirm: data.passwordConfirm,
                     service_id: data.service_id,
                     google_id: null,
-                }); //inserts provider data to the database
+                });
 
                 if (status) {
-                    const otpStatus = await this.otpSend(status.email, status._id); //generate and sends otp via email
+                    const otpStatus = await this.otpSend(status.email, status._id);
 
                     if (otpStatus) {
-                        //returns this response if otp sent sucessfully
-
                         return {
                             success: true,
-                            message: messages.authentication.signUpSucess,
+                            message: AuthMessages.SIGN_UP_SUCCESS, // "Signed up successfully"
                             email: status.email,
                         };
                     } else {
-                        //returns this response if otp send failure
-
                         return {
                             success: false,
-                            message: messages.authentication.emailOtpFailure,
+                            message: AuthMessages.EMAIL_OTP_FAILURE, // "Email OTP Failure"
                             email: status.email,
                         };
                     }
                 } else {
-                    //returns this reponse if the sign up to database failure
-
                     return {
                         success: false,
-                        message: messages.authentication.signUpFailure,
+                        message: AuthMessages.SIGN_UP_FAILED, // "Sign up failed"
                         email: null,
                     };
                 }
             } else {
-                //returns this if the email already exists
-
                 return {
                     success: false,
-                    message: messages.authentication.dupicateEmail,
+                    message: AuthMessages.DUPLICATE_EMAIL, // "Duplicate email"
                     email: null,
                 };
             }
@@ -167,10 +171,9 @@ class ProviderService implements IProviderService {
         }
     }
 
-    //generate and send otp via mail
     async otpSend(email: string, id: ObjectId): Promise<boolean> {
         try {
-            const otp = generateOtp(); //utility function generates otp
+            const otp = generateOtp();
 
             const mail = await sentMail(
                 email,
@@ -259,15 +262,12 @@ class ProviderService implements IProviderService {
                     </div>
                 </body>
                 </html>`
-            ); //sends otp mail
+            );
+
             if (mail) {
-                // works if mail is sucessfully sent
-
-                const hashedOtp = await hashOtp(otp); // this utility function hash otp
-
-                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id); //stores otp in the database
-
-                return otpStatus ? true : false; //returns status if otp storing to db is success or failure
+                const hashedOtp = await hashOtp(otp);
+                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id);
+                return otpStatus ? true : false;
             }
             return mail;
         } catch (error: any) {
@@ -276,20 +276,12 @@ class ProviderService implements IProviderService {
         }
     }
 
-    /**
-     *
-     * @param email email id of the provider
-     * @returns true/false based on the otp resend status
-     */
-
     async otpResend(email: string): Promise<boolean> {
         try {
-            const data = await this.providerRepository.findProviderByEmail(email); //checks the provider exists and fetch the provider data
+            const data = await this.providerRepository.findProviderByEmail(email);
 
             if (data) {
-                //works if the provider account exists
-
-                const otp = generateOtp(); //generate otp
+                const otp = generateOtp();
                 const mail = await sentMail(
                     email,
                     "Fixify - OTP Verification",
@@ -372,86 +364,62 @@ class ProviderService implements IProviderService {
                         </div>
                     </body>
                     </html>`
-                ); //utility function sends the otp via email to the provider
+                );
 
                 if (mail) {
-                    //executes if mail mail sending successfull
-
-                    const hashedOtp = await hashOtp(otp); //this utility function hashes otp
-
-                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id); //stores otp to the database
-
-                    return otpStatus ? true : false; //returns the otp storing status
+                    const hashedOtp = await hashOtp(otp);
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id);
+                    return otpStatus ? true : false;
                 }
-                return mail; //returns the mail sending status
+                return mail;
             }
 
-            return false; //returns this if the provider account is not found
+            return false;
         } catch (error: any) {
             console.log(error.message);
             return false;
         }
     }
 
-    //verifiying otp
     async otpCheck(otp: string, email: string): Promise<IOtpResponse> {
-        {
-            try {
-                const provider = await this.providerRepository.findProviderByEmail(email); //gets provider account details
+        try {
+            const provider = await this.providerRepository.findProviderByEmail(email);
 
-                if (provider) {
-                    //executs if the provider exists
+            if (provider) {
+                const data = await this.providerRepository.findOtpWithId(provider._id);
 
-                    const data = await this.providerRepository.findOtpWithId(provider._id); //does look up between provider and otp collection and return the data
+                if (data?.otp[0]?.value) {
+                    const otpStatus = await compareOtps(otp, data.otp[0].value);
 
-                    //checking whether otp exists in the aggregated result
-                    if (data?.otp[0]?.value) {
-                        const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
-
-                        if (otpStatus) {
-                            // works if otp is verified
-
-                            const verified = await this.providerRepository.verifyProvider(
-                                provider._id
-                            ); //change the verification status of provider to true
-
-                            return { success: true, message: "Otp verified successfully" };
-                        } else {
-                            //return if the otp is invalid
-
-                            return { success: false, message: "Invalid Otp" };
-                        }
-                    } else if (!data?.otp.length) {
-                        //evaluates true if the otp is not found
-
-                        return { success: false, message: "Otp is expired" };
+                    if (otpStatus) {
+                        const verified = await this.providerRepository.verifyProvider(provider._id);
+                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS }; // "Otp verified successfully"
+                    } else {
+                        return { success: false, message: AuthMessages.OTP_INVALID }; // "Invalid Otp"
                     }
+                } else if (!data?.otp.length) {
+                    return { success: false, message: AuthMessages.OTP_EXPIRED }; // "Otp is expired"
                 }
-                //if provider account doesnot exists returns
-                return {
-                    success: false,
-                    message: "Provider not found",
-                };
-            } catch (error: any) {
-                console.log(error.message);
-                return { success: false, message: "Otp error" };
             }
+            return {
+                success: false,
+                message: GeneralMessages.PROVIDER_NOT_FOUND, // "Provider not found"
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return { success: false, message: AuthMessages.OTP_ERROR }; // "Otp error"
         }
     }
 
-    //authenticates provider by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
     async authenticateProvider(data: ISignIn): Promise<ISignInResponse | null> {
         try {
-            const exists = await this.providerRepository.findProviderByEmail(data.email); //gets provider data with given email
+            const exists = await this.providerRepository.findProviderByEmail(data.email);
 
             if (exists) {
-                //if provider exists
-
                 if (exists.is_blocked) {
-                    //if the provider is blocked by admin
                     return {
                         success: false,
-                        message: "Account blocked by admin",
+                        message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
                         service_id: null,
                         email: "",
                         _id: null,
@@ -462,11 +430,10 @@ class ProviderService implements IProviderService {
                         refreshToken: null,
                     };
                 }
-                // if the providers signed up via google
                 if (exists.google_id) {
                     return {
                         success: false,
-                        message: "Please Sign in With Google",
+                        message: AuthMessages.SIGN_IN_WITH_GOOGLE, // "Please Sign in With Google"
                         email: "",
                         _id: null,
                         service_id: null,
@@ -478,24 +445,18 @@ class ProviderService implements IProviderService {
                     };
                 }
 
-                const passwordStatus = await comparePasswords(data.password, exists.password); // utility function compares passwords
+                const passwordStatus = await comparePasswords(data.password, exists.password);
 
                 if (passwordStatus) {
-                    //executes if the passwords are matching
-
-                    //checks the provider is verified or not
                     if (exists.is_verified) {
-                        //token creation logic here
-
                         const tokens = generateTokens(
                             exists._id.toString(),
                             exists.email,
                             "provider"
-                        ); //generates access and refresh tokens
-
+                        );
                         return {
                             success: true,
-                            message: "Signed in Sucessfully",
+                            message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -506,14 +467,10 @@ class ProviderService implements IProviderService {
                             refreshToken: tokens.refreshToken,
                         };
                     } else {
-                        // sends otp and waits for otp verification
-
-                        const status = await this.otpResend(exists.email); //resends otp for verifiying the provider
-
-                        //sends this reponse to indicate that the provider still needs to verify
+                        const status = await this.otpResend(exists.email);
                         return {
                             success: false,
-                            message: "Didn't complete otp verification",
+                            message: AuthMessages.OTP_NOT_VERIFIED, // "Didn't complete otp verification"
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -525,10 +482,9 @@ class ProviderService implements IProviderService {
                         };
                     }
                 } else {
-                    //if the credentials are wrong returns this
                     return {
                         success: false,
-                        message: "Invalid Credentials",
+                        message: AuthMessages.INVALID_CREDENTIALS, // "Invalid Credentials"
                         email: null,
                         _id: null,
                         name: "",
@@ -540,10 +496,9 @@ class ProviderService implements IProviderService {
                     };
                 }
             } else {
-                //executes this if the provider account is not found
                 return {
                     success: false,
-                    message: "Account does not exist",
+                    message: AuthMessages.ACCOUNT_DOES_NOT_EXIST, // "Account does not exist"
                     email: null,
                     name: "",
                     mobileNo: "",
@@ -560,40 +515,34 @@ class ProviderService implements IProviderService {
         }
     }
 
-    // checks the refresh token and generates access token
     async refreshTokenCheck(token: string): Promise<IRefreshTokenResponse> {
         try {
-            //Verifiying and decoding the token details
             const tokenStatus = await verifyToken(token);
 
-            //checking for verified token and generate new refresh token
             if (tokenStatus.id && tokenStatus.email && tokenStatus.role) {
-                const tokens = generateTokens(tokenStatus.id, tokenStatus.email, tokenStatus.role); //generates refresh token
-
+                const tokens = generateTokens(tokenStatus.id, tokenStatus.email, tokenStatus.role);
                 return {
                     accessToken: tokens.accessToken,
-                    message: tokenStatus.message,
+                    message: tokenMessages.ACCESS_TOKEN_SUCCESS, // "Access token sent successfully"
                 };
             }
 
-            //returns for unverified token
             return {
                 accessToken: null,
                 message: tokenStatus.message,
             };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 accessToken: null,
-                message: "Token error",
+                message: tokenMessages.TOKEN_ERROR, // "Token error"
             };
         }
     }
+
     async googleAuth(code: string): Promise<ISignInResponse> {
         try {
             const googleRes = await oAuth2Client.getToken(code);
-
             oAuth2Client.setCredentials(googleRes.tokens);
 
             const userRes = await axios.get(
@@ -620,7 +569,7 @@ class ProviderService implements IProviderService {
                     const tokens = generateTokens(saveProvider._id.toString(), email, "provider");
                     return {
                         success: true,
-                        message: "Signed in sucessfully",
+                        message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
                         email: saveProvider.email,
                         _id: saveProvider._id,
                         name: saveProvider.name,
@@ -633,7 +582,7 @@ class ProviderService implements IProviderService {
                 }
                 return {
                     success: false,
-                    message: "Google Sign In failed",
+                    message: AuthMessages.GOOGLE_SIGN_IN_FAILED, // "Google Sign In failed"
                     email: null,
                     _id: null,
                     service_id: null,
@@ -647,7 +596,7 @@ class ProviderService implements IProviderService {
                 if (provider.is_blocked) {
                     return {
                         success: false,
-                        message: "Account blocked by admin",
+                        message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
                         email: "",
                         _id: null,
                         name: "",
@@ -662,7 +611,7 @@ class ProviderService implements IProviderService {
                 const tokens = generateTokens(provider._id.toString(), email, "provider");
                 return {
                     success: true,
-                    message: "Signed in sucessfully",
+                    message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
                     email: provider.email,
                     _id: provider._id,
                     name: provider.name,
@@ -677,7 +626,7 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Sign In Failed",
+                message: AuthMessages.SIGN_IN_FAILED, // "Sign In Failed"
                 email: null,
                 _id: null,
                 name: "",
@@ -689,7 +638,7 @@ class ProviderService implements IProviderService {
             };
         }
     }
-    //provider edit profile to db
+
     async editProfile(
         data: IUpdateProfile,
         image: Express.Multer.File | null
@@ -712,7 +661,7 @@ class ProviderService implements IProviderService {
             if (!status) {
                 return null;
             } else {
-                await sendNotfication(data.id, "Profile was updated", "Profile");
+                await sendNotfication(data.id, ProfileMessages.UPDATE_PROFILE_SUCCESS, "Profile"); // "Profile was updated" -> closest match
                 return status;
             }
         } catch (error: any) {
@@ -721,7 +670,6 @@ class ProviderService implements IProviderService {
         }
     }
 
-    //provider get look up profile data with services and address in future
     async getProfileData(id: string): Promise<Partial<IProviderWithService> | null> {
         try {
             const status = await this.providerRepository.fetchProviderProfileData(id);
@@ -731,7 +679,7 @@ class ProviderService implements IProviderService {
             return null;
         }
     }
-    //register provider for approval request
+
     async registerProvider(data: IProviderRegistrationParsed): Promise<IOtpResponse> {
         try {
             const exists = await this.approvalRepository.approvalExists(data.provider_id);
@@ -753,7 +701,7 @@ class ProviderService implements IProviderService {
                 if (urls.length === 0) {
                     return {
                         success: false,
-                        message: "Failed to update images",
+                        message: ProfileMessages.UPDATE_PROFILE_FAILED, // "Failed to update images" -> closest match
                     };
                 }
 
@@ -768,30 +716,29 @@ class ProviderService implements IProviderService {
                 if (status) {
                     return {
                         success: true,
-                        message: "Sucessfully registered request",
+                        message: ProfileMessages.REGISTER_PROFILE_SUCCESS, // "Successfully registered request" -> closest match
                     };
                 } else {
                     return {
                         success: false,
-                        message: "Cannot register at this moment",
+                        message: ProfileMessages.REGISTER_PROFILE_FAILED, // "Cannot register at this moment"
                     };
                 }
             } else {
                 return {
                     success: false,
-                    message: "Already requested for approval",
+                    message: ProfileMessages.ALREADY_REQUESTED_APPROVAL, // "Already requested for approval"
                 };
             }
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to register",
+                message: ProfileMessages.REGISTER_PROFILE_FAILED, // "Failed to register" -> closest match
             };
         }
     }
 
-    //verifies email for sending otp for forgot password
     async forgotPasswordVerify(email: string): Promise<IResponse> {
         try {
             const userData = await this.providerRepository.findProviderByEmail(email);
@@ -799,18 +746,18 @@ class ProviderService implements IProviderService {
             if (!userData) {
                 return {
                     success: false,
-                    message: "Mail not registered",
+                    message: PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED, // "Mail not registered"
                     data: null,
                 };
             }
             if (userData?.google_id) {
                 return {
                     success: false,
-                    message: "Please Sign in with your google account",
+                    message: PasswordMessages.FORGOT_PASSWORD_GOOGLE, // "Please Sign in with your google account"
                     data: null,
                 };
             }
-            const otp = generateOtp(); //utility function generates otp
+            const otp = generateOtp();
 
             const mail = await sentMail(
                 email,
@@ -894,73 +841,61 @@ class ProviderService implements IProviderService {
                     </div>
                 </body>
                 </html>`
-            ); //this utility function sends otp through mail
+            );
 
             if (mail) {
-                // works if mail is sucessfully sent
-
-                const hashedOtp = await hashOtp(otp); // this utility function hash otp
-
-                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id); //stores otp in the database
-
+                const hashedOtp = await hashOtp(otp);
+                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id);
                 return {
                     success: true,
-                    message: "Mail sent successfully",
+                    message: PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "Mail sent successfully" -> closest match
                     data: userData.email,
                 };
             }
             return {
                 success: false,
-                message: "Failed to verify mail",
+                message: PasswordMessages.FORGOT_PASSWORD_FAILED, // "Failed to verify mail"
                 data: null,
             };
         } catch (error: any) {
             console.log(error.message);
-            return { success: false, message: "Couldnt verify mail", data: null };
+            return {
+                success: false,
+                message: PasswordMessages.FORGOT_PASSWORD_FAILED, // "Couldn't verify mail" -> closest match
+                data: null,
+            };
         }
     }
 
-    //verifiying otp for verifiying account
     async passworOtpCheck(otp: string, email: string): Promise<IOtpResponse> {
-        {
-            try {
-                const provider = await this.providerRepository.findProviderByEmail(email); //gets provider account details
+        try {
+            const provider = await this.providerRepository.findProviderByEmail(email);
 
-                if (provider) {
-                    //executes if the account exists
+            if (provider) {
+                const data = await this.providerRepository.findOtpWithId(provider._id);
 
-                    const data = await this.providerRepository.findOtpWithId(provider._id); //does look up between provider and otp collection and return the data
+                if (data?.otp[0]?.value) {
+                    const otpStatus = await compareOtps(otp, data.otp[0].value);
 
-                    //checking whether otp exists in the aggregated result
-                    if (data?.otp[0]?.value) {
-                        const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
-
-                        if (otpStatus) {
-                            // works if otp is verified
-
-                            return { success: true, message: "Otp verified successfully" };
-                        } else {
-                            //return if the otp is invalid
-
-                            return { success: false, message: "Invalid Otp" };
-                        }
-                    } else if (!data?.otp.length) {
-                        //evaluates true if the otp is not found
-
-                        return { success: false, message: "Otp is expired" };
+                    if (otpStatus) {
+                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS }; // "Otp verified successfully"
+                    } else {
+                        return { success: false, message: AuthMessages.OTP_INVALID }; // "Invalid Otp"
                     }
-                } //if user account doesnot exists returns
-                return {
-                    success: false,
-                    message: "Account not found",
-                };
-            } catch (error: any) {
-                console.log(error.message);
-                return { success: false, message: "Otp error" };
+                } else if (!data?.otp.length) {
+                    return { success: false, message: AuthMessages.OTP_EXPIRED }; // "Otp is expired"
+                }
             }
+            return {
+                success: false,
+                message: GeneralMessages.ACCOUNT_NOT_FOUND, // "Account not found"
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return { success: false, message: AuthMessages.OTP_ERROR }; // "Otp error"
         }
     }
-    //find and resets with new password
+
     async changePassword(email: string, password: string): Promise<IResponse> {
         try {
             const hashedPassword = await hashPassword(password);
@@ -972,25 +907,24 @@ class ProviderService implements IProviderService {
             return updateStatus
                 ? {
                       success: true,
-                      message: "Password updated sucessfully",
+                      message: PasswordMessages.RESET_PASSWORD_SUCCESS, // "Password updated successfully"
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to update password",
+                      message: PasswordMessages.RESET_PASSWORD_FAILED, // "Failed to update password"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to update password",
+                message: PasswordMessages.RESET_PASSWORD_FAILED, // "Failed to update password"
                 data: null,
             };
         }
     }
 
-    // verifies the old password
     async verifyPassword(id: string, password: string): Promise<IResponse> {
         try {
             const data = await this.providerRepository.getProviderDataWithId(id);
@@ -1000,18 +934,18 @@ class ProviderService implements IProviderService {
                 return status
                     ? {
                           success: true,
-                          message: "Password verified successfully",
+                          message: PasswordMessages.CONFIRM_PASSWORD_SUCCESS, // "Password verified successfully"
                           data: null,
                       }
                     : {
                           success: false,
-                          message: "Incorrect Password",
+                          message: PasswordMessages.INCORRECT_PASSWORD, // "Incorrect Password"
                           data: null,
                       };
             } else {
                 return {
                     success: false,
-                    message: "Invalid id",
+                    message: GeneralMessages.INVALID_ID, // "Invalid id"
                     data: null,
                 };
             }
@@ -1019,13 +953,12 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to verify password",
+                message: PasswordMessages.CONFIRM_PASSWORD_FAILED, // "Failed to verify password"
                 data: null,
             };
         }
     }
 
-    // creates a schedule for a day with a selected location with timely slots
     async addSchedule(id: string, date: string, address: IAddress): Promise<IResponse> {
         try {
             const providerData = await this.providerRepository.getProviderDataWithId(id);
@@ -1033,7 +966,7 @@ class ProviderService implements IProviderService {
             if (!providerData?.is_approved) {
                 return {
                     success: false,
-                    message: "Complete verification to create schedules",
+                    message: ScheduleMessages.COMPLETE_VERIFICATION, // "Complete verification to create schedules"
                     data: null,
                 };
             }
@@ -1042,38 +975,36 @@ class ProviderService implements IProviderService {
             return status
                 ? {
                       success: true,
-                      message: "Schedule created successfully",
+                      message: ScheduleMessages.CREATE_SCHEDULE_SUCCESS, // "Schedule created successfully"
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to create schedule",
+                      message: ScheduleMessages.CREATE_SCHEDULE_FAILED, // "Failed to create schedule"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to create schedule",
+                message: ScheduleMessages.CREATE_SCHEDULE_FAILED, // "Failed to create schedule"
                 data: null,
             };
         }
     }
 
-    //fetches schedule from the db
     async getSchedule(id: string, date: string): Promise<IResponse> {
         try {
-            //fetches schedule details from the database
             const scheduleResponse = await this.scheduleRepository.fetchSchedule(id, date);
             if (scheduleResponse.success) {
                 return {
                     success: true,
-                    message: "Fetched schedule successfully", //on success
+                    message: ScheduleMessages.FETCH_SCHEDULE_SUCCESS, // "Fetched schedule successfully"
                     data: scheduleResponse.data,
                 };
             } else {
                 return {
-                    success: false, //return on errors
+                    success: false,
                     message: scheduleResponse.message,
                     data: null,
                 };
@@ -1082,13 +1013,12 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch services",
+                message: ScheduleMessages.FETCH_SCHEDULE_FAILED, // "Failed to fetch services" -> closest match
                 data: null,
             };
         }
     }
 
-    //get all requests
     async getAllRequests(provider_id: string): Promise<IResponse> {
         try {
             const requests = await this.scheduleRepository.findAllRequests(provider_id);
@@ -1108,12 +1038,12 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
-    //confirms or cancels the booking requests
+
     async changeBookingRequestStatus(request_id: string, status: string): Promise<IResponse> {
         try {
             let updateStatus: boolean | null = null;
@@ -1124,7 +1054,7 @@ class ProviderService implements IProviderService {
                 if (!requestData.success || !requestData.data || requestData.data.length === 0) {
                     return {
                         success: false,
-                        message: "Booking request not found",
+                        message: BookingMessages.BOOKING_REQUEST_NOT_FOUND, // "Booking request not found"
                         data: null,
                     };
                 }
@@ -1143,7 +1073,7 @@ class ProviderService implements IProviderService {
                 if (!bookingStatus) {
                     return {
                         success: false,
-                        message: "Failed to create booking",
+                        message: BookingMessages.CREATE_BOOKING_FAILED, // "Failed to create booking"
                         data: null,
                     };
                 }
@@ -1158,7 +1088,7 @@ class ProviderService implements IProviderService {
                 if (!userData) {
                     return {
                         success: false,
-                        message: "Failed to find user data",
+                        message: GeneralMessages.USER_NOT_FOUND, // "Failed to find user data" -> closest match
                         data: null,
                     };
                 }
@@ -1176,7 +1106,7 @@ class ProviderService implements IProviderService {
                 if (userData._id)
                     await sendNotfication(
                         userData._id.toString(),
-                        `Your booking for ${bookingDetails.time} has been confirmed.`,
+                        BookingMessages.BOOKING_CONFIRMED, // "Your booking for ${bookingDetails.time} has been confirmed."
                         "Booking"
                     );
 
@@ -1300,27 +1230,26 @@ class ProviderService implements IProviderService {
             if (!updateStatus) {
                 return {
                     success: false,
-                    message: "Failed to update booking status",
+                    message: BookingMessages.UPDATE_BOOKING_STATUS_FAILED, // "Failed to update booking status"
                     data: null,
                 };
             }
 
             return {
                 success: true,
-                message: `Booking completed successfully`,
+                message: BookingMessages.BOOKING_COMPLETED_SUCCESS, // "Booking completed successfully"
                 data: null,
             };
         } catch (error: any) {
             console.error("Error in changeBookingRequestStatus:", error.message);
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    //fetch all booking details
     async fetchBookings(id: string, page: number): Promise<IResponse> {
         try {
             const bookingStatus = await this.bookingRepository.getBookingsWithProviderId(id, page);
@@ -1337,16 +1266,15 @@ class ProviderService implements IProviderService {
                       data: null,
                   };
         } catch (error: any) {
-            console.log(error.messaege);
+            console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch bookings",
+                message: BookingMessages.FETCH_BOOKINGS_FAILED, // "Failed to fetch bookings"
                 data: null,
             };
         }
     }
 
-    //fetch booking details
     async fetchBookingDetail(id: string): Promise<IResponse> {
         try {
             const response = await this.bookingRepository.getBookingDetails(id);
@@ -1366,13 +1294,12 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch booking details",
+                message: BookingMessages.FETCH_BOOKING_DETAILS_FAILED, // "Failed to fetch booking details"
                 data: null,
             };
         }
     }
 
-    // creates a payment document with amount and mode for payment from user side
     async intiatePaymentRequest(id: string, amount: number, method: string): Promise<IResponse> {
         try {
             const response = await this.paymentRepository.savePayment(amount, method);
@@ -1397,7 +1324,7 @@ class ProviderService implements IProviderService {
             if (!updatedBooking) {
                 return {
                     success: false,
-                    message: "Failed to update booking status",
+                    message: BookingMessages.UPDATE_BOOKING_STATUS_FAILED, // "Failed to update booking status"
                     data: null,
                 };
             }
@@ -1410,20 +1337,19 @@ class ProviderService implements IProviderService {
                   }
                 : {
                       success: false,
-                      message: "Failed to update booking with payment ID",
+                      message: BookingMessages.UPDATE_BOOKING_PAYMENT_FAILED, // "Failed to update booking with payment ID"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to initiate payment request",
+                message: PaymentMessages.INITIATE_PAYMENT_FAILED, // "Failed to initiate payment request"
                 data: null,
             };
         }
     }
 
-    //get all chat data
     async fetchChat(room_id: string): Promise<IResponse> {
         try {
             const chatResponse = await this.chatRepository.fetchChats(room_id);
@@ -1442,13 +1368,12 @@ class ProviderService implements IProviderService {
         } catch (error: any) {
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    //get dashboard details
     async fetchDashboard(data: IProviderDashboardFilter): Promise<IResponse> {
         try {
             const response = await this.bookingRepository.getProviderDashboardDetails(
@@ -1463,20 +1388,19 @@ class ProviderService implements IProviderService {
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch dashboard details",
+                      message: DashboardMessages.FETCH_DASHBOARD_FAILED, // "Failed to fetch dashboard details"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    // reports account
     async report(data: IReportData): Promise<IResponse> {
         try {
             const duplicateExists = await this.reportRepository.duplicateReport(data);
@@ -1484,7 +1408,7 @@ class ProviderService implements IProviderService {
             if (duplicateExists) {
                 return {
                     success: false,
-                    message: "Already reported",
+                    message: ReportMessages.REPORT_ALREADY_EXISTS, // "Already reported"
                     data: null,
                 };
             }
@@ -1494,26 +1418,24 @@ class ProviderService implements IProviderService {
             return reportResponse
                 ? {
                       success: true,
-                      message: "Reported successfully",
+                      message: ReportMessages.REPORT_SUCCESS, // "Reported successfully"
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to report",
+                      message: ReportMessages.REPORT_FAILED, // "Failed to report"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    //fetch unread notifications count
     async fetchUnreadNotificationsCount(id: string): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.unreadNotificationCount(id);
@@ -1521,26 +1443,24 @@ class ProviderService implements IProviderService {
             return response.success
                 ? {
                       success: true,
-                      message: "Fetched unread count successfully",
+                      message: NotificationMessages.FETCH_UNREAD_COUNT_SUCCESS, // "Fetched unread count successfully"
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch unread count",
+                      message: NotificationMessages.FETCH_UNREAD_COUNT_FAILED, // "Failed to fetch unread count"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    //fetch unread notifications
     async fetchNotifications(id: string, page: number): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.getNotifications(id, page);
@@ -1548,26 +1468,24 @@ class ProviderService implements IProviderService {
             return response.success
                 ? {
                       success: true,
-                      message: "Fetched notifications successfully",
+                      message: NotificationMessages.FETCH_NOTIFICATIONS_SUCCESS, // "Fetched notifications successfully"
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch notifications",
+                      message: NotificationMessages.FETCH_NOTIFICATIONS_FAILED, // "Failed to fetch notifications"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }
     }
 
-    //mark notifications as read
     async markNotification(id: string): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.markNotification(id);
@@ -1575,20 +1493,19 @@ class ProviderService implements IProviderService {
             return response.success
                 ? {
                       success: true,
-                      message: "Updated notification successfully",
+                      message: NotificationMessages.UPDATE_NOTIFICATION_SUCCESS, // "Updated notification successfully"
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to update notification",
+                      message: NotificationMessages.UPDATE_NOTIFICATION_FAILED, // "Failed to update notification"
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             };
         }

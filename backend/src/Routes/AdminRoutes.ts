@@ -11,7 +11,6 @@ import ServiceRepository from "../Repositories/ServiceRepository";
 import BookingRepository from "../Repositories/BookingRepository";
 import PaymentRepository from "../Repositories/PaymentRepository";
 import ReportRepository from "../Repositories/ReportRepository";
-import checkBlockedStatus from "../Middlewares/BlockCheck";
 
 const adminRepository = new AdminRepository(); // Initialize admin repository instance
 const userRepository = new UserRepository(); // Initialize user repository instance
@@ -31,7 +30,9 @@ const adminService = new AdminService(
     bookingRepository,
     paymentRepository,
     reportRepository
-); // Dependency injection of repository into service
+);
+
+// Dependency injection of repository into service
 const adminController = new AdminController(adminService); // Dependency injection of service into controller
 
 // // Initialize admin router instance
@@ -47,35 +48,27 @@ adminRoute.route("/refresh-token").post((req, res) => adminController.refreshTok
 //---------------------------------------------User Management-----------------------------------------------------
 adminRoute
     .route("/users")
-    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
-        adminController.getUsers(req, res)
-    );
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getUsers(req, res));
 
 adminRoute
     .route("/users/:id/block")
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
-        adminController.blockUser(req, res)
-    );
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) => adminController.blockUser(req, res));
 
 adminRoute
     .route("/users/:id/unblock")
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
-        adminController.unBlockUser(req, res)
-    );
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) => adminController.unBlockUser(req, res));
 
 //--------------------------------------------Approval Management-----------------------------------------------------
 adminRoute
     .route("/approvals")
-    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
-        adminController.getApprovals(req, res)
-    );
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getApprovals(req, res));
 
 adminRoute
     .route("/approvals/:id")
-    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+    .get(verifyToken, verifyRole(["admin"]), (req, res) =>
         adminController.approvalDetails(req, res)
     )
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) =>
         adminController.approvalStatusUpdate(req, res)
     );
 
@@ -83,38 +76,36 @@ adminRoute
 
 adminRoute
     .route("/providers")
-    .get(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
-        adminController.getProviders(req, res)
-    );
+    .get(verifyToken, verifyRole(["admin"]), (req, res) => adminController.getProviders(req, res));
 
 adminRoute
     .route("/providers/:id/block")
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) =>
         adminController.blockProvider(req, res)
     );
 
 adminRoute
     .route("/providers/:id/unblock")
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) =>
         adminController.unBlockProvider(req, res)
     );
 
 //--------------------------------------------Service Routes-----------------------------------------------------
 adminRoute
     .route("/services")
-    .all(verifyToken, verifyRole(["admin"]), checkBlockedStatus)
+    .all(verifyToken, verifyRole(["admin"]))
     .get((req, res) => adminController.getAllServices(req, res))
     .post((req, res) => adminController.addService(req, res));
 
 adminRoute
     .route("/services/:id/status")
-    .patch(verifyToken, verifyRole(["admin"]), checkBlockedStatus, (req, res) =>
+    .patch(verifyToken, verifyRole(["admin"]), (req, res) =>
         adminController.changeServiceStatus(req, res)
     );
 
 adminRoute
     .route("/services/:id")
-    .all(verifyToken, verifyRole(["admin"]), checkBlockedStatus)
+    .all(verifyToken, verifyRole(["admin"]))
     .get((req, res) => adminController.getService(req, res))
     .patch((req, res) => adminController.updateService(req, res));
 

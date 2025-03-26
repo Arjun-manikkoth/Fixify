@@ -2,7 +2,6 @@ import IUserService from "../Interfaces/User/UserServiceInterface";
 import { ISlotFetch, IUpdateProfile, SignUp } from "../Interfaces/User/SignUpInterface";
 import { ISignIn } from "../Interfaces/User/SignUpInterface";
 import IUserRepository from "../Interfaces/User/UserRepositoryInterface";
-import { messages } from "../Constants/Messages";
 import { generateOtp, hashOtp, compareOtps } from "../Utils/GenerateOtp";
 import { sentMail } from "../Utils/SendMail";
 import { ObjectId } from "mongoose";
@@ -28,15 +27,27 @@ import { uploadImages } from "../Utils/Cloudinary";
 import { IReportData } from "../Interfaces/Report/IReport";
 import IReportRepository from "../Interfaces/Report/IReportRepository";
 import { sendNotfication } from "../Utils/Socket";
+import {
+    AuthMessages,
+    PasswordMessages,
+    AddressMessages,
+    SlotMessages,
+    BookingMessages,
+    PaymentMessages,
+    ChatMessages,
+    ReviewMessages,
+    ReportMessages,
+    NotificationMessages,
+    GeneralMessages,
+} from "../Constants/Messages";
 
-//interface for signup response
+// Interface definitions remain unchanged
 export interface ISignUpResponse {
     success: boolean;
     message: string;
     email: string | null;
 }
 
-//interface for signin response
 export interface ISignInResponse {
     success: boolean;
     message: string;
@@ -49,20 +60,17 @@ export interface ISignInResponse {
     refreshToken: string | null;
 }
 
-//interface for otp response
 export interface IOtpResponse {
     success: boolean;
     message: string;
 }
 
-//interface for refresh token response
 export interface IRefreshTokenResponse {
     accessToken: string | null;
     message: string;
 }
 
 class UserService implements IUserService {
-    //injecting respositories dependency to service
     constructor(
         private userRepository: IUserRepository,
         private otpRepository: IOtpRepository,
@@ -76,17 +84,9 @@ class UserService implements IUserService {
         private notificationRepository: INotificationRepository
     ) {}
 
-    /**
-     * Creates a user account by validating the user's email and password,
-     * hashing the password, storing the data, and sending an OTP for verification.
-     *
-     * @param {SignUp} userData - User registration data
-     * @returns {Promise<ISignUpResponse|null>} - Response indicating success or failure
-     */
-
     async createUser(userData: SignUp): Promise<ISignUpResponse | null> {
         try {
-            const exists = await this.userRepository.findUserByEmail(userData.email); //checking the registration status of the user
+            const exists = await this.userRepository.findUserByEmail(userData.email);
 
             if (!exists) {
                 const hashedPassword = await hashPassword(userData.password);
@@ -96,43 +96,35 @@ class UserService implements IUserService {
                     ...userData,
                     google_id: null,
                     url: "",
-                }); //inserts userdata to the database
+                });
 
                 if (status) {
-                    const otpStatus = await this.otpSend(status.email, status._id); //generate and sends otp via email
+                    const otpStatus = await this.otpSend(status.email, status._id);
 
                     if (otpStatus) {
-                        //returns this response if otp sent sucessfully
-
                         return {
                             success: true,
-                            message: messages.authentication.signUpSucess,
+                            message: AuthMessages.SIGN_UP_SUCCESS,
                             email: status.email,
                         };
                     } else {
-                        //returns this response if otp send failure
-
                         return {
                             success: false,
-                            message: messages.authentication.emailOtpFailure,
+                            message: AuthMessages.EMAIL_OTP_FAILURE,
                             email: status.email,
                         };
                     }
                 } else {
-                    //returns this reponse if the sign up to database failure
-
                     return {
                         success: false,
-                        message: messages.authentication.signUpFailure,
+                        message: AuthMessages.SIGN_UP_FAILURE,
                         email: null,
                     };
                 }
             } else {
-                //returns this if the email already exists
-
                 return {
                     success: false,
-                    message: messages.authentication.dupicateEmail,
+                    message: AuthMessages.DUPLICATE_EMAIL,
                     email: null,
                 };
             }
@@ -142,108 +134,103 @@ class UserService implements IUserService {
         }
     }
 
-    //generate and send otp via mail
     async otpSend(email: string, id: ObjectId): Promise<boolean> {
         try {
-            const otp = generateOtp(); //utility function generates otp
+            const otp = generateOtp();
 
             const mail = await sentMail(
                 email,
                 "Fixify - OTP Verification",
                 `<!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Fixify - OTP Verification</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            background-color: #f4f4f4;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        .email-container {
-                            max-width: 600px;
-                            margin: 20px auto;
-                            background-color: #ffffff;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                        }
-                        .header {
-                            background-color: #007bff;
-                            color: #ffffff;
-                            text-align: center;
-                            padding: 20px;
-                        }
-                        .header h1 {
-                            margin: 0;
-                            font-size: 24px;
-                        }
-                        .content {
-                            padding: 20px;
-                            color: #333333;
-                        }
-                        .content h2 {
-                            font-size: 20px;
-                            margin-bottom: 10px;
-                        }
-                        .content p {
-                            font-size: 16px;
-                            line-height: 1.6;
-                        }
-                        .otp-code {
-                            font-size: 24px;
-                            font-weight: bold;
-                            color: #007bff;
-                            text-align: center;
-                            margin: 20px 0;
-                        }
-                        .footer {
-                            background-color: #f4f4f4;
-                            text-align: center;
-                            padding: 10px;
-                            font-size: 14px;
-                            color: #666666;
-                        }
-                        .footer a {
-                            color: #007bff;
-                            text-decoration: none;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="email-container">
-                        <div class="header">
-                            <h1>Fixify</h1>
-                        </div>
-                        <div class="content">
-                            <h2>Verify Your Account</h2>
-                            <p>Dear User,</p>
-                            <p>Thank you for choosing Fixify! To complete your account verification, please use the following One-Time Password (OTP):</p>
-                            <div class="otp-code">${otp}</div>
-                            <p>This code is valid for <b>2 minutes</b>. Please do not share this code with anyone for security reasons.</p>
-                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
-                            <p>Best regards,<br>The Fixify Team</p>
-                        </div>
-                        <div class="footer">
-                            <p>© 2025 Fixify. All rights reserved.</p>
-                            <p><a href="https://fixify.com">Visit our website</a></p>
-                        </div>
-                    </div>
-                </body>
-                </html>`
-            ); //this utility function sends otp through mail
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Fixify - OTP Verification</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background-color: #007bff;
+                    color: #ffffff;
+                    text-align: center;
+                    padding: 20px;
+                }
+                .header h1 {
+                    margin: 0;
+                    font-size: 24px;
+                }
+                .content {
+                    padding: 20px;
+                    color: #333333;
+                }
+                .content h2 {
+                    font-size: 20px;
+                    margin-bottom: 10px;
+                }
+                .content p {
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                .otp-code {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #007bff;
+                    text-align: center;
+                    margin: 20px 0;
+                }
+                .footer {
+                    background-color: #f4f4f4;
+                    text-align: center;
+                    padding: 10px;
+                    font-size: 14px;
+                    color: #666666;
+                }
+                .footer a {
+                    color: #007bff;
+                    text-decoration: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="header">
+                    <h1>Fixify</h1>
+                </div>
+                <div class="content">
+                    <h2>Verify Your Account</h2>
+                    <p>Dear User,</p>
+                    <p>Thank you for choosing Fixify! To complete your account verification, please use the following One-Time Password (OTP):</p>
+                    <div class="otp-code">${otp}</div>
+                    <p>This code is valid for <b>2 minutes</b>. Please do not share this code with anyone for security reasons.</p>
+                    <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                    <p>Best regards,<br>The Fixify Team</p>
+                </div>
+                <div class="footer">
+                    <p>© 2025 Fixify. All rights reserved.</p>
+                    <p><a href="https://fixify.com">Visit our website</a></p>
+                </div>
+            </div>
+        </body>
+        </html>`
+            );
 
             if (mail) {
-                // works if mail is sucessfully sent
-
-                const hashedOtp = await hashOtp(otp); // this utility function hash otp
-
-                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id); //stores otp in the database
-
-                return otpStatus ? true : false; //returns status if otp storing to db is success or failure
+                const hashedOtp = await hashOtp(otp);
+                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, id);
+                return otpStatus ? true : false;
             }
             return mail;
         } catch (error: any) {
@@ -252,178 +239,151 @@ class UserService implements IUserService {
         }
     }
 
-    /**
-     *
-     * @param email email id of the user
-     * @returns true/false based on the otp resend status
-     */
-
     async otpResend(email: string): Promise<boolean> {
         try {
-            const data = await this.userRepository.findUserByEmail(email); //checks the user exists and fetch the user data
+            const data = await this.userRepository.findUserByEmail(email);
 
             if (data) {
-                //works if the user account exists
-
-                const otp = generateOtp(); //generate otp
+                const otp = generateOtp();
 
                 const mail = await sentMail(
                     email,
                     "Fixify - OTP Verification",
                     `<!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Fixify - OTP Verification</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                background-color: #f4f4f4;
-                                margin: 0;
-                                padding: 0;
-                            }
-                            .email-container {
-                                max-width: 600px;
-                                margin: 20px auto;
-                                background-color: #ffffff;
-                                border-radius: 8px;
-                                overflow: hidden;
-                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                            }
-                            .header {
-                                background-color: #007bff;
-                                color: #ffffff;
-                                text-align: center;
-                                padding: 20px;
-                            }
-                            .header h1 {
-                                margin: 0;
-                                font-size: 24px;
-                            }
-                            .content {
-                                padding: 20px;
-                                color: #333333;
-                            }
-                            .content p {
-                                font-size: 16px;
-                                line-height: 1.6;
-                            }
-                            .otp-code {
-                                font-size: 24px;
-                                font-weight: bold;
-                                color: #007bff;
-                                text-align: center;
-                                margin: 20px 0;
-                            }
-                            .footer {
-                                background-color: #f4f4f4;
-                                text-align: center;
-                                padding: 10px;
-                                font-size: 14px;
-                                color: #666666;
-                            }
-                            .footer a {
-                                color: #007bff;
-                                text-decoration: none;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="email-container">
-                            <div class="header">
-                                <h1>Fixify</h1>
-                            </div>
-                            <div class="content">
-                                <p>Dear User,</p>
-                                <p>To verify your Fixify account, please enter the following One-Time Password (OTP):</p>
-                                <div class="otp-code">${otp}</div>
-                                <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
-                                <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
-                                <p>Best regards,<br>The Fixify Team</p>
-                            </div>
-                            <div class="footer">
-                                <p>© 2025 Fixify. All rights reserved.</p>
-                                <p><a href="https://fixify.com">Visit our website</a></p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>`
-                ); //utility function sends the otp via email to the user
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Fixify - OTP Verification</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      background-color: #f4f4f4;
+                      margin: 0;
+                      padding: 0;
+                  }
+                  .email-container {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      background-color: #ffffff;
+                      border-radius: 8px;
+                      overflow: hidden;
+                      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  }
+                  .header {
+                      background-color: #007bff;
+                      color: #ffffff;
+                      text-align: center;
+                      padding: 20px;
+                  }
+                  .header h1 {
+                      margin: 0;
+                      font-size: 24px;
+                  }
+                  .content {
+                      padding: 20px;
+                      color: #333333;
+                  }
+                  .content p {
+                      font-size: 16px;
+                      line-height: 1.6;
+                  }
+                  .otp-code {
+                      font-size: 24px;
+                      font-weight: bold;
+                      color: #007bff;
+                      text-align: center;
+                      margin: 20px 0;
+                  }
+                  .footer {
+                      background-color: #f4f4f4;
+                      text-align: center;
+                      padding: 10px;
+                      font-size: 14px;
+                      color: #666666;
+                  }
+                  .footer a {
+                      color: #007bff;
+                      text-decoration: none;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="email-container">
+                  <div class="header">
+                      <h1>Fixify</h1>
+                  </div>
+                  <div class="content">
+                      <p>Dear User,</p>
+                      <p>To verify your Fixify account, please enter the following One-Time Password (OTP):</p>
+                      <div class="otp-code">${otp}</div>
+                      <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                      <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                      <p>Best regards,<br>The Fixify Team</p>
+                  </div>
+                  <div class="footer">
+                      <p>© 2025 Fixify. All rights reserved.</p>
+                      <p><a href="https://fixify.com">Visit our website</a></p>
+                  </div>
+              </div>
+          </body>
+          </html>`
+                );
 
                 if (mail) {
-                    //executes if mail mail sending successfull
-
-                    const hashedOtp = await hashOtp(otp); //this utility function hashes otp
-
-                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id); //stores otp to the database
-
-                    return otpStatus ? true : false; //returns the otp storing status
+                    const hashedOtp = await hashOtp(otp);
+                    const otpStatus = await this.otpRepository.storeOtp(hashedOtp, data._id);
+                    return otpStatus ? true : false;
                 }
-                return mail; //returns the mail sending status
+                return mail;
             }
 
-            return false; //returns this if the user account is not found
+            return false;
         } catch (error: any) {
             console.log(error.message);
             return false;
         }
     }
 
-    //verifiying otp for verifiying account
     async otpCheck(otp: string, email: string): Promise<IOtpResponse> {
-        {
-            try {
-                const user = await this.userRepository.findUserByEmail(email); //gets user account details
+        try {
+            const user = await this.userRepository.findUserByEmail(email);
 
-                if (user) {
-                    //executes if the user exists
+            if (user) {
+                const data = await this.userRepository.findOtpWithId(user._id);
 
-                    const data = await this.userRepository.findOtpWithId(user._id); //does look up between user and otp collection and return the data
+                if (data?.otp[0]?.value) {
+                    const otpStatus = await compareOtps(otp, data.otp[0].value);
 
-                    //checking whether otp exists in the aggregated result
-                    if (data?.otp[0]?.value) {
-                        const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
-
-                        if (otpStatus) {
-                            // works if otp is verified
-
-                            const verified = await this.userRepository.verifyUser(user._id); //change the verification status of user to true
-
-                            return { success: true, message: "Otp verified successfully" };
-                        } else {
-                            //return if the otp is invalid
-
-                            return { success: false, message: "Invalid Otp" };
-                        }
-                    } else if (!data?.otp.length) {
-                        //evaluates true if the otp is not found
-
-                        return { success: false, message: "Otp is expired" };
+                    if (otpStatus) {
+                        const verified = await this.userRepository.verifyUser(user._id);
+                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS };
+                    } else {
+                        return { success: false, message: AuthMessages.OTP_INVALID };
                     }
-                } //if user account doesnot exists returns
-                return {
-                    success: false,
-                    message: "User not found",
-                };
-            } catch (error: any) {
-                console.log(error.message);
-                return { success: false, message: "Otp error" };
+                } else if (!data?.otp.length) {
+                    return { success: false, message: AuthMessages.OTP_EXPIRED };
+                }
             }
+            return {
+                success: false,
+                message: GeneralMessages.USER_NOT_FOUND,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return { success: false, message: AuthMessages.OTP_ERROR };
         }
     }
 
-    //authenticates uesr by checking the account , verifiying the credentials and sends the tokens or proceed to otp verifiction if not verified
     async authenticateUser(userData: ISignIn): Promise<ISignInResponse | null> {
         try {
-            const exists = await this.userRepository.findUserByEmail(userData.email); //gets user data with given email
+            const exists = await this.userRepository.findUserByEmail(userData.email);
 
             if (exists) {
-                //checks whether the user is blocked by admin
                 if (exists.is_blocked) {
                     return {
                         success: false,
-                        message: "Account blocked by admin",
+                        message: AuthMessages.ACCOUNT_BLOCKED,
                         email: "",
                         _id: null,
                         name: "",
@@ -433,11 +393,10 @@ class UserService implements IUserService {
                         refreshToken: null,
                     };
                 }
-                // if the user signed in via google
                 if (exists.google_id) {
                     return {
                         success: false,
-                        message: "Please Sign in With Google",
+                        message: AuthMessages.SIGN_IN_WITH_GOOGLE,
                         email: "",
                         _id: null,
                         name: "",
@@ -448,20 +407,15 @@ class UserService implements IUserService {
                     };
                 }
 
-                const passwordStatus = await comparePasswords(userData.password, exists.password); // utility function compares passwords
+                const passwordStatus = await comparePasswords(userData.password, exists.password);
 
                 if (passwordStatus) {
-                    //executes if the passwords are matching
-
-                    //checks the user is verified or not
                     if (exists.is_verified) {
-                        //token creation logic here
-
-                        const tokens = generateTokens(exists._id.toString(), exists.email, "user"); //generates access and refresh tokens
+                        const tokens = generateTokens(exists._id.toString(), exists.email, "user");
 
                         return {
                             success: true,
-                            message: "Signed in Sucessfully",
+                            message: AuthMessages.SIGN_IN_SUCCESS,
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -471,14 +425,10 @@ class UserService implements IUserService {
                             refreshToken: tokens.refreshToken,
                         };
                     } else {
-                        // sends otp and waits for otp verification
-
-                        const status = await this.otpResend(exists.email); //resends otp for verifiying the user
-
-                        //sends this reponse to indicate that the user still needs to verify
+                        const status = await this.otpResend(exists.email);
                         return {
                             success: false,
-                            message: "Didn't complete otp verification",
+                            message: AuthMessages.OTP_NOT_VERIFIED,
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -489,10 +439,9 @@ class UserService implements IUserService {
                         };
                     }
                 } else {
-                    //if the credentials are wrong returns this
                     return {
                         success: false,
-                        message: "Invalid Credentials",
+                        message: AuthMessages.INVALID_CREDENTIALS,
                         email: exists.email,
                         _id: null,
                         name: "",
@@ -503,10 +452,9 @@ class UserService implements IUserService {
                     };
                 }
             } else {
-                //executes this if the user account is not found
                 return {
                     success: false,
-                    message: "Account does not exist",
+                    message: AuthMessages.ACCOUNT_DOES_NOT_EXIST,
                     email: null,
                     name: "",
                     mobileNo: "",
@@ -522,42 +470,34 @@ class UserService implements IUserService {
         }
     }
 
-    // checks the refresh token and generates access token
     async refreshTokenCheck(token: string): Promise<IRefreshTokenResponse> {
         try {
-            //Verifiying and decoding the token details
             const tokenStatus = await verifyToken(token);
 
-            //checking for verified token and generate new refresh token
             if (tokenStatus.id && tokenStatus.email && tokenStatus.role) {
-                const tokens = generateTokens(tokenStatus.id, tokenStatus.email, tokenStatus.role); //generates refresh token
-
+                const tokens = generateTokens(tokenStatus.id, tokenStatus.email, tokenStatus.role);
                 return {
                     accessToken: tokens.accessToken,
                     message: tokenStatus.message,
                 };
             }
 
-            //returns for unverified token
             return {
                 accessToken: null,
                 message: tokenStatus.message,
             };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 accessToken: null,
-                message: "Token error",
+                message: AuthMessages.TOKEN_ERROR,
             };
         }
     }
 
-    //sign in or sign up via google
     async googleAuth(code: string): Promise<ISignInResponse> {
         try {
             const googleRes = await oAuth2Client.getToken(code);
-
             oAuth2Client.setCredentials(googleRes.tokens);
 
             const userRes = await axios.get(
@@ -582,7 +522,7 @@ class UserService implements IUserService {
                     const tokens = generateTokens(saveUser._id.toString(), email, "user");
                     return {
                         success: true,
-                        message: "Signed in sucessfully",
+                        message: AuthMessages.SIGN_IN_SUCCESS,
                         email: saveUser.email,
                         _id: saveUser._id,
                         name: saveUser.name,
@@ -594,7 +534,7 @@ class UserService implements IUserService {
                 }
                 return {
                     success: false,
-                    message: "Google Sign In failed",
+                    message: AuthMessages.GOOGLE_SIGN_IN_FAILED,
                     email: null,
                     _id: null,
                     name: "",
@@ -607,7 +547,7 @@ class UserService implements IUserService {
                 if (user.is_blocked) {
                     return {
                         success: false,
-                        message: "Account blocked by admin",
+                        message: AuthMessages.ACCOUNT_BLOCKED,
                         email: null,
                         _id: null,
                         name: "",
@@ -620,7 +560,7 @@ class UserService implements IUserService {
                 const tokens = generateTokens(user._id.toString(), email, "user");
                 return {
                     success: true,
-                    message: "Signed in sucessfully",
+                    message: AuthMessages.SIGN_IN_SUCCESS,
                     email: user.email,
                     _id: user._id,
                     name: user.name,
@@ -634,7 +574,7 @@ class UserService implements IUserService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Sign In Failed",
+                message: AuthMessages.GOOGLE_SIGN_IN_FAILED,
                 email: null,
                 _id: null,
                 name: "",
@@ -646,7 +586,6 @@ class UserService implements IUserService {
         }
     }
 
-    //user edit profile to db
     async editProfile(
         data: IUpdateProfile,
         image: Express.Multer.File | null
@@ -656,7 +595,6 @@ class UserService implements IUserService {
 
             if (image) {
                 image_url = await uploadImages([image]);
-
                 if (image_url.length === 0) {
                     return null;
                 }
@@ -678,7 +616,6 @@ class UserService implements IUserService {
         }
     }
 
-    //fetches user document from db
     async getUserData(id: string): Promise<Partial<IUser | null>> {
         try {
             const status = await this.userRepository.getUserDataWithId(id);
@@ -693,176 +630,158 @@ class UserService implements IUserService {
         }
     }
 
-    //verifies email for sending otp for forgot password
     async forgotPasswordVerify(email: string): Promise<IResponse> {
         try {
             const userData = await this.userRepository.findUserByEmail(email);
             if (!userData) {
                 return {
                     success: false,
-                    message: "Mail not registered",
+                    message: PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED,
                     data: null,
                 };
             }
             if (userData?.google_id) {
                 return {
                     success: false,
-                    message: "Please Sign in with your google account",
+                    message: PasswordMessages.FORGOT_PASSWORD_GOOGLE,
                     data: null,
                 };
             }
-            const otp = generateOtp(); //utility function generates otp
+            const otp = generateOtp();
 
             const mail = await sentMail(
                 email,
                 "Fixify - Forgot Password Verification",
                 `<!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Fixify - Forgot Password Verification</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            background-color: #f4f4f4;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        .email-container {
-                            max-width: 600px;
-                            margin: 20px auto;
-                            background-color: #ffffff;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                        }
-                        .header {
-                            background-color: #007bff;
-                            color: #ffffff;
-                            text-align: center;
-                            padding: 20px;
-                        }
-                        .header h1 {
-                            margin: 0;
-                            font-size: 24px;
-                        }
-                        .content {
-                            padding: 20px;
-                            color: #333333;
-                        }
-                        .content p {
-                            font-size: 16px;
-                            line-height: 1.6;
-                        }
-                        .otp-code {
-                            font-size: 24px;
-                            font-weight: bold;
-                            color: #007bff;
-                            text-align: center;
-                            margin: 20px 0;
-                        }
-                        .footer {
-                            background-color: #f4f4f4;
-                            text-align: center;
-                            padding: 10px;
-                            font-size: 14px;
-                            color: #666666;
-                        }
-                        .footer a {
-                            color: #007bff;
-                            text-decoration: none;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="email-container">
-                        <div class="header">
-                            <h1>Fixify</h1>
-                        </div>
-                        <div class="content">
-                            <p>Dear User,</p>
-                            <p>To reset your password, please enter the following One-Time Password (OTP):</p>
-                            <div class="otp-code">${otp}</div>
-                            <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
-                            <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
-                            <p>Best regards,<br>The Fixify Team</p>
-                        </div>
-                        <div class="footer">
-                            <p>© 2024 Fixify. All rights reserved.</p>
-                            <p><a href="https://fixify.com">Visit our website</a></p>
-                        </div>
-                    </div>
-                </body>
-                </html>`
-            ); //this utility function sends otp through mail
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Fixify - Forgot Password Verification</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background-color: #007bff;
+                    color: #ffffff;
+                    text-align: center;
+                    padding: 20px;
+                }
+                .header h1 {
+                    margin: 0;
+                    font-size: 24px;
+                }
+                .content {
+                    padding: 20px;
+                    color: #333333;
+                }
+                .content p {
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                .otp-code {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #007bff;
+                    text-align: center;
+                    margin: 20px 0;
+                }
+                .footer {
+                    background-color: #f4f4f4;
+                    text-align: center;
+                    padding: 10px;
+                    font-size: 14px;
+                    color: #666666;
+                }
+                .footer a {
+                    color: #007bff;
+                    text-decoration: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="header">
+                    <h1>Fixify</h1>
+                </div>
+                <div class="content">
+                    <p>Dear User,</p>
+                    <p>To reset your password, please enter the following One-Time Password (OTP):</p>
+                    <div class="otp-code">${otp}</div>
+                    <p>This code expires in <b>2 minutes</b>. Please do not share this code with anyone.</p>
+                    <p>If you did not request this OTP, please ignore this email or contact our support team at <a href="mailto:support@fixify.com">support@fixify.com</a>.</p>
+                    <p>Best regards,<br>The Fixify Team</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 Fixify. All rights reserved.</p>
+                    <p><a href="https://fixify.com">Visit our website</a></p>
+                </div>
+            </div>
+        </body>
+        </html>`
+            );
 
             if (mail) {
-                // works if mail is sucessfully sent
-
-                const hashedOtp = await hashOtp(otp); // this utility function hash otp
-
-                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id); //stores otp in the database
-
+                const hashedOtp = await hashOtp(otp);
+                const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id);
                 return {
                     success: true,
-                    message: "Mail sent successfully",
+                    message: PasswordMessages.MAIL_SENT_SUCCESS,
                     data: userData.email,
                 };
             }
             return {
                 success: false,
-                message: "Failed to verify mail",
+                message: PasswordMessages.MAIL_VERIFY_FAILED,
                 data: null,
             };
         } catch (error: any) {
             console.log(error.message);
-            return { success: false, message: "Couldnt verify mail", data: null };
+            return { success: false, message: PasswordMessages.COULDNT_VERIFY_MAIL, data: null };
         }
     }
 
-    //verifiying otp for verifiying account
     async passworOtpCheck(otp: string, email: string): Promise<IOtpResponse> {
-        {
-            try {
-                const user = await this.userRepository.findUserByEmail(email); //gets user account details
+        try {
+            const user = await this.userRepository.findUserByEmail(email);
 
-                if (user) {
-                    //executes if the user exists
+            if (user) {
+                const data = await this.userRepository.findOtpWithId(user._id);
 
-                    const data = await this.userRepository.findOtpWithId(user._id); //does look up between user and otp collection and return the data
+                if (data?.otp[0]?.value) {
+                    const otpStatus = await compareOtps(otp, data.otp[0].value);
 
-                    //checking whether otp exists in the aggregated result
-                    if (data?.otp[0]?.value) {
-                        const otpStatus = await compareOtps(otp, data.otp[0].value); //utility function compares the otps
-
-                        if (otpStatus) {
-                            // works if otp is verified
-
-                            return { success: true, message: "Otp verified successfully" };
-                        } else {
-                            //return if the otp is invalid
-
-                            return { success: false, message: "Invalid Otp" };
-                        }
-                    } else if (!data?.otp.length) {
-                        //evaluates true if the otp is not found
-
-                        return { success: false, message: "Otp is expired" };
+                    if (otpStatus) {
+                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS };
+                    } else {
+                        return { success: false, message: AuthMessages.OTP_INVALID };
                     }
-                } //if user account doesnot exists returns
-                return {
-                    success: false,
-                    message: "Account not found",
-                };
-            } catch (error: any) {
-                console.log(error.message);
-                return { success: false, message: "Otp error" };
+                } else if (!data?.otp.length) {
+                    return { success: false, message: AuthMessages.OTP_EXPIRED };
+                }
             }
+            return {
+                success: false,
+                message: GeneralMessages.ACCOUNT_NOT_FOUND,
+            };
+        } catch (error: any) {
+            console.log(error.message);
+            return { success: false, message: AuthMessages.OTP_ERROR };
         }
     }
 
-    //find and resets with new password
     async changePassword(email: string, password: string): Promise<IResponse> {
         try {
             const hashedPassword = await hashPassword(password);
@@ -872,25 +791,24 @@ class UserService implements IUserService {
             return updateStatus
                 ? {
                       success: true,
-                      message: "Password updated sucessfully",
+                      message: PasswordMessages.RESET_PASSWORD_SUCCESS,
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to update password",
+                      message: PasswordMessages.RESET_PASSWORD_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to update password",
+                message: PasswordMessages.RESET_PASSWORD_FAILED,
                 data: null,
             };
         }
     }
 
-    // verifies the old password
     async verifyPassword(id: string, password: string): Promise<IResponse> {
         try {
             const data = await this.userRepository.getUserDataWithId(id);
@@ -900,18 +818,18 @@ class UserService implements IUserService {
                 return status
                     ? {
                           success: true,
-                          message: "Password verified successfully",
+                          message: PasswordMessages.CONFIRM_PASSWORD_SUCCESS,
                           data: null,
                       }
                     : {
                           success: false,
-                          message: "Incorrect Password",
+                          message: PasswordMessages.INCORRECT_PASSWORD,
                           data: null,
                       };
             } else {
                 return {
                     success: false,
-                    message: "Invalid id",
+                    message: PasswordMessages.INVALID_ID,
                     data: null,
                 };
             }
@@ -919,22 +837,20 @@ class UserService implements IUserService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to verify password",
+                message: PasswordMessages.CONFIRM_PASSWORD_FAILED,
                 data: null,
             };
         }
     }
 
-    //limits and checks for duplicate addresses and creates one
     async createAddress(address: IAddAddress): Promise<IResponse> {
         try {
-            //count the number of addresses user have
             const addressCount = await this.addressRepository.countAddresses(address.id);
 
             if (addressCount === null) {
                 return {
                     success: false,
-                    message: "Failed to create address",
+                    message: AddressMessages.CREATE_ADDRESS_FAILED,
                     data: null,
                 };
             } else {
@@ -944,60 +860,61 @@ class UserService implements IUserService {
                     if (exists === null) {
                         return {
                             success: false,
-                            message: "Failed to create address",
+                            message: AddressMessages.CREATE_ADDRESS_FAILED,
                             data: null,
                         };
                     } else if (exists) {
                         return {
                             success: false,
-                            message: "Address already added",
+                            message: AddressMessages.ADDRESS_ALREADY_ADDED,
                             data: null,
                         };
                     } else {
-                        //creates address
                         const response = await this.addressRepository.createAddress(address);
 
                         return response
                             ? {
                                   success: true,
-                                  message: "Address added successfully",
+                                  message: AddressMessages.CREATE_ADDRESS_SUCCESS,
                                   data: null,
                               }
-                            : { success: false, message: "Failed to create address", data: null };
+                            : {
+                                  success: false,
+                                  message: AddressMessages.CREATE_ADDRESS_FAILED,
+                                  data: null,
+                              };
                     }
                 } else {
                     return {
                         success: false,
-                        message: "You can only add upto 3 addressess",
+                        message: AddressMessages.ADDRESS_LIMIT_REACHED,
                         data: null,
                     };
                 }
             }
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Failed to create address",
+                message: AddressMessages.CREATE_ADDRESS_FAILED,
                 data: null,
             };
         }
     }
 
-    // fetch all addresses related to user
     async findAddresses(userId: string): Promise<IResponse> {
         try {
             const addresses = await this.addressRepository.fetchAllAddress(userId);
             if (addresses === null) {
                 return {
                     success: false,
-                    message: "Failed to fetch addresses",
+                    message: AddressMessages.GET_ADDRESSES_FAILED,
                     data: null,
                 };
             } else {
                 return {
                     success: true,
-                    message: "Successfully fetched addresses",
+                    message: AddressMessages.GET_ADDRESSES_SUCCESS,
                     data: addresses,
                 };
             }
@@ -1005,13 +922,12 @@ class UserService implements IUserService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch addresses",
+                message: AddressMessages.GET_ADDRESSES_FAILED,
                 data: null,
             };
         }
     }
 
-    //deletes address
     async changeAddressStatus(id: string): Promise<IResponse> {
         try {
             const status = await this.addressRepository.deleteAddress(id);
@@ -1019,25 +935,24 @@ class UserService implements IUserService {
             return status
                 ? {
                       success: true,
-                      message: "Address deleted successfully",
+                      message: AddressMessages.DELETE_ADDRESS_SUCCESS,
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to delete address",
+                      message: AddressMessages.DELETE_ADDRESS_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to delete address",
+                message: AddressMessages.DELETE_ADDRESS_FAILED,
                 data: null,
             };
         }
     }
 
-    // get address associated with user
     async getAddress(addressId: string): Promise<IResponse> {
         try {
             const address = await this.addressRepository.fetchAddress(addressId);
@@ -1045,26 +960,25 @@ class UserService implements IUserService {
             if (address === null) {
                 return {
                     success: false,
-                    message: "Failed to fetch address",
+                    message: AddressMessages.GET_ADDRESS_FAILED,
                     data: null,
                 };
             } else {
                 return {
                     success: true,
-                    message: "Successfully fetched address",
+                    message: AddressMessages.GET_ADDRESS_SUCCESS,
                     data: address,
                 };
             }
         } catch (error: any) {
             return {
                 success: false,
-                message: "Failed to fetch addresses",
+                message: AddressMessages.GET_ADDRESS_FAILED,
                 data: null,
             };
         }
     }
 
-    //update address
     async editAddress(address: IAddAddress, id: string): Promise<IResponse> {
         try {
             const updatedStatus = await this.addressRepository.updateAddress(address, id);
@@ -1072,26 +986,24 @@ class UserService implements IUserService {
             return updatedStatus
                 ? {
                       success: true,
-                      message: "Address updated successfully",
+                      message: AddressMessages.UPDATE_ADDRESS_SUCCESS,
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to update address",
+                      message: AddressMessages.UPDATE_ADDRESS_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Failed to update address",
+                message: AddressMessages.UPDATE_ADDRESS_FAILED,
                 data: null,
             };
         }
     }
 
-    //get all slots based on time location date and service
     async getSlots(data: ISlotFetch): Promise<IResponse> {
         try {
             const slots = await this.scheduleRepository.findSlots(data);
@@ -1099,31 +1011,28 @@ class UserService implements IUserService {
             return slots.success
                 ? {
                       success: true,
-                      message: "Slots fetched successfully",
+                      message: SlotMessages.FETCH_SLOTS_SUCCESS,
                       data: slots.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch slots",
+                      message: SlotMessages.FETCH_SLOTS_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Error in fetching slots",
+                message: SlotMessages.FETCH_SLOTS_ERROR,
                 data: null,
             };
         }
     }
 
-    //add a booking request to a slot
     async requestBooking(bookingData: IBookingRequestData): Promise<IResponse> {
         try {
             const time = new Date();
 
-            //checks for duplicate requests
             const exists = await this.scheduleRepository.findBookingRequest(
                 bookingData.user_id,
                 bookingData.slot_id,
@@ -1156,16 +1065,14 @@ class UserService implements IUserService {
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Error in booking slots",
+                message: SlotMessages.REQUEST_SLOTS_ERROR,
                 data: null,
             };
         }
     }
 
-    //fetch all booking
     async fetchBookings(id: string, page: number): Promise<IResponse> {
         try {
             const bookingStatus = await this.bookingRepository.getBookingsWithUserId(id, page);
@@ -1182,16 +1089,15 @@ class UserService implements IUserService {
                       data: null,
                   };
         } catch (error: any) {
-            console.log(error.messaege);
+            console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch bookings",
+                message: BookingMessages.GET_BOOKINGS_SUCCESS,
                 data: null,
             };
         }
     }
 
-    //fetch booking details
     async fetchBookingDetail(id: string): Promise<IResponse> {
         try {
             const response = await this.bookingRepository.getBookingDetails(id);
@@ -1211,13 +1117,12 @@ class UserService implements IUserService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to fetch booking details",
+                message: BookingMessages.GET_BOOKING_DETAILS_SUCCESS,
                 data: null,
             };
         }
     }
 
-    //updates payment status to complete and adds site fee
     async processOnlinePayment(payment_id: string, amount: number): Promise<IResponse> {
         try {
             const response = await createPaymentIntent(amount);
@@ -1225,7 +1130,7 @@ class UserService implements IUserService {
             if (!response.success || !response.clientSecret) {
                 return {
                     success: false,
-                    message: response.message || "Failed to create payment intent",
+                    message: response.message || PaymentMessages.PAYMENT_INTENT_FAILED,
                     data: null,
                 };
             }
@@ -1237,44 +1142,42 @@ class UserService implements IUserService {
             if (!status) {
                 return {
                     success: false,
-                    message: "Failed to update payment status",
+                    message: PaymentMessages.CREATE_PAYMENT_FAILED,
                     data: null,
                 };
             }
 
             return {
                 success: true,
-                message: "Payment status updated successfully",
+                message: PaymentMessages.CREATE_PAYMENT_SUCCESS,
                 data: response,
             };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Failed to update payment status",
+                message: PaymentMessages.CREATE_PAYMENT_FAILED,
                 data: null,
             };
         }
     }
 
-    //checks the time is 3 hours before the slot time
     async cancelBooking(booking_id: string): Promise<IResponse> {
         try {
             const booking = await this.bookingRepository.getBookingById(booking_id);
             if (!booking.success) {
-                return { success: false, message: "Booking not found", data: null };
+                return { success: false, message: BookingMessages.BOOKING_NOT_FOUND, data: null };
             }
 
             const slotTime = new Date(booking.data.time);
             const currentTime = new Date();
 
-            // Check if current time is at least 3 hours before the slot time
             const threeHoursBeforeSlot = new Date(slotTime.getTime() - 3 * 60 * 60 * 1000);
 
             if (currentTime > threeHoursBeforeSlot) {
                 return {
                     success: false,
-                    message: "Cannot cancel booking less than 3 hours before the slot time",
+                    message: BookingMessages.CANCEL_BOOKING_TIME_ERROR,
                     data: null,
                 };
             }
@@ -1292,20 +1195,19 @@ class UserService implements IUserService {
 
             return {
                 success: true,
-                message: "Booking cancelled successfully",
+                message: BookingMessages.CANCEL_BOOKING_SUCCESS,
                 data: updatedBooking,
             };
         } catch (error: any) {
             console.log(error.message);
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
 
-    //get all chat data
     async fetchChat(room_id: string): Promise<IResponse> {
         try {
             const chatResponse = await this.chatRepository.fetchChats(room_id);
@@ -1324,13 +1226,12 @@ class UserService implements IUserService {
         } catch (error: any) {
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
 
-    // checks and creates review for a completed booking
     async processReviewCreation(
         reviewData: IReviewData,
         reviewImages: Express.Multer.File[]
@@ -1341,7 +1242,7 @@ class UserService implements IUserService {
             if (image_urls.length === 0) {
                 return {
                     success: false,
-                    message: "Failed to store image",
+                    message: ReviewMessages.IMAGE_STORAGE_FAILED,
                     data: null,
                 };
             }
@@ -1353,7 +1254,7 @@ class UserService implements IUserService {
             if (duplicateExists.success) {
                 return {
                     success: false,
-                    message: "Review added already",
+                    message: ReviewMessages.REVIEW_ALREADY_ADDED,
                     data: null,
                 };
             }
@@ -1384,13 +1285,12 @@ class UserService implements IUserService {
             console.log(error.message);
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
 
-    // reports account
     async report(data: IReportData): Promise<IResponse> {
         try {
             const duplicateExists = await this.reportRepository.duplicateReport(data);
@@ -1398,7 +1298,7 @@ class UserService implements IUserService {
             if (duplicateExists) {
                 return {
                     success: false,
-                    message: "Already reported",
+                    message: ReportMessages.REPORT_ALREADY_EXISTS,
                     data: null,
                 };
             }
@@ -1410,26 +1310,24 @@ class UserService implements IUserService {
             return reportResponse
                 ? {
                       success: true,
-                      message: "Reported successfully",
+                      message: ReportMessages.REPORT_SUCCESS,
                       data: null,
                   }
                 : {
                       success: false,
-                      message: "Failed to report",
+                      message: ReportMessages.REPORT_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
 
-    //fetch unread notifications count
     async fetchUnreadNotificationsCount(id: string): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.unreadNotificationCount(id);
@@ -1437,26 +1335,24 @@ class UserService implements IUserService {
             return response.success
                 ? {
                       success: true,
-                      message: "Fetched unread count successfully",
+                      message: NotificationMessages.FETCH_COUNT_SUCCESS,
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch unread count",
+                      message: NotificationMessages.FETCH_COUNT_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
 
-    //fetch unread notifications
     async fetchNotifications(id: string, page: number): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.getNotifications(id, page);
@@ -1464,25 +1360,24 @@ class UserService implements IUserService {
             return response.success
                 ? {
                       success: true,
-                      message: "Fetched notifications successfully",
+                      message: NotificationMessages.FETCH_NOTIFICATIONS_SUCCESS,
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to fetch notifications",
+                      message: NotificationMessages.FETCH_NOTIFICATIONS_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
     }
-    //mark notifications as read
+
     async markNotification(id: string): Promise<IResponse> {
         try {
             const response = await this.notificationRepository.markNotification(id);
@@ -1490,20 +1385,19 @@ class UserService implements IUserService {
             return response.success
                 ? {
                       success: true,
-                      message: "Updated notification successfully",
+                      message: NotificationMessages.MARK_NOTIFICATION_SUCCESS,
                       data: response.data,
                   }
                 : {
                       success: false,
-                      message: "Failed to update notification",
+                      message: NotificationMessages.MARK_NOTIFICATION_FAILED,
                       data: null,
                   };
         } catch (error: any) {
             console.log(error.message);
-
             return {
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }

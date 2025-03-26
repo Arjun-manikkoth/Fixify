@@ -1,6 +1,21 @@
 import IUserService from "../Interfaces/User/UserServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
+import {
+    AuthMessages,
+    ProfileMessages,
+    PasswordMessages,
+    AddressMessages,
+    SlotMessages,
+    BookingMessages,
+    PaymentMessages,
+    ChatMessages,
+    ReviewMessages,
+    ReportMessages,
+    NotificationMessages,
+    GeneralMessages,
+    tokenMessages,
+} from "../Constants/Messages";
 
 const {
     OK,
@@ -17,13 +32,12 @@ const {
 class UserController {
     constructor(private UserService: IUserService) {}
 
-    // Sign up if account does not exist and sends the corresponding success code
     async signUp(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password || !req.body.userName || !req.body.mobileNo) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email, password, username, and mobile number are required fields",
+                    message: AuthMessages.SIGN_UP_REQUIRED_FIELDS,
                     data: null,
                 });
                 return;
@@ -40,7 +54,7 @@ class UserController {
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: user?.message || "Sign up failed",
+                    message: user?.message || AuthMessages.SIGN_UP_FAILED,
                     data: null,
                 });
             }
@@ -48,19 +62,18 @@ class UserController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Login if account exists and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and password are required fields",
+                    message: AuthMessages.SIGN_IN_REQUIRED_FIELDS,
                     data: null,
                 });
                 return;
@@ -97,23 +110,23 @@ class UserController {
                     });
             } else {
                 switch (response?.message) {
-                    case "Account does not exist":
+                    case AuthMessages.ACCOUNT_DOES_NOT_EXIST:
                         res.status(NOT_FOUND).json({
                             success: false,
                             message: response.message,
                             data: null,
                         });
                         break;
-                    case "Invalid Credentials":
+                    case AuthMessages.INVALID_CREDENTIALS:
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
                             data: null,
                         });
                         break;
-                    case "Didn't complete OTP verification":
-                    case "Please Sign in With Google":
-                    case "Account blocked by admin":
+                    case AuthMessages.OTP_NOT_VERIFIED:
+                    case AuthMessages.SIGN_IN_WITH_GOOGLE:
+                    case AuthMessages.ACCOUNT_BLOCKED:
                         res.status(FORBIDDEN).json({
                             success: false,
                             message: response.message,
@@ -123,7 +136,7 @@ class UserController {
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Internal server error",
+                            message: GeneralMessages.INTERNAL_SERVER_ERROR,
                             data: null,
                         });
                         break;
@@ -133,19 +146,18 @@ class UserController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Verify OTP for account verification
     async otpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and OTP are required fields",
+                    message: AuthMessages.OTP_REQUIRED_FIELDS,
                     data: null,
                 });
                 return;
@@ -157,17 +169,17 @@ class UserController {
                 res.status(OK).json({ success: true, message: otpStatus.message, data: null });
             } else {
                 switch (otpStatus.message) {
-                    case "Invalid OTP":
+                    case AuthMessages.OTP_INVALID:
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
                             data: null,
                         });
                         break;
-                    case "OTP is expired":
+                    case AuthMessages.OTP_EXPIRED:
                         res.status(GONE).json({ success: false, message: otpStatus.message });
                         break;
-                    case "OTP error":
+                    case AuthMessages.OTP_ERROR:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
@@ -177,7 +189,7 @@ class UserController {
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
-                            message: "User not found",
+                            message: GeneralMessages.USER_NOT_FOUND,
                             data: null,
                         });
                         break;
@@ -187,19 +199,18 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Resend OTP for expired OTPs
     async otpResend(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required field",
+                    message: AuthMessages.OTP_RESEND_REQUIRED,
                     data: null,
                 });
                 return;
@@ -210,13 +221,13 @@ class UserController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "OTP sent successfully",
+                    message: AuthMessages.OTP_RESEND_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "OTP cannot be sent at this moment",
+                    message: AuthMessages.OTP_RESEND_FAILED,
                     data: null,
                 });
             }
@@ -224,73 +235,32 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Sign out by clearing cookies
     async signOut(req: Request, res: Response): Promise<void> {
         try {
             res.clearCookie("accessToken", { httpOnly: true, secure: false });
             res.clearCookie("refreshToken", { httpOnly: true, secure: false });
 
-            res.status(OK).json({ success: true, message: "Signed out successfully", data: null });
+            res.status(OK).json({
+                success: true,
+                message: AuthMessages.SIGN_OUT_SUCCESS,
+                data: null,
+            });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Refresh token logic
-    async refreshToken(req: Request, res: Response): Promise<void> {
-        try {
-            const token = req.cookies.refreshToken;
-
-            if (!token) {
-                res.status(UNAUTHORIZED).json({
-                    success: false,
-                    message: "Refresh token missing",
-                    data: null,
-                });
-                return;
-            }
-
-            const response = await this.UserService.refreshTokenCheck(token);
-
-            if (response.accessToken) {
-                res.status(OK)
-                    .cookie("accessToken", response.accessToken, {
-                        httpOnly: true,
-                        secure: false,
-                        maxAge: process.env.MAX_AGE_ACCESS_COOKIE
-                            ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
-                            : 15 * 60 * 1000, // 15 minutes
-                    })
-                    .json({ success: true, message: "Access token sent successfully", data: null });
-            } else {
-                res.status(UNAUTHORIZED).json({
-                    success: false,
-                    message: response.message,
-                    data: null,
-                });
-            }
-        } catch (error: any) {
-            console.error(error.message);
-            res.status(INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message: "Internal server error",
-                data: null,
-            });
-        }
-    }
-
-    // Google authentication logic
     async googleAuth(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.code) {
@@ -336,14 +306,14 @@ class UserController {
                     });
             } else {
                 switch (response?.message) {
-                    case "Google Sign In failed":
+                    case AuthMessages.GOOGLE_SIGN_IN_FAILED:
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: response.message,
                             data: null,
                         });
                         break;
-                    case "Account blocked by admin":
+                    case AuthMessages.ACCOUNT_BLOCKED:
                         res.status(FORBIDDEN).json({
                             success: false,
                             message: response.message,
@@ -353,7 +323,7 @@ class UserController {
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Internal server error",
+                            message: GeneralMessages.INTERNAL_SERVER_ERROR,
                             data: null,
                         });
                         break;
@@ -363,26 +333,71 @@ class UserController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Update user profile data
+    // Refresh token logic
+    async refreshToken(req: Request, res: Response): Promise<void> {
+        try {
+            const token = req.cookies.refreshToken;
+
+            if (!token) {
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: tokenMessages.REFRESH_TOKEN_MISSING,
+                    data: null,
+                });
+                return;
+            }
+
+            const response = await this.UserService.refreshTokenCheck(token);
+
+            if (response.accessToken) {
+                res.status(OK)
+                    .cookie("accessToken", response.accessToken, {
+                        httpOnly: true,
+                        secure: false,
+                        maxAge: process.env.MAX_AGE_ACCESS_COOKIE
+                            ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
+                            : 15 * 60 * 1000, // 15 minutes
+                    })
+                    .json({
+                        success: true,
+                        message: tokenMessages.ACCESS_TOKEN_SUCCESS,
+                        data: null,
+                    });
+            } else {
+                res.status(UNAUTHORIZED).json({
+                    success: false,
+                    message: response.message,
+                    data: null,
+                });
+            }
+        } catch (error: any) {
+            console.error(error.message);
+            res.status(INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
+                data: null,
+            });
+        }
+    }
+
     async updateProfile(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.userName || !req.body.mobileNo || !req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Name, mobile number, and ID are required fields",
+                    message: ProfileMessages.UPDATE_PROFILE_REQUIRED,
                     data: null,
                 });
                 return;
             }
 
             let image = null;
-
             if (req.file) {
                 image = req.file;
             }
@@ -395,34 +410,32 @@ class UserController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Profile updated successfully",
+                    message: ProfileMessages.UPDATE_PROFILE_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Profile update failed",
+                    message: ProfileMessages.UPDATE_PROFILE_FAILED,
                     data: null,
                 });
             }
         } catch (error: any) {
             console.log(error.message);
-
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch user profile data
     async getUser(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID is a required field",
+                    message: ProfileMessages.GET_USER_REQUIRED,
                     data: null,
                 });
                 return;
@@ -433,13 +446,13 @@ class UserController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Profile data fetched successfully",
+                    message: ProfileMessages.GET_USER_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Profile fetching failed",
+                    message: ProfileMessages.GET_USER_FAILED,
                     data: null,
                 });
             }
@@ -447,19 +460,18 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Forgot password logic
     async forgotPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required field",
+                    message: PasswordMessages.FORGOT_PASSWORD_REQUIRED,
                     data: null,
                 });
                 return;
@@ -470,25 +482,25 @@ class UserController {
             if (status.message === "Mail sent successfully") {
                 res.status(OK).json({
                     success: true,
-                    message: "OTP email sent successfully",
+                    message: PasswordMessages.FORGOT_PASSWORD_SUCCESS,
                     data: status.data,
                 });
             } else if (status.message === "Mail not registered") {
                 res.status(NOT_FOUND).json({
                     success: false,
-                    message: "Email is not registered",
+                    message: PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED,
                     data: null,
                 });
-            } else if (status.message === "Please Sign in with your Google account") {
+            } else if (status.message === PasswordMessages.FORGOT_PASSWORD_GOOGLE) {
                 res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: "Please Sign in with your Google account",
+                    message: PasswordMessages.FORGOT_PASSWORD_GOOGLE,
                     data: null,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Failed to verify email",
+                    message: PasswordMessages.FORGOT_PASSWORD_FAILED,
                     data: null,
                 });
             }
@@ -496,19 +508,18 @@ class UserController {
             console.error("Forgot Password Error:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Verify OTP for forgot password
     async forgotPasswordOtpVerify(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.otp) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and OTP are required fields",
+                    message: AuthMessages.OTP_REQUIRED_FIELDS,
                     data: null,
                 });
                 return;
@@ -520,21 +531,21 @@ class UserController {
                 res.status(OK).json({ success: true, message: otpStatus.message });
             } else {
                 switch (otpStatus.message) {
-                    case "Invalid OTP":
+                    case AuthMessages.OTP_INVALID:
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: otpStatus.message,
                             data: null,
                         });
                         break;
-                    case "OTP is expired":
+                    case AuthMessages.OTP_EXPIRED:
                         res.status(GONE).json({
                             success: false,
                             message: otpStatus.message,
                             data: null,
                         });
                         break;
-                    case "OTP error":
+                    case AuthMessages.OTP_ERROR:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
                             message: otpStatus.message,
@@ -544,7 +555,7 @@ class UserController {
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
-                            message: "Account not found",
+                            message: GeneralMessages.ACCOUNT_NOT_FOUND,
                             data: null,
                         });
                         break;
@@ -554,19 +565,18 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Reset password logic
     async resetPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and password are required fields",
+                    message: PasswordMessages.RESET_PASSWORD_REQUIRED,
                     data: null,
                 });
                 return;
@@ -594,19 +604,18 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Confirm old password logic
     async confirmPassword(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID and password are required fields",
+                    message: PasswordMessages.CONFIRM_PASSWORD_REQUIRED,
                     data: null,
                 });
                 return;
@@ -623,7 +632,7 @@ class UserController {
                     message: response.message,
                     data: null,
                 });
-            } else if (response.message === "Failed to verify password") {
+            } else if (response.message === PasswordMessages.CONFIRM_PASSWORD_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
@@ -640,13 +649,12 @@ class UserController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Create a new address for the user
     async createAddress(req: Request, res: Response): Promise<void> {
         try {
             const { address } = req.body;
@@ -655,7 +663,7 @@ class UserController {
             if (!address) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address is required",
+                    message: AddressMessages.CREATE_ADDRESS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -670,8 +678,8 @@ class UserController {
                     data: null,
                 });
             } else if (
-                status?.message === "Address already added" ||
-                status?.message === "You can only add up to 3 addresses"
+                status?.message === AddressMessages.ADDRESS_ALREADY_ADDED ||
+                status?.message === AddressMessages.ADDRESS_LIMIT_REACHED
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
@@ -681,7 +689,7 @@ class UserController {
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: status?.message || "Address creation failed",
+                    message: status?.message || AddressMessages.CREATE_ADDRESS_FAILED,
                     data: null,
                 });
             }
@@ -689,13 +697,12 @@ class UserController {
             console.error("Error in createAddress:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Get all addresses of the user
     async getAddresses(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.params.id;
@@ -703,7 +710,7 @@ class UserController {
             if (!userId) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User ID is required",
+                    message: AddressMessages.GET_ADDRESSES_REQUIRED,
                     data: null,
                 });
                 return;
@@ -717,7 +724,7 @@ class UserController {
                     message: status.message,
                     data: status.data,
                 });
-            } else if (status?.message === "Failed to fetch addresses") {
+            } else if (status?.message === AddressMessages.GET_ADDRESSES_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: status.message,
@@ -728,19 +735,18 @@ class UserController {
             console.error("Error in getAddresses:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Delete address logic
     async deleteAddresses(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address ID is required",
+                    message: AddressMessages.DELETE_ADDRESS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -751,13 +757,13 @@ class UserController {
             if (response) {
                 res.status(OK).json({
                     success: true,
-                    message: "Address deleted successfully",
+                    message: AddressMessages.DELETE_ADDRESS_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Failed to delete address",
+                    message: AddressMessages.DELETE_ADDRESS_FAILED,
                     data: null,
                 });
             }
@@ -765,13 +771,12 @@ class UserController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Get single address of the user
     async getAddress(req: Request, res: Response): Promise<void> {
         try {
             const addressId = req.params.id;
@@ -779,7 +784,7 @@ class UserController {
             if (!addressId) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address ID is required",
+                    message: AddressMessages.GET_ADDRESS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -793,7 +798,7 @@ class UserController {
                     message: status.message,
                     data: status.data,
                 });
-            } else if (status?.message === "Failed to fetch address") {
+            } else if (status?.message === AddressMessages.GET_ADDRESS_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: status.message,
@@ -804,13 +809,12 @@ class UserController {
             console.error("Error in getAddress:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Update address for the user
     async updateAddress(req: Request, res: Response): Promise<void> {
         try {
             const { address } = req.body;
@@ -819,7 +823,7 @@ class UserController {
             if (!address || !id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Address and ID are required",
+                    message: AddressMessages.UPDATE_ADDRESS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -836,7 +840,7 @@ class UserController {
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: status?.message || "Address update failed",
+                    message: status?.message || AddressMessages.UPDATE_ADDRESS_FAILED,
                     data: null,
                 });
             }
@@ -844,13 +848,12 @@ class UserController {
             console.error("Error in updateAddress:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch all available slots based on location
     async fetchSlots(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -862,7 +865,7 @@ class UserController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Service ID, location, date, and time are required fields",
+                    message: SlotMessages.FETCH_SLOTS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -883,7 +886,7 @@ class UserController {
                     message: response.message,
                     data: response.data,
                 });
-            } else if (response.message === "Failed to fetch slots") {
+            } else if (response.message === SlotMessages.FETCH_SLOTS_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
@@ -900,13 +903,12 @@ class UserController {
             console.error("Error in fetching slots:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Add booking request to book slots
     async requestSlots(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -919,8 +921,7 @@ class UserController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message:
-                        "User ID, slot ID, technician ID ,time, address, and description are required fields",
+                    message: SlotMessages.REQUEST_SLOTS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -941,14 +942,14 @@ class UserController {
             }
 
             switch (response.message) {
-                case "Booking request exists":
+                case SlotMessages.REQUEST_SLOTS_EXISTS:
                     res.status(CONFLICT).json({
                         success: false,
                         message: response.message,
                         data: null,
                     });
                     break;
-                case "Failed to add booking request":
+                case SlotMessages.REQUEST_SLOTS_FAILED:
                     res.status(INTERNAL_SERVER_ERROR).json({
                         success: false,
                         message: response.message,
@@ -966,19 +967,18 @@ class UserController {
             console.error("Error in requestSlots:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch all bookings for user with ID
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID and page number are required fields",
+                    message: BookingMessages.GET_BOOKINGS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1006,19 +1006,18 @@ class UserController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch booking details for user
     async getBookingDetails(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID is a required field",
+                    message: BookingMessages.GET_BOOKING_DETAILS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1043,19 +1042,18 @@ class UserController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Logic to handle payment intent
     async createStripePayment(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.id || !req.body.amount) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID and amount are required fields",
+                    message: PaymentMessages.CREATE_PAYMENT_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1083,19 +1081,18 @@ class UserController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Cancel booking based on the time
     async cancelBooking(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "ID is a required field",
+                    message: BookingMessages.CANCEL_BOOKING_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1120,19 +1117,18 @@ class UserController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch chat data
     async fetchChat(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Room ID is a required field",
+                    message: ChatMessages.FETCH_CHAT_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1157,13 +1153,12 @@ class UserController {
             console.error("Error in fetching chat details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Add review to bookings
     async addReview(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -1176,7 +1171,7 @@ class UserController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Rating, review, description, and images are required fields",
+                    message: ReviewMessages.ADD_REVIEW_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1187,13 +1182,13 @@ class UserController {
                 req.files as Express.Multer.File[]
             );
 
-            if (response.message === "Review added already") {
+            if (response.message === ReviewMessages.REVIEW_ALREADY_ADDED) {
                 res.status(CONFLICT).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
-            } else if (response.message === "Failed to store image") {
+            } else if (response.message === ReviewMessages.IMAGE_STORAGE_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
@@ -1202,13 +1197,13 @@ class UserController {
             } else if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Review added successfully",
+                    message: ReviewMessages.ADD_REVIEW_SUCCESS,
                     data: response.data,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Failed to add review",
+                    message: ReviewMessages.ADD_REVIEW_FAILED,
                     data: null,
                 });
             }
@@ -1216,13 +1211,12 @@ class UserController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // report account
     async report(req: Request, res: Response): Promise<void> {
         try {
             if (
@@ -1234,8 +1228,7 @@ class UserController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message:
-                        "Reason, reportedId, reporterId, bookingId and reporterdRole are required fields",
+                    message: ReportMessages.REPORT_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1246,13 +1239,13 @@ class UserController {
                 bookingId: req.params.id,
             });
 
-            if (response.message === "Failed report account") {
+            if (response.message === ReportMessages.REPORT_FAILED) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
                     message: response.message,
                     data: null,
                 });
-            } else if (response.message === "Already reported") {
+            } else if (response.message === ReportMessages.REPORT_ALREADY_EXISTS) {
                 res.status(CONFLICT).json({
                     success: true,
                     message: response.message,
@@ -1261,7 +1254,7 @@ class UserController {
             } else if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Reported successfully",
+                    message: ReportMessages.REPORT_SUCCESS,
                     data: response.data,
                 });
             } else {
@@ -1275,19 +1268,18 @@ class UserController {
             console.error("Error in reporting account:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // fetch notifications count
     async fetchNotificationsCount(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id is a required feild",
+                    message: NotificationMessages.FETCH_COUNT_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1298,13 +1290,13 @@ class UserController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Fetched notification count successfully",
+                    message: NotificationMessages.FETCH_COUNT_SUCCESS,
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: GeneralMessages.INTERNAL_SERVER_ERROR,
                     data: null,
                 });
             }
@@ -1312,18 +1304,18 @@ class UserController {
             console.error("Error in fetching count:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
-    // fetch notifications
+
     async fetchNotifications(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id , page no are required feilds",
+                    message: NotificationMessages.FETCH_NOTIFICATIONS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1337,13 +1329,13 @@ class UserController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Fetched notifications successfully",
+                    message: NotificationMessages.FETCH_NOTIFICATIONS_SUCCESS,
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: GeneralMessages.INTERNAL_SERVER_ERROR,
                     data: null,
                 });
             }
@@ -1351,19 +1343,18 @@ class UserController {
             console.error("Error in fetching notifications:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // mark notifications
     async markNotification(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Notification id is a required feild",
+                    message: NotificationMessages.MARK_NOTIFICATION_REQUIRED,
                     data: null,
                 });
                 return;
@@ -1380,7 +1371,7 @@ class UserController {
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: GeneralMessages.INTERNAL_SERVER_ERROR,
                     data: null,
                 });
             }
@@ -1388,7 +1379,7 @@ class UserController {
             console.error("Error in updating notification:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }

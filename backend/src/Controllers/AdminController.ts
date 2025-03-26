@@ -1,28 +1,38 @@
 import IAdminService from "../Interfaces/Admin/AdminServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
+import {
+    AuthMessages,
+    GeneralMessages,
+    tokenMessages,
+    UserMessages,
+    ProviderMessages,
+    ApprovalMessages,
+    ServiceMessages,
+    BookingMessages,
+    DashboardMessages,
+    ReportMessages,
+} from "../Constants/Messages";
 
 const { OK, BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, CONFLICT, INTERNAL_SERVER_ERROR } = HttpStatus;
 
 class AdminController {
     constructor(private AdminService: IAdminService) {}
 
-    // Login and sends the corresponding status code
     async signIn(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.email || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and Password are required feilds",
+                    message: AuthMessages.SIGN_IN_PROVIDER_REQUIRED_FIELDS, // "Email and Password are required fields"
                     data: null,
                 });
                 return;
             }
 
-            const response = await this.AdminService.authenticateAdmin(req.body); // This function checks and verifies the credentials
+            const response = await this.AdminService.authenticateAdmin(req.body);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                // Sends admin data, access, and refresh token in cookie after a successful sign-in
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
@@ -44,23 +54,22 @@ class AdminController {
                         data: { email: response.email, id: response._id },
                     });
             } else {
-                // Error handling based on error messages
                 switch (response?.message) {
-                    case "Account does not exist":
+                    case AuthMessages.ACCOUNT_DOES_NOT_EXIST:
                         res.status(BAD_REQUEST).json({
                             success: false,
                             message: response.message,
                             data: null,
                         });
                         break;
-                    case "Invalid Credentials":
+                    case AuthMessages.INVALID_CREDENTIALS:
                         res.status(UNAUTHORIZED).json({
                             success: false,
                             message: response.message,
                             data: null,
                         });
                         break;
-                    case "Didn't complete otp verification":
+                    case AuthMessages.OTP_NOT_VERIFIED:
                         res.status(FORBIDDEN).json({
                             success: false,
                             message: response.message,
@@ -70,7 +79,7 @@ class AdminController {
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Internal server error",
+                            message: GeneralMessages.INTERNAL_SERVER_ERROR,
                             data: null,
                         });
                         break;
@@ -80,13 +89,12 @@ class AdminController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Sign out function which clears the cookie
     async signOut(req: Request, res: Response): Promise<void> {
         try {
             res.clearCookie("accessToken", {
@@ -99,35 +107,35 @@ class AdminController {
                 secure: false,
             });
 
-            res.status(OK).json({ success: true, message: "Signed Out Successfully", data: null });
+            res.status(OK).json({
+                success: true,
+                message: AuthMessages.SIGN_OUT_SUCCESS,
+                data: null,
+            });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Function which validates the refresh token and sends an access token if required
     async refreshToken(req: Request, res: Response): Promise<void> {
         try {
             const token = req.cookies.refreshToken;
 
             if (!token) {
-                // If the cookie is deleted or expired
                 res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: "Refresh Token missing",
+                    message: tokenMessages.REFRESH_TOKEN_MISSING,
                     data: null,
                 });
             } else {
-                // Checks the validity of refresh token and returns access token
                 const response = await this.AdminService.refreshTokenCheck(token);
 
                 if (response.accessToken) {
-                    // Sends the token via cookie for successful refresh token
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                             httpOnly: true,
@@ -136,7 +144,7 @@ class AdminController {
                                 ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                                 : 15 * 60 * 1000, // 15 minutes
                         })
-                        .json({ success: true, message: "Access token sent successfully" });
+                        .json({ success: true, message: tokenMessages.ACCESS_TOKEN_SUCCESS });
                 } else {
                     res.status(UNAUTHORIZED).json({
                         success: true,
@@ -149,19 +157,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // List users in the admin side based on the selections
     async getUsers(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page || !req.query.filter) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Page,filter are required feilds",
+                    message: UserMessages.FETCH_USERS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -175,13 +182,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Users data fetched successully",
+                    message: UserMessages.FETCH_USERS_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Users data fetching failed",
+                    message: UserMessages.FETCH_USERS_FAILED,
                     data: null,
                 });
             }
@@ -189,19 +196,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Block user
     async blockUser(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -211,13 +217,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "User blocked successully",
+                    message: UserMessages.BLOCK_USER_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "User blocking failed",
+                    message: UserMessages.BLOCK_USER_FAILED,
                     data: null,
                 });
             }
@@ -225,19 +231,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Unblock user
     async unBlockUser(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -247,13 +252,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "User Unblocked successully",
+                    message: UserMessages.UNBLOCK_USER_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "User Unblocking failed",
+                    message: UserMessages.UNBLOCK_USER_FAILED,
                     data: null,
                 });
             }
@@ -261,19 +266,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // List providers in the admin side based on the selections
     async getProviders(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page || !req.query.filter) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "search,page,filter are required feilds",
+                    message: ProviderMessages.FETCH_PROVIDERS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -287,13 +291,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Providers data fetched successully",
+                    message: ProviderMessages.FETCH_PROVIDERS_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Providers data fetching failed",
+                    message: ProviderMessages.FETCH_PROVIDERS_FAILED,
                     data: null,
                 });
             }
@@ -301,19 +305,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // List approval request in the admin side based on the page no
     async getApprovals(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Page is a required feild",
+                    message: ApprovalMessages.FETCH_APPROVALS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -322,13 +325,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Approvals data fetched successully",
+                    message: ApprovalMessages.FETCH_APPROVALS_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Approvals data fetching failed",
+                    message: ApprovalMessages.FETCH_APPROVALS_FAILED,
                     data: null,
                 });
             }
@@ -336,19 +339,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Block provider
     async blockProvider(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -358,13 +360,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Provider blocked successfully",
+                    message: ProviderMessages.BLOCK_PROVIDER_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Provider blocking failed",
+                    message: ProviderMessages.BLOCK_PROVIDER_FAILED,
                     data: null,
                 });
             }
@@ -372,19 +374,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Unblock provider
     async unBlockProvider(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -394,13 +395,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Provider Unblocked successully",
+                    message: ProviderMessages.UNBLOCK_PROVIDER_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Provider Unblocking failed",
+                    message: ProviderMessages.UNBLOCK_PROVIDER_FAILED,
                     data: null,
                 });
             }
@@ -408,19 +409,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Get approval details with id
     async approvalDetails(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -429,13 +429,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Provider approval details fetched successully",
+                    message: ApprovalMessages.FETCH_APPROVAL_DETAILS_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Provider approval details fetched sucessfully",
+                    message: ApprovalMessages.FETCH_APPROVAL_DETAILS_FAILED,
                     data: null,
                 });
             }
@@ -443,19 +443,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Update approval detail status
     async approvalStatusUpdate(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.body.status) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and status are required feilds",
+                    message: ApprovalMessages.UPDATE_APPROVAL_STATUS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -467,13 +466,13 @@ class AdminController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Provider approval status updated successully",
+                    message: ApprovalMessages.UPDATE_APPROVAL_STATUS_SUCCESS,
                     data: status,
                 });
             } else {
                 res.status(OK).json({
                     success: false,
-                    message: "Provider approval status update failed",
+                    message: ApprovalMessages.UPDATE_APPROVAL_STATUS_FAILED,
                     data: null,
                 });
             }
@@ -481,19 +480,18 @@ class AdminController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Get all services
     async getAllServices(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page || !req.query.filter) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "search,page,filter are required feilds",
+                    message: ServiceMessages.FETCH_SERVICES_REQUIRED,
                     data: null,
                 });
                 return;
@@ -506,26 +504,25 @@ class AdminController {
 
             res.status(OK).json({
                 success: true,
-                message: "services fetched sucessfully",
+                message: ServiceMessages.FETCH_SERVICES_SUCCESS,
                 data: services,
             });
         } catch (error: any) {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Update the service status to list or unlist
     async changeServiceStatus(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id || !req.body.status) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and status are required feilds",
+                    message: ServiceMessages.UPDATE_SERVICE_STATUS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -538,13 +535,13 @@ class AdminController {
             if (response) {
                 res.status(OK).json({
                     success: true,
-                    message: "Service status updated",
+                    message: ServiceMessages.UPDATE_SERVICE_STATUS_SUCCESS,
                     data: null,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Failed to update service status",
+                    message: ServiceMessages.UPDATE_SERVICE_STATUS_FAILED,
                     data: null,
                 });
             }
@@ -552,18 +549,17 @@ class AdminController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
             });
         }
     }
 
-    // Add new service
     async addService(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.data.serviceName || !req.body.data.description) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Service name and description are required feilds",
+                    message: ServiceMessages.CREATE_SERVICE_REQUIRED,
                     data: null,
                 });
                 return;
@@ -573,10 +569,10 @@ class AdminController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Service created successfully",
+                    message: ServiceMessages.CREATE_SERVICE_SUCCESS,
                     data: null,
                 });
-            } else if (response.message === "Service already exists") {
+            } else if (response.message === ServiceMessages.SERVICE_ALREADY_EXISTS) {
                 res.status(CONFLICT).json({
                     success: false,
                     message: response.message,
@@ -585,7 +581,7 @@ class AdminController {
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Failed to create service",
+                    message: ServiceMessages.CREATE_SERVICE_FAILED,
                     data: null,
                 });
             }
@@ -593,18 +589,17 @@ class AdminController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
             });
         }
     }
 
-    // Get service
     async getService(req: Request, res: Response): Promise<void> {
         try {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: GeneralMessages.INVALID_ID,
                     data: null,
                 });
                 return;
@@ -615,13 +610,13 @@ class AdminController {
             if (response) {
                 res.status(OK).json({
                     success: true,
-                    message: "Service details fetched successfully",
+                    message: ServiceMessages.FETCH_SERVICE_DETAILS_SUCCESS,
                     data: response,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Failed to fetch service detail",
+                    message: ServiceMessages.FETCH_SERVICE_DETAILS_FAILED,
                     data: null,
                 });
             }
@@ -629,19 +624,18 @@ class AdminController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Update service
     async updateService(req: Request, res: Response): Promise<void> {
         try {
             if (!req.body.data.serviceName || !req.body.data.description || !req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Service name,description and id are required feilds",
+                    message: ServiceMessages.UPDATE_SERVICE_REQUIRED,
                     data: null,
                 });
                 return;
@@ -652,19 +646,19 @@ class AdminController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Service updated successfully",
+                    message: ServiceMessages.UPDATE_SERVICE_SUCCESS,
                     data: response,
                 });
-            } else if (response.message === "Service exists already") {
+            } else if (response.message === ServiceMessages.SERVICE_ALREADY_EXISTS) {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Service already exists",
+                    message: ServiceMessages.SERVICE_ALREADY_EXISTS,
                     data: null,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Failed to update service",
+                    message: ServiceMessages.UPDATE_SERVICE_FAILED,
                     data: null,
                 });
             }
@@ -672,19 +666,18 @@ class AdminController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // Fetch all bookings for admin
     async getBookings(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Page number is a required feild",
+                    message: BookingMessages.GET_BOOKINGS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -709,19 +702,18 @@ class AdminController {
             console.error("Error in fetching booking data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // get sales data based on the queries
     async getSales(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page || !req.query.fromDate || !req.query.toDate) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Page number,from date and to date are required feilds",
+                    message: DashboardMessages.FETCH_SALES_REQUIRED,
                     data: null,
                 });
                 return;
@@ -750,13 +742,12 @@ class AdminController {
             console.error("Error in fetching booking data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // get dashboard data to display as tiles
     async getDashboard(req: Request, res: Response): Promise<void> {
         try {
             const response = await this.AdminService.fetchDashboardData();
@@ -778,19 +769,18 @@ class AdminController {
             console.error("Error in fetching booking data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    // get dashboard revemue data  to display as chart with filter
     async getRevenue(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.period) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Period is a required feild",
+                    message: DashboardMessages.FETCH_REVENUE_REQUIRED,
                     data: null,
                 });
                 return;
@@ -815,19 +805,18 @@ class AdminController {
             console.error("Error in fetching booking data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }
     }
 
-    //fetches list of all reports
     async fetchReportsList(req: Request, res: Response): Promise<void> {
         try {
             if (!req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Page is a required feild",
+                    message: ReportMessages.FETCH_REPORTS_REQUIRED,
                     data: null,
                 });
                 return;
@@ -852,7 +841,7 @@ class AdminController {
             console.error("Error in fetching reports data:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             });
         }

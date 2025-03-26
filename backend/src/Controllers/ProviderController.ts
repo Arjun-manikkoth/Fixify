@@ -1,6 +1,21 @@
 import IProviderService from "../Interfaces/Provider/ProviderServiceInterface";
 import { Request, Response } from "express";
 import { HttpStatus } from "../Constants/StatusCodes";
+import {
+    AuthMessages,
+    ProfileMessages,
+    PasswordMessages,
+    ServiceMessages,
+    ScheduleMessages,
+    BookingMessages,
+    PaymentMessages,
+    ChatMessages,
+    ReportMessages,
+    NotificationMessages,
+    GeneralMessages,
+    tokenMessages,
+    DashboardMessages,
+} from "../Constants/Messages";
 
 const {
     OK,
@@ -24,7 +39,7 @@ class ProviderController {
 
             res.status(OK).json({
                 success: true,
-                message: "services fetched sucessfully",
+                message: ServiceMessages.FETCH_SERVICES_SUCCESS, // "services fetched sucessfully" -> closest match
                 data: services,
             });
         } catch (error: any) {
@@ -32,7 +47,7 @@ class ProviderController {
 
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -50,26 +65,24 @@ class ProviderController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,password,username,mobile no and service id are required feilds",
+                    message: AuthMessages.SIGN_UP_PROVIDER_REQUIRED_FIELDS, // "Email,password,username,mobile no and service id are required feilds"
                     data: null,
                 });
                 return;
             }
 
-            const provider = await this.providerService.createProvider(req.body); // This function is called to check and save data to the db
+            const provider = await this.providerService.createProvider(req.body);
 
             if (provider?.success === true) {
-                // Sends for successful sign up
                 res.status(CREATED).json({
                     success: true,
-                    message: provider.message,
+                    message: AuthMessages.SIGN_UP_SUCCESS, // "Signed up successfully"
                     data: provider.email,
                 });
             } else {
-                // Sends this response for failed sign up
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: provider?.message || "Sign up failed",
+                    message: provider?.message || AuthMessages.SIGN_UP_FAILED, // "Sign up failed"
                     data: null,
                 });
             }
@@ -77,7 +90,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -89,16 +102,15 @@ class ProviderController {
             if (!req.body.email || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,password are required feilds",
+                    message: AuthMessages.SIGN_IN_PROVIDER_REQUIRED_FIELDS, // "Email,password are required feilds"
                     data: null,
                 });
                 return;
             }
 
-            const response = await this.providerService.authenticateProvider(req.body); // This function checks and verifies the credentials
+            const response = await this.providerService.authenticateProvider(req.body);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                // Sends user data, access, and refresh token in cookie after a successful sign-in
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
@@ -116,7 +128,7 @@ class ProviderController {
                     })
                     .json({
                         success: true,
-                        message: response.message,
+                        message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
                         data: {
                             email: response.email,
                             id: response._id,
@@ -127,47 +139,46 @@ class ProviderController {
                         },
                     });
             } else {
-                // Error handling based on error messages
                 switch (response?.message) {
                     case "Account does not exist":
                         res.status(BAD_REQUEST).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.ACCOUNT_DOES_NOT_EXIST, // "Account does not exist"
                             data: null,
                         });
                         break;
                     case "Invalid Credentials":
                         res.status(UNAUTHORIZED).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.INVALID_CREDENTIALS, // "Invalid Credentials"
                             data: null,
                         });
                         break;
                     case "Didn't complete otp verification":
                         res.status(FORBIDDEN).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.OTP_NOT_VERIFIED, // "Didn't complete OTP verification"
                             data: null,
                         });
                         break;
                     case "Please Sign in With Google":
                         res.status(UNAUTHORIZED).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.SIGN_IN_WITH_GOOGLE, // "Please Sign in With Google"
                             data: null,
                         });
                         break;
                     case "Account blocked by admin":
                         res.status(FORBIDDEN).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
                             data: null,
                         });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Internal server error",
+                            message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                             data: null,
                         });
                         break;
@@ -177,7 +188,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -189,45 +200,47 @@ class ProviderController {
             if (!req.body.email || !req.body.otp) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email,otp are required feilds",
+                    message: AuthMessages.OTP_PROVIDER_REQUIRED_FIELDS, // "Email,otp are required feilds"
                     data: null,
                 });
                 return;
             }
 
-            const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email); // Checks for OTP and validates
+            const otpStatus = await this.providerService.otpCheck(req.body.otp, req.body.email);
 
             if (otpStatus.success) {
-                // Sends on a successful verification
-                res.status(OK).json({ success: true, message: otpStatus.message, data: null });
+                res.status(OK).json({
+                    success: true,
+                    message: AuthMessages.OTP_VERIFIED_SUCCESS, // "OTP verified successfully"
+                    data: null,
+                });
             } else {
-                // Error handling based on error messages
                 switch (otpStatus.message) {
                     case "Invalid Otp":
                         res.status(BAD_REQUEST).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_INVALID, // "Invalid OTP"
                             data: null,
                         });
                         break;
                     case "Otp is expired":
                         res.status(GONE).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_EXPIRED, // "OTP is expired"
                             data: null,
                         });
                         break;
                     case "Otp error":
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_ERROR, // "OTP error"
                             data: null,
                         });
                         break;
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
-                            message: "Provider not found",
+                            message: GeneralMessages.PROVIDER_NOT_FOUND, // "Provider not found"
                             data: null,
                         });
                         break;
@@ -237,7 +250,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -249,25 +262,23 @@ class ProviderController {
             if (!req.body.email) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required feild",
+                    message: AuthMessages.OTP_RESEND_REQUIRED, // "Email is a required feild"
                     data: null,
                 });
                 return;
             }
-            const status = await this.providerService.otpResend(req.body.email); // Resends OTPs via mail
+            const status = await this.providerService.otpResend(req.body.email);
 
             if (status) {
-                // Sends for successfully sent mail
                 res.status(OK).json({
                     success: true,
-                    message: "Otp sent Successfully",
+                    message: AuthMessages.OTP_RESEND_SUCCESS, // "Otp sent Successfully"
                     data: null,
                 });
             } else {
-                // Sends for failed OTP
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
-                    message: "Otp Cannot be send at this moment",
+                    message: AuthMessages.OTP_RESEND_FAILED, // "Otp Cannot be send at this moment"
                     data: null,
                 });
             }
@@ -275,7 +286,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -294,12 +305,16 @@ class ProviderController {
                 secure: false,
             });
 
-            res.status(OK).json({ success: true, message: "Signed Out Successfully", data: null });
+            res.status(OK).json({
+                success: true,
+                message: AuthMessages.SIGN_OUT_SUCCESS, // "Signed Out Successfully"
+                data: null,
+            });
         } catch (error: any) {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -311,18 +326,15 @@ class ProviderController {
             const token = req.cookies.refreshToken;
 
             if (!token) {
-                // If the cookie is deleted or expired
                 res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: "Refresh Token missing",
+                    message: tokenMessages.REFRESH_TOKEN_MISSING, // "Refresh Token missing"
                     data: null,
                 });
             } else {
-                // Checks the validity of refresh token and returns access token
                 const response = await this.providerService.refreshTokenCheck(token);
 
                 if (response.accessToken) {
-                    // Sends the token via cookie for successful refresh token
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                             httpOnly: true,
@@ -333,7 +345,7 @@ class ProviderController {
                         })
                         .json({
                             success: true,
-                            message: "Access token sent successfully",
+                            message: tokenMessages.ACCESS_TOKEN_SUCCESS, // "Access token sent successfully"
                             data: null,
                         });
                 } else {
@@ -348,7 +360,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -360,7 +372,7 @@ class ProviderController {
             if (!req.query.code) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Google signin code is required feild",
+                    message: AuthMessages.GOOGLE_SIGN_IN_CODE_REQUIRED, // "Google signin code is required feild"
                     data: null,
                 });
                 return;
@@ -370,7 +382,6 @@ class ProviderController {
             const response = await this.providerService.googleAuth(code as string);
 
             if (response?.success && response?.accessToken && response?.refreshToken) {
-                // Sends user data, access, and refresh token in cookie after a successful sign-in
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
@@ -388,7 +399,7 @@ class ProviderController {
                     })
                     .json({
                         success: true,
-                        message: response.message,
+                        message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
                         data: {
                             email: response.email,
                             id: response._id,
@@ -398,26 +409,25 @@ class ProviderController {
                         },
                     });
             } else {
-                // Error handling based on error messages
                 switch (response?.message) {
                     case "Google Sign In failed":
                         res.status(BAD_REQUEST).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.GOOGLE_SIGN_IN_FAILED, // "Google Sign In failed"
                             data: null,
                         });
                         break;
                     case "Account blocked by admin":
                         res.status(UNAUTHORIZED).json({
                             success: false,
-                            message: response.message,
+                            message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
                             data: null,
                         });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Internal server error",
+                            message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                             data: null,
                         });
                         break;
@@ -427,7 +437,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -439,7 +449,7 @@ class ProviderController {
             if (!req.body.userName || !req.body.mobileNo || !req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Name,mobile no and id are required feilds",
+                    message: ProfileMessages.UPDATE_PROFILE_REQUIRED, // "Name,mobile no and id are required feilds"
                     data: null,
                 });
                 return;
@@ -459,13 +469,13 @@ class ProviderController {
             if (status) {
                 res.status(OK).json({
                     success: true,
-                    message: "Profile updated successfully",
+                    message: ProfileMessages.UPDATE_PROFILE_SUCCESS, // "Profile updated successfully"
                     data: status,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Profile updated failed",
+                    message: ProfileMessages.UPDATE_PROFILE_FAILED, // "Profile updated failed"
                     data: null,
                 });
             }
@@ -473,7 +483,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -485,7 +495,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: ProfileMessages.GET_USER_REQUIRED, // "Id is a required feild"
                     data: null,
                 });
                 return;
@@ -494,14 +504,14 @@ class ProviderController {
 
             res.status(OK).json({
                 success: true,
-                message: "Profile fetched successfully",
+                message: ProfileMessages.FETCH_PROFILE_SUCCESS, // "Profile fetched successfully"
                 data: status,
             });
         } catch (error: any) {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -519,8 +529,7 @@ class ProviderController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message:
-                        "provider ID , description, expertise ID ,aadhar Image and workImages are a required feild",
+                    message: ProfileMessages.REGISTER_PROFILE_REQUIRED, // "provider ID , description, expertise ID ,aadhar Image and workImages are a required feild"
                     data: null,
                 });
                 return;
@@ -534,7 +543,7 @@ class ProviderController {
             if (response.success === true) {
                 res.status(OK).json({
                     success: true,
-                    message: "Provider registration successfully",
+                    message: ProfileMessages.REGISTER_PROFILE_SUCCESS, // "Provider registration successfully"
                     data: "",
                 });
             } else {
@@ -542,14 +551,14 @@ class ProviderController {
                     case "Already requested for approval":
                         res.status(BAD_REQUEST).json({
                             success: false,
-                            message: response.message,
+                            message: ProfileMessages.ALREADY_REQUESTED_APPROVAL, // "Already requested for approval"
                             data: null,
                         });
                         break;
                     default:
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: "Cannot register at this moment",
+                            message: ProfileMessages.REGISTER_PROFILE_FAILED, // "Cannot register at this moment"
                             data: null,
                         });
                         break;
@@ -559,7 +568,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -571,7 +580,7 @@ class ProviderController {
             if (!req.body.email) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email is a required feild",
+                    message: PasswordMessages.FORGOT_PASSWORD_REQUIRED, // "Email is a required feild"
                     data: null,
                 });
                 return;
@@ -581,25 +590,25 @@ class ProviderController {
             if (status.message === "Mail sent successfully") {
                 res.status(OK).json({
                     success: true,
-                    message: "OTP email sent successfully",
+                    message: PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "OTP email sent successfully"
                     data: status.data,
                 });
             } else if (status.message === "Mail not registered") {
                 res.status(NOT_FOUND).json({
                     success: false,
-                    message: "Email is not registered",
+                    message: PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED, // "Email is not registered"
                     data: null,
                 });
             } else if (status.message === "Please Sign in with your google account") {
                 res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: "Please Sign in with your google account",
+                    message: PasswordMessages.FORGOT_PASSWORD_GOOGLE, // "Please Sign in with your google account"
                     data: null,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Failed to verify email",
+                    message: PasswordMessages.FORGOT_PASSWORD_FAILED, // "Failed to verify email"
                     data: null,
                 });
             }
@@ -607,7 +616,7 @@ class ProviderController {
             console.error("Forgot Password Error:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -619,7 +628,7 @@ class ProviderController {
             if (!req.body.email || !req.body.otp) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and otp are a required feilds",
+                    message: PasswordMessages.FORGOT_PASSWORD_OTP_REQUIRED, // "Email and otp are a required feilds"
                     data: null,
                 });
                 return;
@@ -628,39 +637,41 @@ class ProviderController {
             const otpStatus = await this.providerService.passworOtpCheck(
                 req.body.otp,
                 req.body.email
-            ); // Checks for OTP and validates
+            );
 
             if (otpStatus.success) {
-                // Sends on a successful verification
-                res.status(OK).json({ success: true, message: otpStatus.message, data: null });
+                res.status(OK).json({
+                    success: true,
+                    message: AuthMessages.OTP_VERIFIED_SUCCESS, // "OTP verified successfully" (reused from AuthMessages)
+                    data: null,
+                });
             } else {
-                // Error handling based on error messages
                 switch (otpStatus.message) {
                     case "Invalid Otp":
                         res.status(BAD_REQUEST).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_INVALID, // "Invalid OTP"
                             data: null,
                         });
                         break;
                     case "Otp is expired":
                         res.status(GONE).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_EXPIRED, // "OTP is expired"
                             data: null,
                         });
                         break;
                     case "Otp error":
                         res.status(INTERNAL_SERVER_ERROR).json({
                             success: false,
-                            message: otpStatus.message,
+                            message: AuthMessages.OTP_ERROR, // "OTP error"
                             data: null,
                         });
                         break;
                     default:
                         res.status(NOT_FOUND).json({
                             success: false,
-                            message: "Account not found",
+                            message: GeneralMessages.ACCOUNT_NOT_FOUND, // "Account not found"
                             data: null,
                         });
                         break;
@@ -670,7 +681,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -682,7 +693,7 @@ class ProviderController {
             if (!req.body.email || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Email and password are a required feilds",
+                    message: PasswordMessages.RESET_PASSWORD_REQUIRED, // "Email and password are a required feilds"
                     data: null,
                 });
                 return;
@@ -695,13 +706,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: PasswordMessages.RESET_PASSWORD_SUCCESS, // "Password updated successfully"
                     data: null,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: response.message,
+                    message: PasswordMessages.RESET_PASSWORD_FAILED, // "Failed to update password"
                     data: null,
                 });
             }
@@ -709,7 +720,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR_ALT, // "An internal server error occurred"
                 data: null,
             });
         }
@@ -721,7 +732,7 @@ class ProviderController {
             if (!req.params.id || !req.body.password) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and password are a required feilds",
+                    message: PasswordMessages.CONFIRM_PASSWORD_REQUIRED, // "Id and password are a required feilds"
                     data: null,
                 });
                 return;
@@ -734,19 +745,19 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: PasswordMessages.CONFIRM_PASSWORD_SUCCESS, // "Password verified successfully"
                     data: null,
                 });
             } else if (response.message === "Failed to verify password") {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: response.message,
+                    message: PasswordMessages.CONFIRM_PASSWORD_FAILED, // "Failed to verify password"
                     data: null,
                 });
             } else {
                 res.status(UNAUTHORIZED).json({
                     success: false,
-                    message: response.message,
+                    message: PasswordMessages.INCORRECT_PASSWORD, // "Incorrect Password" (assuming this is the intent)
                     data: null,
                 });
             }
@@ -754,7 +765,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR_ALT, // "An internal server error occurred"
                 data: null,
             });
         }
@@ -766,7 +777,7 @@ class ProviderController {
             if (!req.params.id || !req.body.address || !req.body.date) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id,address and date are required feilds",
+                    message: ScheduleMessages.CREATE_SCHEDULE_REQUIRED, // "Id,address and date are required feilds"
                     data: null,
                 });
                 return;
@@ -781,19 +792,19 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: ScheduleMessages.FETCH_SCHEDULE_SUCCESS, // "schedule fetched successfully" (closest match, assuming success intent)
                     data: null,
                 });
             } else if (response.message === "Failed to create schedule") {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: response.message,
+                    message: ScheduleMessages.FETCH_SCHEDULE_FAILED, // "Failed to create schedule"
                     data: null,
                 });
             } else {
                 res.status(FORBIDDEN).json({
                     success: false,
-                    message: response.message,
+                    message: response.message, // No direct match, keeping original
                     data: null,
                 });
             }
@@ -801,7 +812,7 @@ class ProviderController {
             console.error(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR_ALT, // "An internal server error occurred"
                 data: null,
             });
         }
@@ -813,7 +824,7 @@ class ProviderController {
             if (!req.params.id || !req.query.date) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and date are required feilds",
+                    message: ScheduleMessages.CREATE_SCHEDULE_REQUIRED, // "Id and date are required feilds" (closest match)
                     data: null,
                 });
                 return;
@@ -825,7 +836,7 @@ class ProviderController {
             if (schedule.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "schedule fetched sucessfully",
+                    message: ScheduleMessages.FETCH_SCHEDULE_SUCCESS, // "schedule fetched sucessfully"
                     data: schedule.data,
                 });
             } else {
@@ -833,7 +844,10 @@ class ProviderController {
                     schedule.message === "Resource not found" ? NOT_FOUND : INTERNAL_SERVER_ERROR
                 ).json({
                     success: false,
-                    message: schedule.message,
+                    message:
+                        schedule.message === "Resource not found"
+                            ? GeneralMessages.RESOURCE_NOT_FOUND // "Resource not found"
+                            : ScheduleMessages.FETCH_SCHEDULE_FAILED, // "Failed to create schedule" (closest match)
                     data: null,
                 });
             }
@@ -841,7 +855,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR_ALT, // "An internal server error occurred"
                 data: null,
             });
         }
@@ -853,7 +867,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required feild",
+                    message: BookingMessages.GET_BOOKINGS_REQUIRED, // "Id is a required feild" (closest match)
                     data: null,
                 });
                 return;
@@ -863,7 +877,7 @@ class ProviderController {
             if (requestData.success) {
                 res.status(OK).json({
                     success: true,
-                    message: requestData.message,
+                    message: BookingMessages.GET_BOOKINGS_SUCCESS, // "Bookings fetched successfully" (closest match)
                     data: requestData.data,
                 });
             } else {
@@ -873,7 +887,7 @@ class ProviderController {
                         : INTERNAL_SERVER_ERROR
                 ).json({
                     success: false,
-                    message: requestData.message,
+                    message: requestData.message, // No direct match, keeping original
                     data: null,
                 });
             }
@@ -881,7 +895,7 @@ class ProviderController {
             console.log(error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "An internal server error occurred",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR_ALT, // "An internal server error occurred"
                 data: null,
             });
         }
@@ -895,7 +909,7 @@ class ProviderController {
             if (!req.params.id || !status) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Booking request ID and status are required",
+                    message: BookingMessages.BOOKING_REQUEST_ID_STATUS_REQUIRED, // "Booking request ID and status are required"
                     data: null,
                 });
                 return;
@@ -913,7 +927,10 @@ class ProviderController {
                         : INTERNAL_SERVER_ERROR;
                 res.status(statusCode).json({
                     success: false,
-                    message: requestData.message,
+                    message:
+                        requestData.message === "Booking request not found"
+                            ? BookingMessages.BOOKING_REQUEST_NOT_FOUND // "Booking request not found"
+                            : requestData.message, // No direct match for other cases
                     data: null,
                 });
                 return;
@@ -921,14 +938,14 @@ class ProviderController {
 
             res.status(OK).json({
                 success: true,
-                message: requestData.message,
+                message: requestData.message, // No direct match, keeping original
                 data: requestData.data,
             });
         } catch (error: any) {
             console.error("Error in updateBookingRequestStatus:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -940,7 +957,7 @@ class ProviderController {
             if (!req.params.id || !req.query.page) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id and page are required fields",
+                    message: BookingMessages.GET_BOOKINGS_REQUIRED, // "Id and page are required fields"
                     data: null,
                 });
                 return;
@@ -953,13 +970,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: BookingMessages.GET_BOOKINGS_SUCCESS, // "Bookings fetched successfully"
                     data: response.data,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: response.message,
+                    message: response.message, // No direct match, keeping original
                     data: null,
                 });
             }
@@ -967,7 +984,7 @@ class ProviderController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -979,7 +996,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required field",
+                    message: BookingMessages.GET_BOOKING_DETAILS_REQUIRED, // "Id is a required field"
                     data: null,
                 });
                 return;
@@ -989,13 +1006,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: BookingMessages.GET_BOOKING_DETAILS_SUCCESS, // "Booking details fetched successfully"
                     data: response.data,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: response.message,
+                    message: response.message, // No direct match, keeping original
                     data: null,
                 });
             }
@@ -1003,7 +1020,7 @@ class ProviderController {
             console.error("Error in fetching booking details:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -1015,7 +1032,7 @@ class ProviderController {
             if (!req.params.id || !req.body.amount || !req.body.method) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id,amount and payment method are required fields",
+                    message: PaymentMessages.CREATE_PAYMENT_PROVIDER_REQUIRED, // "Id,amount and payment method are required fields"
                     data: null,
                 });
                 return;
@@ -1030,13 +1047,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: PaymentMessages.CREATE_PAYMENT_SUCCESS, // "Payment status updated successfully"
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: response.message,
+                    message: PaymentMessages.CREATE_PAYMENT_FAILED, // "Failed to update payment status"
                     data: null,
                 });
             }
@@ -1044,7 +1061,7 @@ class ProviderController {
             console.error("Error in creating payment request:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -1056,7 +1073,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id is a required field",
+                    message: ChatMessages.FETCH_CHAT_REQUIRED, // "Id is a required field"
                     data: null,
                 });
                 return;
@@ -1067,13 +1084,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: ChatMessages.FETCH_CHAT_SUCCESS, // "Chat fetched successfully"
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
-                    message: response.message,
+                    message: ChatMessages.FETCH_CHAT_FAILED, // "Failed to fetch chat"
                     data: response.data,
                 });
             }
@@ -1082,7 +1099,7 @@ class ProviderController {
 
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -1094,7 +1111,7 @@ class ProviderController {
             if (!req.params.id || !req.query.revenueBy || !req.query.hoursBy) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Id,revenue filter and working hours filters are required fields",
+                    message: DashboardMessages.FETCH_DASHBOARD_REQUIRED, // "Id,revenue filter and working hours filters are required fields"
                     data: null,
                 });
                 return;
@@ -1109,13 +1126,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: response.message, // No direct match, keeping original
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: true,
-                    message: response.message,
+                    message: response.message, // No direct match, keeping original
                     data: response.data,
                 });
             }
@@ -1124,7 +1141,7 @@ class ProviderController {
 
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
                 data: null,
             });
         }
@@ -1142,8 +1159,7 @@ class ProviderController {
             ) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message:
-                        "Reason, reportedId, reporterId, and reporterdRole are required fields",
+                    message: ReportMessages.REPORT_REQUIRED, // "Reason, reportedId, reporterId, and reporterdRole are required fields"
                     data: null,
                 });
                 return;
@@ -1157,25 +1173,25 @@ class ProviderController {
             if (response.message === "Failed report account") {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: response.message,
+                    message: ReportMessages.REPORT_PROVIDER_FAILED, // "Failed report account"
                     data: null,
                 });
             } else if (response.message === "Already reported") {
                 res.status(CONFLICT).json({
                     success: true,
-                    message: response.message,
+                    message: ReportMessages.REPORT_ALREADY_EXISTS, // "Already reported"
                     data: response.data,
                 });
             } else if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Reported successfully",
+                    message: ReportMessages.REPORT_SUCCESS, // "Reported successfully"
                     data: response.data,
                 });
             } else {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Failed to report",
+                    message: ReportMessages.REPORT_FAILED, // "Failed to report"
                     data: null,
                 });
             }
@@ -1183,7 +1199,7 @@ class ProviderController {
             console.error("Error in reporting account:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error."
                 data: null,
             });
         }
@@ -1192,10 +1208,10 @@ class ProviderController {
     // fetch notifications count
     async fetchNotificationsCount(req: Request, res: Response): Promise<void> {
         try {
-            if (!req.params.id || !req.query.page) {
+            if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "User id ,page no are required feilds",
+                    message: NotificationMessages.FETCH_COUNT_REQUIRED, // "User id is a required feild"
                     data: null,
                 });
                 return;
@@ -1208,13 +1224,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Fetched notification count successfully",
+                    message: NotificationMessages.FETCH_COUNT_SUCCESS, // "Fetched unread count successfully"
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: NotificationMessages.FETCH_COUNT_FAILED, // "Failed to fetch unread count"
                     data: null,
                 });
             }
@@ -1222,7 +1238,7 @@ class ProviderController {
             console.error("Error in reporting account:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error."
                 data: null,
             });
         }
@@ -1234,7 +1250,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Notification id is a required feild",
+                    message: NotificationMessages.FETCH_NOTIFICATIONS_REQUIRED, // "Notification id is a required feild" (closest match)
                     data: null,
                 });
                 return;
@@ -1248,13 +1264,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: "Fetched notifications successfully",
+                    message: NotificationMessages.FETCH_NOTIFICATIONS_SUCCESS, // "Fetched notifications successfully"
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: NotificationMessages.FETCH_NOTIFICATIONS_FAILED, // "Failed to fetch notifications"
                     data: null,
                 });
             }
@@ -1262,7 +1278,7 @@ class ProviderController {
             console.error("Error in fetching notifications:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error."
                 data: null,
             });
         }
@@ -1274,7 +1290,7 @@ class ProviderController {
             if (!req.params.id) {
                 res.status(BAD_REQUEST).json({
                     success: false,
-                    message: "Notification id is a required feild",
+                    message: NotificationMessages.MARK_NOTIFICATION_REQUIRED, // "Notification id is a required feild"
                     data: null,
                 });
                 return;
@@ -1285,13 +1301,13 @@ class ProviderController {
             if (response.success) {
                 res.status(OK).json({
                     success: true,
-                    message: response.message,
+                    message: NotificationMessages.MARK_NOTIFICATION_SUCCESS, // "Updated notification successfully"
                     data: response.data,
                 });
             } else {
                 res.status(INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Internal server error.",
+                    message: NotificationMessages.MARK_NOTIFICATION_FAILED, // "Failed to update notification"
                     data: null,
                 });
             }
@@ -1299,7 +1315,7 @@ class ProviderController {
             console.error("Error in updating notification:", error.message);
             res.status(INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: "Internal server error.",
+                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error."
                 data: null,
             });
         }
