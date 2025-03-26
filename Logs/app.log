@@ -1,0 +1,8 @@
+2025-03-26 18:17:05 [WARN]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 401 | Duration: 8ms
+2025-03-26 18:17:05 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/profile | Response: 304 | Duration: 48ms
+2025-03-26 18:17:05 [INFO]: Request: POST /users/refresh-token | Response: 200 | Duration: 12ms
+2025-03-26 18:17:05 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 304 | Duration: 72ms
+2025-03-26 18:17:43 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/profile | Response: 304 | Duration: 39ms
+2025-03-26 18:17:43 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 304 | Duration: 66ms
+2025-03-26 18:17:47 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/profile | Response: 304 | Duration: 38ms
+2025-03-26 18:17:47 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 304 | Duration: 65ms

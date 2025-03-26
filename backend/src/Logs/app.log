@@ -1,0 +1,2 @@
+2025-03-26 18:19:28 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/profile | Response: 304 | Duration: 49ms
+2025-03-26 18:19:28 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 304 | Duration: 93ms

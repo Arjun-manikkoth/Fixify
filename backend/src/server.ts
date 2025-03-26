@@ -5,11 +5,11 @@ import { connectDB } from "./Database/Db";
 import cors from "cors";
 import userRoute from "./Routes/UserRoutes";
 import providerRoute from "./Routes/ProviderRoutes";
-import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import adminRoute from "./Routes/AdminRoutes";
 import { configureSockets } from "./Utils/Socket";
-import { initializeSocket, getIO } from "./Utils/Socket";
+import { initializeSocket } from "./Utils/Socket";
+import loggingMiddleware from "./Middlewares/Logging";
 
 const app: Express = express();
 
@@ -36,15 +36,15 @@ const corsOptions = {
 //cors middleware
 app.use(cors(corsOptions));
 
+//logging middleware
+app.use(loggingMiddleware);
+
 //middleware to parser cookies
 app.use(cookieParser());
 
 //parsing datas
 app.use(express.urlencoded());
 app.use(express.json());
-
-//logging middleware
-app.use(morgan("dev"));
 
 //user router
 app.use("/users", userRoute);

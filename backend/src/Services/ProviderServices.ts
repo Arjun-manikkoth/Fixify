@@ -141,27 +141,27 @@ class ProviderService implements IProviderService {
                     if (otpStatus) {
                         return {
                             success: true,
-                            message: AuthMessages.SIGN_UP_SUCCESS, // "Signed up successfully"
+                            message: AuthMessages.SIGN_UP_SUCCESS,
                             email: status.email,
                         };
                     } else {
                         return {
                             success: false,
-                            message: AuthMessages.EMAIL_OTP_FAILURE, // "Email OTP Failure"
+                            message: AuthMessages.EMAIL_OTP_FAILURE,
                             email: status.email,
                         };
                     }
                 } else {
                     return {
                         success: false,
-                        message: AuthMessages.SIGN_UP_FAILED, // "Sign up failed"
+                        message: AuthMessages.SIGN_UP_FAILED,
                         email: null,
                     };
                 }
             } else {
                 return {
                     success: false,
-                    message: AuthMessages.DUPLICATE_EMAIL, // "Duplicate email"
+                    message: AuthMessages.DUPLICATE_EMAIL,
                     email: null,
                 };
             }
@@ -393,21 +393,21 @@ class ProviderService implements IProviderService {
 
                     if (otpStatus) {
                         const verified = await this.providerRepository.verifyProvider(provider._id);
-                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS }; // "Otp verified successfully"
+                        return { success: true, message: AuthMessages.OTP_VERIFIED_SUCCESS };
                     } else {
-                        return { success: false, message: AuthMessages.OTP_INVALID }; // "Invalid Otp"
+                        return { success: false, message: AuthMessages.OTP_INVALID };
                     }
                 } else if (!data?.otp.length) {
-                    return { success: false, message: AuthMessages.OTP_EXPIRED }; // "Otp is expired"
+                    return { success: false, message: AuthMessages.OTP_EXPIRED };
                 }
             }
             return {
                 success: false,
-                message: GeneralMessages.PROVIDER_NOT_FOUND, // "Provider not found"
+                message: GeneralMessages.PROVIDER_NOT_FOUND,
             };
         } catch (error: any) {
             console.log(error.message);
-            return { success: false, message: AuthMessages.OTP_ERROR }; // "Otp error"
+            return { success: false, message: AuthMessages.OTP_ERROR };
         }
     }
 
@@ -419,7 +419,7 @@ class ProviderService implements IProviderService {
                 if (exists.is_blocked) {
                     return {
                         success: false,
-                        message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
+                        message: AuthMessages.ACCOUNT_BLOCKED,
                         service_id: null,
                         email: "",
                         _id: null,
@@ -433,7 +433,7 @@ class ProviderService implements IProviderService {
                 if (exists.google_id) {
                     return {
                         success: false,
-                        message: AuthMessages.SIGN_IN_WITH_GOOGLE, // "Please Sign in With Google"
+                        message: AuthMessages.SIGN_IN_WITH_GOOGLE,
                         email: "",
                         _id: null,
                         service_id: null,
@@ -456,7 +456,7 @@ class ProviderService implements IProviderService {
                         );
                         return {
                             success: true,
-                            message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
+                            message: AuthMessages.SIGN_IN_SUCCESS,
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -470,7 +470,7 @@ class ProviderService implements IProviderService {
                         const status = await this.otpResend(exists.email);
                         return {
                             success: false,
-                            message: AuthMessages.OTP_NOT_VERIFIED, // "Didn't complete otp verification"
+                            message: AuthMessages.OTP_NOT_VERIFIED,
                             email: exists.email,
                             _id: exists._id,
                             name: exists.name,
@@ -484,7 +484,7 @@ class ProviderService implements IProviderService {
                 } else {
                     return {
                         success: false,
-                        message: AuthMessages.INVALID_CREDENTIALS, // "Invalid Credentials"
+                        message: AuthMessages.INVALID_CREDENTIALS,
                         email: null,
                         _id: null,
                         name: "",
@@ -498,7 +498,7 @@ class ProviderService implements IProviderService {
             } else {
                 return {
                     success: false,
-                    message: AuthMessages.ACCOUNT_DOES_NOT_EXIST, // "Account does not exist"
+                    message: AuthMessages.ACCOUNT_DOES_NOT_EXIST,
                     email: null,
                     name: "",
                     mobileNo: "",
@@ -523,7 +523,7 @@ class ProviderService implements IProviderService {
                 const tokens = generateTokens(tokenStatus.id, tokenStatus.email, tokenStatus.role);
                 return {
                     accessToken: tokens.accessToken,
-                    message: tokenMessages.ACCESS_TOKEN_SUCCESS, // "Access token sent successfully"
+                    message: tokenMessages.ACCESS_TOKEN_SUCCESS,
                 };
             }
 
@@ -535,7 +535,7 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 accessToken: null,
-                message: tokenMessages.TOKEN_ERROR, // "Token error"
+                message: tokenMessages.TOKEN_ERROR,
             };
         }
     }
@@ -569,7 +569,7 @@ class ProviderService implements IProviderService {
                     const tokens = generateTokens(saveProvider._id.toString(), email, "provider");
                     return {
                         success: true,
-                        message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
+                        message: AuthMessages.SIGN_IN_SUCCESS,
                         email: saveProvider.email,
                         _id: saveProvider._id,
                         name: saveProvider.name,
@@ -582,7 +582,7 @@ class ProviderService implements IProviderService {
                 }
                 return {
                     success: false,
-                    message: AuthMessages.GOOGLE_SIGN_IN_FAILED, // "Google Sign In failed"
+                    message: AuthMessages.GOOGLE_SIGN_IN_FAILED,
                     email: null,
                     _id: null,
                     service_id: null,
@@ -596,7 +596,7 @@ class ProviderService implements IProviderService {
                 if (provider.is_blocked) {
                     return {
                         success: false,
-                        message: AuthMessages.ACCOUNT_BLOCKED, // "Account blocked by admin"
+                        message: AuthMessages.ACCOUNT_BLOCKED,
                         email: "",
                         _id: null,
                         name: "",
@@ -611,7 +611,7 @@ class ProviderService implements IProviderService {
                 const tokens = generateTokens(provider._id.toString(), email, "provider");
                 return {
                     success: true,
-                    message: AuthMessages.SIGN_IN_SUCCESS, // "Signed in successfully"
+                    message: AuthMessages.SIGN_IN_SUCCESS,
                     email: provider.email,
                     _id: provider._id,
                     name: provider.name,
@@ -626,7 +626,7 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: AuthMessages.SIGN_IN_FAILED, // "Sign In Failed"
+                message: AuthMessages.SIGN_IN_FAILED,
                 email: null,
                 _id: null,
                 name: "",
@@ -1480,7 +1480,7 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: GeneralMessages.INTERNAL_SERVER_ERROR, // "Internal server error"
+                message: GeneralMessages.INTERNAL_SERVER_ERROR,
                 data: null,
             };
         }
