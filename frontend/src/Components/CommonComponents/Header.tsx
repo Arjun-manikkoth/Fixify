@@ -32,7 +32,6 @@ import { setProvider } from "../../Redux/ProviderSlice";
 
 export const ModalContext = React.createContext("");
 
-// Add props interface for scroll functions
 interface HeaderProps {
     scrollToHome: () => void;
     scrollToServices: () => void;
@@ -113,22 +112,16 @@ const Header: FC<HeaderProps> = ({ scrollToHome, scrollToServices, scrollToAbout
                         </div>
                     </div>
                     <div className="flex space-x-2 sm:space-x-4 md:space-x-6 text-xs sm:text-sm md:text-base text-black">
-                        <a href="#" className="hover:text-gray-400">
-                            Kerela
-                        </a>
+                        <span className="hover:text-gray-400">Kerela</span>
                         <span className="text-gray-400">|</span>
-                        <a href="#" className="hover:text-gray-400">
-                            Bangalore
-                        </a>
+                        <span className="hover:text-gray-400">Bangalore</span>
                         <span className="text-gray-400">|</span>
-                        <a href="#" className="hover:text-gray-400">
-                            Chennai
-                        </a>
+                        <span className="hover:text-gray-400">Chennai</span>
                     </div>
                 </div>
             </div>
 
-            <div className="p-0 px-12">
+            <div className="p-0 px-12 relative">
                 <div className="flex items-center justify-between h-16">
                     <div>
                         <img src="/FixifyLogo.png" alt="Fixify Logo" className="h-10" />
@@ -207,71 +200,72 @@ const Header: FC<HeaderProps> = ({ scrollToHome, scrollToServices, scrollToAbout
                 </div>
 
                 {isMenuOpen && (
-                    <div className="md:hidden flex flex-col items-center bg-gray-100 p-4 space-y-4">
-                        <span
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
-                            onClick={() => {
-                                scrollToHome();
-                                toggleMenu(); // Close menu after click
-                            }}
-                        >
-                            Home
-                        </span>
-                        <span
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
-                            onClick={() => {
-                                scrollToServices();
-                                toggleMenu(); // Close menu after click
-                            }}
-                        >
-                            Services
-                        </span>
-                        <span
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
-                            onClick={() => {
-                                scrollToAbout();
-                                toggleMenu(); // Close menu after click
-                            }}
-                        >
-                            About
-                        </span>
-                        {user.id || provider.id ? null : (
+                    <div className="md:hidden absolute top-16 left-0 w-full bg-gray-100 shadow-lg z-50">
+                        <div className="flex flex-col items-center p-4 space-y-3 text-center max-h-[calc(100vh-4rem)] overflow-y-auto">
                             <span
-                                className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                                className="block text-base font-medium text-gray-700 hover:text-gray-400 cursor-pointer py-2 w-full"
                                 onClick={() => {
-                                    openModal("providerSignIn");
-                                    toggleMenu(); // Close menu after click
+                                    scrollToHome();
+                                    toggleMenu();
                                 }}
                             >
-                                Join Us
+                                Home
                             </span>
-                        )}
-
-                        <button
-                            className="bg-brandBlue text-white font-regular text-lg px-6 py-4 hover:bg-blue-600 flex items-center justify-center"
-                            onClick={() => {
-                                openModal("userSignIn");
-                                toggleMenu(); // Close menu after click
-                            }}
-                        >
-                            Book Now
-                            <svg
-                                className="ml-2"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 36 24"
-                                strokeWidth="3"
-                                stroke="currentColor"
-                                width="30"
-                                height="30"
+                            <span
+                                className="block text-base font-medium text-gray-700 hover:text-gray-400 cursor-pointer py-2 w-full"
+                                onClick={() => {
+                                    scrollToServices();
+                                    toggleMenu();
+                                }}
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M3 12h26m0 0l-6-6m6 6l-6 6"
-                                />
-                            </svg>
-                        </button>
+                                Services
+                            </span>
+                            <span
+                                className="block text-base font-medium text-gray-700 hover:text-gray-400 cursor-pointer py-2 w-full"
+                                onClick={() => {
+                                    scrollToAbout();
+                                    toggleMenu();
+                                }}
+                            >
+                                About
+                            </span>
+                            {user.id || provider.id ? null : (
+                                <span
+                                    className="block text-base font-medium text-gray-700 hover:text-gray-400 cursor-pointer py-2 w-full"
+                                    onClick={() => {
+                                        openModal("providerSignIn");
+                                        toggleMenu();
+                                    }}
+                                >
+                                    Join Us
+                                </span>
+                            )}
+                            <button
+                                className="w-full bg-brandBlue text-white font-regular text-base px-6 py-3 hover:bg-blue-600 flex items-center justify-center"
+                                onClick={() => {
+                                    openModal("userSignIn");
+                                    toggleMenu();
+                                }}
+                            >
+                                Book Now
+                                <svg
+                                    className="ml-2"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 36 24"
+                                    strokeWidth="3"
+                                    stroke="currentColor"
+                                    width="24"
+                                    height="24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M3 12h26m0 0l-6-6m6 6l-6 6"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
