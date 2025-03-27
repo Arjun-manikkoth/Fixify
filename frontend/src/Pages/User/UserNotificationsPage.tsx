@@ -6,15 +6,9 @@ import Notifications from "../../Components/CommonComponents/Notifications";
 const NotificationsPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <UserSidebar />
-
-                <div className="flex-1 ml-72">
-                    <UserHeader />
-
-                    <Notifications />
-                </div>
-            </div>
+            <UserSidebar />
+            <UserHeader />
+            <Notifications />
         </>
     );
 };

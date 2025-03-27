@@ -1,31 +1,37 @@
+// src/components/UserComponents/UserHeader.tsx
 import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
-import { FiBell } from "react-icons/fi";
+import { FiBell, FiMenu } from "react-icons/fi";
 import { useContext } from "react";
 import { NotificationContext } from "../../Contexts/NotificationContext";
+import { useSidebar } from "../../Contexts/SidebarContext";
 
 const UserHeader: React.FC = () => {
     const user = useSelector((state: RootState) => state.user);
     const notification = useContext(NotificationContext);
+    const { toggleSidebar } = useSidebar();
 
     return (
-        <header className="flex items-center justify-between px-6 md:px-12 py-4 bg-white shadow-md">
-            {/* Logo or App Name (Optional) */}
-            <h2 className="text-xl font-bold text-gray-800 hidden md:block">Fixify</h2>
-
-            {/* Right Side - Notifications & Profile */}
+        <header className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-4 md:px-12 py-4 bg-white z-50">
             <div className="flex items-center space-x-4">
-                {/* Notification Icon */}
+                <button
+                    className="md:hidden text-gray-700 focus:outline-none"
+                    onClick={toggleSidebar}
+                >
+                    <FiMenu className="w-6 h-6" />
+                </button>
+                <h2 className="text-xl font-bold text-gray-800">Fixify</h2>
+            </div>
+
+            <div className="flex items-center space-x-4">
                 <div className="relative cursor-pointer">
                     <FiBell className="w-6 h-6 text-gray-700" />
-                    {/* Notification Badge (Dynamic in future) */}
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                        {notification?.unreadCount}
+                        {notification?.unreadCount || 0}
                     </span>
                 </div>
 
-                {/* User Profile */}
                 {user.url ? (
                     <img
                         src={user.url}
@@ -40,9 +46,8 @@ const UserHeader: React.FC = () => {
                     />
                 )}
 
-                {/* User Name - Hide on Small Screens */}
                 <h1 className="text-lg font-semibold text-black hidden sm:block">
-                    Hello, {user.name}
+                    Hello, {user.name || "User"}
                 </h1>
             </div>
         </header>

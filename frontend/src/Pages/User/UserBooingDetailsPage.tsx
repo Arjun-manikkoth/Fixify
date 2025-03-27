@@ -6,13 +6,9 @@ import UserBookingDetail from "../../Components/UserComponents/UserBookingDetail
 const BookingDetailsPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <UserSidebar />
-                <div className="flex-1 ml-72">
-                    <UserHeader />
-                    <UserBookingDetail />
-                </div>
-            </div>
+            <UserSidebar />
+            <UserHeader />
+            <UserBookingDetail />
         </>
     );
 };

@@ -1,26 +1,22 @@
+// src/components/UserComponents/UserProfile.tsx
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../Redux/Store";
 import { toast } from "react-toastify";
 import { useRef } from "react";
 import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 import { getUserData, updateProfile } from "../../Api/UserApis";
-import { useDispatch } from "react-redux";
 import { setUser } from "../../Redux/UserSlice";
-import { profileData } from "../../Interfaces/UserInterfaces/SignInInterface";
-import { User } from "../../Interfaces/UserInterfaces/SignInInterface";
+import { profileData, User } from "../../Interfaces/UserInterfaces/SignInInterface";
 import ChangePasswordModalUser from "./UserChangePassword";
 import UserResetPassword from "./UserPasswordReset";
 
 const UserProfile: React.FC = () => {
     const ref = useRef<HTMLInputElement | null>(null);
-
     const dispatch = useDispatch();
 
     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
-    //state to show loading indicator
     const [loading, setLoading] = useState<boolean>(false);
-    //state to store the profile data
     const [profileData, setProfileData] = useState<User>({
         _id: "",
         name: "",
@@ -51,69 +47,67 @@ const UserProfile: React.FC = () => {
             getUserData(user.id)
                 .then((data) => {
                     setProfileData(data.data);
+                    setFormData({
+                        userName: data.data.name,
+                        mobileNo: data.data.mobile_no,
+                        image: null,
+                    });
                 })
                 .catch((error) => {
                     console.log(error.message);
-                });
-            setLoading(false);
+                })
+                .finally(() => setLoading(false));
         }
-    }, []);
+    }, [user.id]);
 
     const validateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         try {
-            e.preventDefault();
+            let isValid = true;
 
-            let isValid = true; //sets to true initially
-
-            //checks username inputs
             if (formData.userName.trim() === "") {
-                toast.error("Name cant be empty.");
+                toast.error("Name can't be empty.");
                 isValid = false;
             }
 
-            //checks mobileNo inputs is empty
             if (formData.mobileNo.trim() === "") {
-                toast.error("Phone number cant be empty");
+                toast.error("Phone number can't be empty");
                 isValid = false;
             } else if (formData.mobileNo.trim().length !== 10) {
-                //checks whether it is 10 numbers long
-
                 toast.error("Phone number must be 10 digits.");
                 isValid = false;
             }
 
-            if (isValid) {
-                if (user.id) {
-                    setLoading(true);
-                    const updateResponse = await updateProfile({
-                        ...formData,
-                        id: user.id,
-                    });
+            if (isValid && user.id) {
+                setLoading(true);
+                const updateResponse = await updateProfile({
+                    ...formData,
+                    id: user.id,
+                });
 
-                    if (updateResponse.success) {
-                        toast.success("Profile Updated Successfully");
-                        dispatch(
-                            setUser({
-                                id: updateResponse.data._id,
-                                name: updateResponse.data.name,
-                                email: updateResponse.data.email,
-                                phone: updateResponse.data.mobile_no,
-                                url: updateResponse.data.url,
-                            })
-                        );
-                        setPreview("");
-                    }
-                    setLoading(false);
+                if (updateResponse.success) {
+                    toast.success("Profile Updated Successfully");
+                    dispatch(
+                        setUser({
+                            id: updateResponse.data._id,
+                            name: updateResponse.data.name,
+                            email: updateResponse.data.email,
+                            phone: updateResponse.data.mobile_no,
+                            url: updateResponse.data.url,
+                        })
+                    );
+                    setPreview("");
                 }
+                setLoading(false);
             }
         } catch (error: any) {
             console.log(error.message);
+            setLoading(false);
         }
     };
+
     const handleImageUpload = () => {
-        if (ref.current) {
-            ref.current.click();
-        }
+        ref.current?.click();
     };
 
     const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,8 +117,6 @@ const UserProfile: React.FC = () => {
     const imageOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-
-            // image file size and type validation
             if (file.size > 5 * 1024 * 1024) {
                 toast.error("File size must be less than 5MB.");
                 return;
@@ -137,42 +129,38 @@ const UserProfile: React.FC = () => {
             setPreview(URL.createObjectURL(file));
         }
     };
+
     const cancelUpload = () => {
         setPreview("");
         setFormData({ ...formData, image: null });
-        if (ref.current) {
-            ref.current.value = "";
-        }
+        if (ref.current) ref.current.value = "";
     };
 
     return (
-        <>
-            {/* Main Content Section */}
-            <div className="flex flex-col space-y-6 bg-customBlue p-9 me-12 rounded-xl">
-                {/* Profile Section */}
-                <div className="w-full bg-white shadow p-11 rounded-xl">
-                    <h2 className="text-lg font-semibold text-black mb-4">My Profile</h2>
-                    <div className="flex flex-col items-center">
+        <div className="pt-16 md:pl-72 bg-gray-100 min-h-screen flex-1">
+            <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                <div className="flex flex-col space-y-6">
+                    {/* Profile Section */}
+                    <div className="w-full bg-white shadow-lg rounded-xl p-6 sm:p-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">My Profile</h2>
                         {loading ? (
-                            <LoadingSpinner />
+                            <div className="flex justify-center">
+                                <LoadingSpinner />
+                            </div>
                         ) : (
-                            <form
-                                onSubmit={validateProfile}
-                                className="flex flex-col items-center w-full"
-                            >
-                                {/* Profile Image */}
-                                <div className="relative w-full flex justify-center">
+                            <form onSubmit={validateProfile} className="space-y-6">
+                                <div className="flex justify-center relative">
                                     {preview ? (
                                         <>
                                             <img
                                                 src={preview}
-                                                alt="Profile"
-                                                className="w-52 h-52 rounded-full mb-8 cursor-pointer"
+                                                alt="Profile Preview"
+                                                className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
                                                 onClick={handleImageUpload}
                                             />
                                             <button
-                                                onClick={() => cancelUpload()}
-                                                className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg"
+                                                onClick={cancelUpload}
+                                                className="absolute top-0 right-1/3 sm:right-1/4 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg"
                                             >
                                                 ✕
                                             </button>
@@ -180,16 +168,16 @@ const UserProfile: React.FC = () => {
                                     ) : user.url ? (
                                         <img
                                             src={user.url}
-                                            alt="Preview"
+                                            alt="Profile"
                                             referrerPolicy="no-referrer"
-                                            className="w-52 h-52 rounded-full mb-8 cursor-pointer"
+                                            className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
                                             onClick={handleImageUpload}
                                         />
                                     ) : (
                                         <img
-                                            src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
+                                            src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8"
                                             alt="Default Profile"
-                                            className="w-52 h-52 rounded-full mb-8 cursor-pointer"
+                                            className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
                                             onClick={handleImageUpload}
                                         />
                                     )}
@@ -198,88 +186,107 @@ const UserProfile: React.FC = () => {
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    alt="profile"
                                     ref={ref}
                                     id="image"
                                     onChange={imageOnChange}
                                     className="hidden"
                                 />
 
-                                {/* Profile Name and Phone Number */}
-                                <div className="w-full space-y-4">
-                                    <div className="flex flex-col sm:flex-row sm:space-x-4">
-                                        <div className="w-full sm:w-1/2">
-                                            <input
-                                                type="text"
-                                                id="userName"
-                                                onChange={onChangeInput}
-                                                className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                                value={formData.userName}
-                                            />
-                                        </div>
-                                        <div className="w-full sm:w-1/2">
-                                            <input
-                                                type="text"
-                                                id="mobileNo"
-                                                onChange={onChangeInput}
-                                                className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                                                value={formData.mobileNo}
-                                            />
-                                        </div>
-                                    </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
+                                        <label
+                                            htmlFor="userName"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Name
+                                        </label>
                                         <input
                                             type="text"
-                                            className="w-full mt-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                                            id="userName"
+                                            onChange={onChangeInput}
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent"
+                                            value={formData.userName}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label
+                                            htmlFor="mobileNo"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="mobileNo"
+                                            onChange={onChangeInput}
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent"
+                                            value={formData.mobileNo}
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label
+                                            htmlFor="email"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none bg-transparent text-gray-500"
                                             defaultValue={user.email}
                                             readOnly
                                         />
                                     </div>
                                 </div>
 
-                                {/* Save Button */}
-                                <div className="mt-10">
-                                    <button className="px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg">
+                                <div className="flex justify-center mt-6">
+                                    <button
+                                        type="submit"
+                                        className="px-6 py-2 sm:px-9 sm:py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-base sm:text-lg"
+                                    >
                                         Save
                                     </button>
                                 </div>
                             </form>
                         )}
                     </div>
-                </div>
 
-                {/* Password Section */}
-                <div className="w-full bg-white shadow p-11 rounded-xl">
-                    {!profileData?.google_id ? (
-                        <>
-                            <h2 className="text-lg font-semibold text-black mb-4">
-                                Passwords And Security
-                            </h2>
-                            <p className="text-black mb-6">
-                                For optimal security, consider updating your password periodically.
-                            </p>
-                            <button
-                                className="px-6 py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600"
-                                onClick={() => setModal("changePassword")}
-                            >
-                                Change Now
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <h2 className="text-lg font-semibold text-black mb-4">
-                                Signed In With Google Account
-                            </h2>
-                            <p className="text-black mb-6 leading-relaxed">
-                                You can Seamlessly sign in everytime with your gmail account.
-                            </p>
-                        </>
-                    )}
+                    {/* Password Section */}
+                    <div className="w-full bg-white shadow-lg rounded-xl p-6 sm:p-8">
+                        {!profileData?.google_id ? (
+                            <>
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                                    Passwords And Security
+                                </h2>
+                                <p className="text-gray-600 mb-6">
+                                    For optimal security, consider updating your password
+                                    periodically.
+                                </p>
+                                <button
+                                    className="px-6 py-2 sm:px-8 sm:py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-base sm:text-lg"
+                                    onClick={() => setModal("changePassword")}
+                                >
+                                    Change Now
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                                    Signed In With Google Account
+                                </h2>
+                                <p className="text-gray-600 mb-6 leading-relaxed">
+                                    You can seamlessly sign in every time with your Gmail account.
+                                </p>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
+
             {modalType === "changePassword" && <ChangePasswordModalUser setModal={setModal} />}
             {modalType === "newPassword" && <UserResetPassword setModal={setModal} />}
-        </>
+        </div>
     );
 };
 

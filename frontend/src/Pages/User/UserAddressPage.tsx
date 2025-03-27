@@ -6,13 +6,9 @@ import UserAddressPage from "../../Components/UserComponents/UserAddress";
 const AddressPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <UserSidebar />
-                <div className="flex-1 ml-72">
-                    <UserHeader />
-                    <UserAddressPage />
-                </div>
-            </div>
+            <UserSidebar />
+            <UserHeader />
+            <UserAddressPage />
         </>
     );
 };

@@ -1,3 +1,4 @@
+// src/components/CommonComponents/Modals/MapComponent.tsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { GoogleMap, Marker, useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { reverseGeocodingApi } from "../../../Api/UserApis";
@@ -11,7 +12,7 @@ interface MapModalProps {
         lng: number,
         city: string,
         state: string,
-        country: string,
+        pincode: string,
         street?: string
     ) => void;
 }
@@ -50,8 +51,13 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
                         lng: position.coords.longitude,
                     });
                 },
-                (error) => console.error("Error fetching location:", error)
+                (error) => {
+                    console.error("Error fetching location:", error);
+                    toast.error("Unable to fetch current location.");
+                }
             );
+        } else {
+            toast.error("Geolocation is not supported by this browser.");
         }
     };
 
@@ -66,25 +72,31 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
         }
     };
 
-    // Fetch address details using Google Geocoding API
+    // Fetch address details using reverse geocoding API
     const fetchAddressDetails = async (latitude: number, longitude: number) => {
-        const { success, message, data } = await reverseGeocodingApi(latitude, longitude);
-        if (success && data) {
-            const addressComponents = data.results[0]?.address_components || [];
-            const city =
-                addressComponents.find((c: any) => c.types.includes("locality"))?.long_name || "";
-            const state =
-                addressComponents.find((c: any) => c.types.includes("administrative_area_level_1"))
-                    ?.long_name || "";
-            const pincode =
-                addressComponents.find((c: any) => c.types.includes("postal_code"))?.long_name ||
-                "";
-            const street =
-                addressComponents.find((c: any) => c.types.includes("political"))?.long_name || "";
-            console.log(street, "at frontend");
-            return { city, state, pincode, street };
-        } else {
-            toast.error("Error fetching address details:", message);
+        try {
+            const { success, message, data } = await reverseGeocodingApi(latitude, longitude);
+            if (success && data) {
+                const addressComponents = data.results[0]?.address_components || [];
+                const city =
+                    addressComponents.find((c: any) => c.types.includes("locality"))?.long_name ||
+                    "";
+                const state =
+                    addressComponents.find((c: any) =>
+                        c.types.includes("administrative_area_level_1")
+                    )?.long_name || "";
+                const pincode =
+                    addressComponents.find((c: any) => c.types.includes("postal_code"))
+                        ?.long_name || "";
+                const street =
+                    addressComponents.find((c: any) => c.types.includes("route"))?.long_name || "";
+                return { city, state, pincode, street };
+            } else {
+                toast.error(message || "Error fetching address details.");
+                return { city: "", state: "", pincode: "", street: "" };
+            }
+        } catch (error) {
+            toast.error("Failed to fetch address details.");
             return { city: "", state: "", pincode: "", street: "" };
         }
     };
@@ -95,21 +107,25 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
             const { lat, lng } = currentLocation;
             const { city, state, pincode, street } = await fetchAddressDetails(lat, lng);
             onLocationSelect(lat, lng, city, state, pincode, street);
+        } else {
+            toast.error("Please select a location first.");
         }
     };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded-lg w-3/4 max-w-xl">
+            <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-md sm:max-w-xl max-h-[90vh] overflow-y-auto relative">
                 {/* Close Button */}
                 <button
                     onClick={() => onClose(false)}
-                    className="absolute top-4 right-4 text-slate-100 hover:text-slate-100 text-2xl"
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl sm:text-2xl"
                     aria-label="Close Modal"
                 >
-                    &times;
+                    ×
                 </button>
-                <h2 className="text-lg font-semibold mb-4">Choose Your Location</h2>{" "}
+
+                <h2 className="text-base sm:text-lg font-semibold mb-4">Choose Your Location</h2>
+
                 {isLoaded ? (
                     <>
                         <Autocomplete
@@ -119,10 +135,10 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
                             <input
                                 type="text"
                                 placeholder="Search location"
-                                className="w-full mb-4 p-2 border rounded"
+                                className="w-full mb-4 p-2 border rounded text-sm sm:text-base"
                             />
                         </Autocomplete>
-                        <div className="h-96 w-full mb-4">
+                        <div className="h-64 sm:h-96 w-full mb-4">
                             <GoogleMap
                                 center={center}
                                 zoom={14}
@@ -141,21 +157,23 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
                                 {currentLocation && <Marker position={currentLocation} />}
                             </GoogleMap>
                         </div>
-                        <button
-                            onClick={fetchCurrentLocation}
-                            className="px-4 py-2 bg-gray-300 rounded"
-                        >
-                            Use Current Location
-                        </button>
-                        <button
-                            onClick={handleConfirmLocation}
-                            className="px-4 py-2 bg-blue-500 text-white rounded ml-4"
-                        >
-                            Confirm Location
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <button
+                                onClick={fetchCurrentLocation}
+                                className="px-4 py-2 bg-gray-300 rounded text-sm sm:text-base hover:bg-gray-400"
+                            >
+                                Use Current Location
+                            </button>
+                            <button
+                                onClick={handleConfirmLocation}
+                                className="px-4 py-2 bg-blue-500 text-white rounded text-sm sm:text-base hover:bg-blue-600"
+                            >
+                                Confirm Location
+                            </button>
+                        </div>
                     </>
                 ) : (
-                    <p>Loading map...</p>
+                    <p className="text-sm sm:text-base">Loading map...</p>
                 )}
             </div>
         </div>

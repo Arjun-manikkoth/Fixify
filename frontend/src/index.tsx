@@ -5,18 +5,21 @@ import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "react-redux";
 import { store, persistor } from "./Redux/Store";
+import { SidebarContextProvider } from "./Contexts/SidebarContext";
 import { PersistGate } from "redux-persist/integration/react";
 import StripeProvider from "./stripe/StripeProvider";
 import { NotificationProvider } from "./Contexts/NotificationContext";
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
     <Provider store={store}>
-        <NotificationProvider>
-            <PersistGate loading={null} persistor={persistor}>
-                <StripeProvider>
-                    <App />
-                </StripeProvider>
-            </PersistGate>
-        </NotificationProvider>
+        <SidebarContextProvider>
+            <NotificationProvider>
+                <PersistGate loading={null} persistor={persistor}>
+                    <StripeProvider>
+                        <App />
+                    </StripeProvider>
+                </PersistGate>
+            </NotificationProvider>
+        </SidebarContextProvider>
     </Provider>
 );

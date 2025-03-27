@@ -1,15 +1,17 @@
+// src/components/CommonComponents/Modals/UpdateAddressModal.tsx
 import React, { useEffect, useState } from "react";
 import MapModal from "./MapComponent";
 import { getAddressApi, updateAddressApi } from "../../../Api/UserApis";
 import { toast } from "react-toastify";
+import LoadingSpinner from "../LoadingSpinner";
 
-interface IAddAddressProps {
+interface IUpdateAddressProps {
     closeModal: React.Dispatch<React.SetStateAction<boolean>>;
     refreshAddress: React.Dispatch<React.SetStateAction<number>>;
     id: string;
 }
 
-const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddress }) => {
+const UpdateAddress: React.FC<IUpdateAddressProps> = ({ closeModal, id, refreshAddress }) => {
     const [address, setAddress] = useState({
         houseName: "",
         landmark: "",
@@ -19,27 +21,33 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddr
         state: "",
         pincode: "",
     });
-
-    //show map
     const [showMap, setShowMap] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        setLoading(true);
         getAddressApi(id)
             .then((response) => {
-                setAddress({
-                    houseName: response.data.house_name,
-                    landmark: response.data.landmark,
-                    latitude: response.data.latittude,
-                    longitude: response.data.longittude,
-                    city: response.data.city,
-                    state: response.data.state,
-                    pincode: response.data.pincode,
-                });
+                if (response.success) {
+                    setAddress({
+                        houseName: response.data.house_name,
+                        landmark: response.data.landmark,
+                        latitude: response.data.latitude, // Fixed typo
+                        longitude: response.data.longitude, // Fixed typo
+                        city: response.data.city,
+                        state: response.data.state,
+                        pincode: response.data.pincode,
+                    });
+                } else {
+                    toast.error(response.message || "Failed to fetch address.");
+                }
             })
-            .catch(() => {});
-    }, []);
+            .catch((error) => {
+                toast.error(error?.message || "Error fetching address.");
+            })
+            .finally(() => setLoading(false));
+    }, [id]);
 
-    // Handle location selection from MapModal
     const handleLocationSelect = (
         lat: number,
         lng: number,
@@ -57,8 +65,7 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddr
         }));
         setShowMap(false);
     };
-    console.log("upate address modal rendered");
-    // Handle form input changes
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setAddress((prevAddress) => ({
@@ -67,92 +74,81 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddr
         }));
     };
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        updateAddressApi(id, address)
-            .then((response) => {
-                if (response.success) {
-                    toast.success(response.message);
-                    console.log("refresh address state changed at update address");
-                    refreshAddress((prev) => prev + 1);
-                    setTimeout(() => {
-                        console.log("close modal state change call");
-                        closeModal(false);
-                    }, 3000);
-                } else {
-                    toast.error(response.message);
-                }
-            })
-            .catch((response) => {
-                toast.error(response?.error || "Error occured");
-            });
+        setLoading(true);
+        try {
+            const response = await updateAddressApi(id, address);
+            if (response.success) {
+                toast.success(response.message);
+                refreshAddress((prev) => prev + 1);
+                setTimeout(() => closeModal(false), 2000);
+            } else {
+                toast.error(response.message || "Failed to update address.");
+            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.error || "Error occurred");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <>
-            <div>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                    Update Address
-                </button>
-                (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div
-                        className="bg-white rounded-lg shadow-lg w-full max-w-lg p-8 relative"
-                        onClick={(e) => e.stopPropagation()}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            {loading ? (
+                <LoadingSpinner />
+            ) : (
+                <div
+                    className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {/* Close Button */}
+                    <button
+                        onClick={() => closeModal(false)}
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl sm:text-2xl"
+                        aria-label="Close Modal"
                     >
-                        {/* Close Button */}
+                        ×
+                    </button>
+
+                    {/* Modal Header */}
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
+                        Edit Address
+                    </h2>
+
+                    {/* Step 1: Location Selection */}
+                    <div className="mb-4">
+                        <p className="text-sm text-gray-500 mb-4">
+                            Verify or update your location on the map to adjust city, state, and
+                            pincode.
+                        </p>
                         <button
-                            onClick={() => closeModal(false)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
-                            aria-label="Close Modal"
+                            onClick={() => setShowMap(true)}
+                            className="bg-brandBlue text-white px-4 py-2 rounded-lg w-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                         >
-                            &times;
+                            Select Location on Map
                         </button>
-                        {/* Modal Header */}
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Edit Address</h2>
+                    </div>
+                    <hr className="my-4" />
 
-                        {/* Step 1: Location Selection */}
-                        <div className="mb-2">
-                            <p className="text-sm text-gray-500 mt-2">
-                                Please verify your location on the map to update city, state, and
-                                country.
-                            </p>
-                            <div className="mt-6">
-                                {" "}
-                                <button
-                                    onClick={() => setShowMap(true)}
-                                    className="bg-brandBlue text-white px-4 py-2 rounded-lg w-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    Select Location on Map
-                                </button>
+                    {/* Step 2: Address Form */}
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                            {/* House Name */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    House Name
+                                </label>
+                                <input
+                                    type="text"
+                                    name="houseName"
+                                    value={address.houseName}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                                    placeholder="Enter house name"
+                                    required
+                                />
                             </div>
-                        </div>
-                        <br />
-                        <hr />
-                        <br />
-
-                        {/* Step 2: Address Form */}
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div className="grid grid-cols-1 gap-6">
-                                {/* House Name */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        House Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="houseName"
-                                        value={address.houseName}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter house name"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
                             {/* Landmark */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
@@ -163,77 +159,71 @@ const UpdateAddress: React.FC<IAddAddressProps> = ({ closeModal, id, refreshAddr
                                     name="landmark"
                                     value={address.landmark}
                                     onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                                     placeholder="Nearby landmark"
                                     required
                                 />
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {/* City */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        City
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        value={address.city}
-                                        disabled
-                                        className="w-full px-4 py-2 bg-gray-100 border rounded-lg"
-                                    />
-                                </div>
-
-                                {/* State */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        State
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="state"
-                                        value={address.state}
-                                        disabled
-                                        className="w-full px-4 py-2 bg-gray-100 border rounded-lg"
-                                    />
-                                </div>
-
-                                {/* Country */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Pincode
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="country"
-                                        value={address.pincode}
-                                        disabled
-                                        className="w-full px-4 py-2 bg-gray-100 border rounded-lg"
-                                    />
-                                </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {/* City */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    City
+                                </label>
+                                <input
+                                    type="text"
+                                    name="city"
+                                    value={address.city}
+                                    disabled
+                                    className="w-full px-4 py-2 bg-gray-100 border rounded-lg text-sm sm:text-base"
+                                />
                             </div>
+                            {/* State */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    State
+                                </label>
+                                <input
+                                    type="text"
+                                    name="state"
+                                    value={address.state}
+                                    disabled
+                                    className="w-full px-4 py-2 bg-gray-100 border rounded-lg text-sm sm:text-base"
+                                />
+                            </div>
+                            {/* Pincode */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Pincode
+                                </label>
+                                <input
+                                    type="text"
+                                    name="pincode" // Fixed typo
+                                    value={address.pincode}
+                                    disabled
+                                    className="w-full px-4 py-2 bg-gray-100 border rounded-lg text-sm sm:text-base"
+                                />
+                            </div>
+                        </div>
 
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                className="w-full bg-brandBlue text-white px-4 py-2 rounded-lg  focus:outline-none focus:ring-2 "
-                            >
-                                Save Changes
-                            </button>
-                        </form>
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            className="w-full bg-brandBlue text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                        >
+                            Save Changes
+                        </button>
+                    </form>
 
-                        {/* Map Modal */}
-                        {showMap && (
-                            <MapModal
-                                onClose={setShowMap}
-                                onLocationSelect={handleLocationSelect}
-                            />
-                        )}
-                    </div>
+                    {/* Map Modal */}
+                    {showMap && (
+                        <MapModal onClose={setShowMap} onLocationSelect={handleLocationSelect} />
+                    )}
                 </div>
-                )
-            </div>{" "}
-        </>
+            )}
+        </div>
     );
 };
 

@@ -6,15 +6,9 @@ import UserSlots from "../../Components/UserComponents/UserSlots";
 const SlotPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <UserSidebar />
-
-                <div className="flex-1 ml-72">
-                    <UserHeader />
-
-                    <UserSlots />
-                </div>
-            </div>
+            <UserSidebar />
+            <UserHeader />
+            <UserSlots />
         </>
     );
 };

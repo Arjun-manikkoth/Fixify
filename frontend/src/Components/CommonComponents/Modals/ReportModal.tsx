@@ -1,5 +1,5 @@
+// src/components/CommonComponents/Modals/ReportModal.tsx
 import React, { useState } from "react";
-
 import { toast } from "react-toastify";
 
 interface ReportModalProps {
@@ -67,10 +67,10 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                <h3 className="text-lg font-semibold mb-4">Report {reported_role}</h3>
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm sm:max-w-md">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">Report {reported_role}</h3>
                 <select
-                    className="w-full p-2 border border-gray-300 rounded mb-4"
+                    className="w-full p-2 border border-gray-300 rounded mb-4 text-sm sm:text-base"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                 >
@@ -81,13 +81,16 @@ const ReportModal: React.FC<ReportModalProps> = ({
                         </option>
                     ))}
                 </select>
-                <div className="flex justify-end space-x-4">
-                    <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
+                <div className="flex justify-end space-x-2 sm:space-x-4">
+                    <button
+                        onClick={onClose}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-300 rounded text-sm sm:text-base hover:bg-gray-400"
+                    >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-4 py-2 bg-red-500 text-white rounded"
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-500 text-white rounded text-sm sm:text-base hover:bg-red-600"
                     >
                         Submit Report
                     </button>

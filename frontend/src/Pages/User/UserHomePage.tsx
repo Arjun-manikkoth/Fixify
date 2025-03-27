@@ -3,23 +3,16 @@ import UserHeader from "../../Components/UserComponents/UserHeader";
 import UserSidebar from "../../Components/UserComponents/UserSidebar";
 import UserProfile from "../../Components/UserComponents/UserProfile";
 
-
 const HomePage: React.FC = () => {
-     return (
-          <>
-               <div className="flex">
-                    <UserSidebar />
+    return (
+        <>
+            <UserSidebar />
 
-                    <div className="flex-1 ml-72">
-                         <UserHeader />
+            <UserHeader />
 
-                         <UserProfile />
-               
-     
-                    </div>
-               </div>
-          </>
-     );
+            <UserProfile />
+        </>
+    );
 };
 
 export default HomePage;
