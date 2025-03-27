@@ -13,44 +13,43 @@ const About: React.FC = () => {
                     support, and results you can count on!
                 </p>
 
-                {/* Stats Section with Full-Width Background Image */}
-                <div
-                    className="relative flex justify-around items-center py-16 w-full"
-                    style={{
-                        backgroundImage: 'url("/About.jpg")',
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        width: "100vw",
-                        marginLeft: "-50vw",
-                        left: "50%",
-                        boxSizing: "border-box",
-                        backgroundColor: "rgba(0, 0, 0, 0.38)", // Darken the background
-                        backgroundBlendMode: "overlay", // Blend the image and color
-                    }}
-                >
-                    {/* Years of Experience */}
-                    <div className="flex flex-col items-center text-white space-y-2">
-                        <FaCheckCircle className="text-4xl mb-2" />
-                        <p className="text-sm">Unmatched Excellence</p>
-                    </div>
+                {/* Stats Section */}
+                <div className="relative w-full">
+                    <div
+                        className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen"
+                        style={{
+                            backgroundImage: 'url("/About.jpg")',
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            backgroundColor: "rgba(0, 0, 0, 0.38)",
+                            backgroundBlendMode: "overlay",
+                        }}
+                    />
+                    <div className="relative flex justify-around items-center py-16 z-10">
+                        {/* Years of Experience */}
+                        <div className="flex flex-col items-center text-white space-y-2">
+                            <FaCheckCircle className="text-4xl mb-2" />
+                            <p className="text-sm">Unmatched Excellence</p>
+                        </div>
 
-                    {/* Expert Technicians */}
-                    <div className="flex flex-col items-center text-white space-y-2">
-                        <FaUserAlt className="text-4xl mb-2" />
-                        <p className="text-sm">Satisfied clients</p>
-                    </div>
+                        {/* Expert Technicians */}
+                        <div className="flex flex-col items-center text-white space-y-2">
+                            <FaUserAlt className="text-4xl mb-2" />
+                            <p className="text-sm">Satisfied clients</p>
+                        </div>
 
-                    {/* Satisfied Clients */}
-                    <div className="flex flex-col items-center text-white space-y-2">
-                        <FaUsers className="text-4xl mb-2" />
-                        <p className="text-sm">Skilled technicians</p>
-                    </div>
+                        {/* Satisfied Clients */}
+                        <div className="flex flex-col items-center text-white space-y-2">
+                            <FaUsers className="text-4xl mb-2" />
+                            <p className="text-sm">Skilled technicians</p>
+                        </div>
 
-                    {/* Completed Projects */}
-                    <div className="flex flex-col items-center text-white space-y-2">
-                        <FaSuitcase className="text-4xl mb-2" />
-                        <p className="text-sm">Satisfactory bookings</p>
+                        {/* Completed Projects */}
+                        <div className="flex flex-col items-center text-white space-y-2">
+                            <FaSuitcase className="text-4xl mb-2" />
+                            <p className="text-sm">Satisfactory bookings</p>
+                        </div>
                     </div>
                 </div>
             </div>

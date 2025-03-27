@@ -736,3 +736,13 @@
 2025-03-27 22:15:55 [INFO]: Request: GET /providers/bookings/67dc6bc8668786e066b399a9 | Response: 200 | Duration: 78ms
 2025-03-27 22:15:58 [INFO]: Request: GET /providers/67c979a26650975a0ea51294/dashboard?revenueBy=monthly&hoursBy=daily | Response: 304 | Duration: 80ms
 2025-03-27 22:16:19 [INFO]: Request: GET /providers/sign-out | Response: 304 | Duration: 0ms
+2025-03-27 22:59:33 [INFO]: Request: PATCH /users/o-auth?code=4/0AQSTgQFGaKSJjrRJQovunTrJMe11pLGV91ENVKFuTjOy5afVkLrXRL_WAkZN875BPDYzIA | Response: 200 | Duration: 486ms
+2025-03-27 22:59:33 [INFO]: Request: GET /users/67b754b3f9abd4290f863aa6/profile | Response: 304 | Duration: 40ms
+2025-03-27 22:59:38 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 36ms
+2025-03-27 22:59:41 [INFO]: Request: GET /users/sign-out | Response: 304 | Duration: 1ms
+2025-03-27 22:59:58 [INFO]: Request: PATCH /users/o-auth?code=4/0AQSTgQFaudZfn9U_YDa0XTe2zZwRLbKxvoR8IKAF_C--2ahQ8ToeYJ9ynP0J3yJa68B9WQ | Response: 200 | Duration: 402ms
+2025-03-27 22:59:58 [INFO]: Request: GET /users/67b754b3f9abd4290f863aa6/profile | Response: 304 | Duration: 38ms
+2025-03-27 23:00:09 [INFO]: Request: GET /users/67b754b3f9abd4290f863aa6/notifications/count | Response: 304 | Duration: 80ms
+2025-03-27 23:00:12 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 36ms
+2025-03-27 23:02:57 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 38ms
+2025-03-27 23:02:59 [INFO]: Request: GET /users/sign-out | Response: 304 | Duration: 0ms

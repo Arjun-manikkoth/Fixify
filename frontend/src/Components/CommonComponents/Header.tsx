@@ -32,9 +32,15 @@ import { setProvider } from "../../Redux/ProviderSlice";
 
 export const ModalContext = React.createContext("");
 
-const Header: FC = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+// Add props interface for scroll functions
+interface HeaderProps {
+    scrollToHome: () => void;
+    scrollToServices: () => void;
+    scrollToAbout: () => void;
+}
 
+const Header: FC<HeaderProps> = ({ scrollToHome, scrollToServices, scrollToAbout }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [modalType, setModalType] = useState<
         | "userSignIn"
         | "userSignUp"
@@ -98,7 +104,6 @@ const Header: FC = () => {
                             <span>India</span>
                         </div>
                         <div className="text-gray-400 hidden sm:block">|</div>
-
                         <div className="flex items-center space-x-3">
                             <FaEnvelope
                                 className="text-base sm:text-lg"
@@ -107,12 +112,11 @@ const Header: FC = () => {
                             <span>fixifysolutions@gmail.com</span>
                         </div>
                     </div>
-
                     <div className="flex space-x-2 sm:space-x-4 md:space-x-6 text-xs sm:text-sm md:text-base text-black">
                         <a href="#" className="hover:text-gray-400">
                             Kerela
                         </a>
-                        <span className=" text-gray-400">|</span>
+                        <span className="text-gray-400">|</span>
                         <a href="#" className="hover:text-gray-400">
                             Bangalore
                         </a>
@@ -131,43 +135,48 @@ const Header: FC = () => {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-16">
-                        <span className="text-lg font-medium text-gray-700 hover:text-gray-400">
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={scrollToHome}
+                        >
                             Home
                         </span>
-                        <span className="text-lg font-medium text-gray-700 hover:text-gray-400">
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={scrollToServices}
+                        >
                             Services
                         </span>
-                        <span className="text-lg font-medium text-gray-700 hover:text-gray-400">
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={scrollToAbout}
+                        >
                             About
                         </span>
 
-                        {/** hides provider sign in button for logged in user and provider */}
-                        {user.id || provider.id ? null : ( //returns null for a logged in user or provider
+                        {user.id || provider.id ? null : (
                             <span
-                                className="text-lg font-medium text-gray-700 hover:text-gray-400"
+                                className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
                                 onClick={() => openModal("providerSignIn")}
                             >
                                 Join Us
                             </span>
                         )}
 
-                        {/** shows hello user and navigate to profile on click or shows book now button */}
                         {user.id || provider.id ? (
                             <button
-                                className="flex items-center gap-3 px-4 py-2 rounded-md  text-gray-900 "
+                                className="flex items-center gap-3 px-4 py-2 rounded-md text-gray-900"
                                 onClick={handleProfileNavigation}
                             >
                                 <FaUser className="w-5 h-5 text-brandBlue" />
-                                <span className="text-lg font-medium text-gray-700 ">
+                                <span className="text-lg font-medium text-gray-700">
                                     Hi, {user.name || provider.name}
                                 </span>
                             </button>
                         ) : (
                             <button
                                 className="bg-brandBlue text-white font-regular text-lg px-6 py-[1.09rem] hover:bg-blue-600 flex items-center justify-center"
-                                onClick={() => {
-                                    openModal("userSignIn");
-                                }}
+                                onClick={() => openModal("userSignIn")}
                             >
                                 Book Now
                                 <svg
@@ -199,32 +208,52 @@ const Header: FC = () => {
 
                 {isMenuOpen && (
                     <div className="md:hidden flex flex-col items-center bg-gray-100 p-4 space-y-4">
-                        <a
-                            href="#"
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400"
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={() => {
+                                scrollToHome();
+                                toggleMenu(); // Close menu after click
+                            }}
                         >
                             Home
-                        </a>
-                        <a
-                            href="#"
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400"
+                        </span>
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={() => {
+                                scrollToServices();
+                                toggleMenu(); // Close menu after click
+                            }}
                         >
                             Services
-                        </a>
-                        <a
-                            href="#"
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400"
+                        </span>
+                        <span
+                            className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                            onClick={() => {
+                                scrollToAbout();
+                                toggleMenu(); // Close menu after click
+                            }}
                         >
                             About
-                        </a>
-                        <a
-                            href="#"
-                            className="text-lg font-medium text-gray-700 hover:text-gray-400"
-                        >
-                            Join Us
-                        </a>
+                        </span>
+                        {user.id || provider.id ? null : (
+                            <span
+                                className="text-lg font-medium text-gray-700 hover:text-gray-400 cursor-pointer"
+                                onClick={() => {
+                                    openModal("providerSignIn");
+                                    toggleMenu(); // Close menu after click
+                                }}
+                            >
+                                Join Us
+                            </span>
+                        )}
 
-                        <button className="bg-brandBlue text-white font-regular text-lg px-6 py-4 hover:bg-blue-600 flex items-center justify-center">
+                        <button
+                            className="bg-brandBlue text-white font-regular text-lg px-6 py-4 hover:bg-blue-600 flex items-center justify-center"
+                            onClick={() => {
+                                openModal("userSignIn");
+                                toggleMenu(); // Close menu after click
+                            }}
+                        >
                             Book Now
                             <svg
                                 className="ml-2"
@@ -248,7 +277,6 @@ const Header: FC = () => {
             </div>
 
             <ModalContext.Provider value={modalType}>
-                {/* user sign in modal */}
                 {modalType === "userSignIn" && (
                     <SignInModal
                         title="Customer"
@@ -261,8 +289,6 @@ const Header: FC = () => {
                         message={signInMessage}
                     />
                 )}
-
-                {/* user sign up modal */}
                 {modalType === "userSignUp" && (
                     <SignUpModal
                         role="user"
@@ -271,8 +297,6 @@ const Header: FC = () => {
                         handleSignUp={signUpApiUser}
                     />
                 )}
-
-                {/* user otp verification modal*/}
                 {modalType === "userOtpVerify" && (
                     <OtpVerifyModal
                         title="Verify Account"
@@ -281,12 +305,10 @@ const Header: FC = () => {
                         accountType="user"
                         mailType="userEmail"
                         openModal={openModal}
-                        message="We’ve sent a one-time password (OTP) to your registered email. Enter the  code here to verify your account."
+                        message="We’ve sent a one-time password (OTP) to your registered email. Enter the code here to verify your account."
                         messageDisplay={setSignInMessage}
                     />
                 )}
-
-                {/* user forgot password email verify modal*/}
                 {modalType === "userForgotPassword" && (
                     <ForgotPasswordModal
                         closeModal={closeModal}
@@ -295,8 +317,6 @@ const Header: FC = () => {
                         sendMail={forgotPasswordApiUser}
                     />
                 )}
-
-                {/* user forgot password otp verification modal*/}
                 {modalType === "userPasswordOtp" && (
                     <OtpVerifyModal
                         title="Verify Email"
@@ -308,8 +328,6 @@ const Header: FC = () => {
                         message="Enter the one-time password (OTP) send to your mail associated with your account for verification."
                     />
                 )}
-
-                {/* user reset password modal*/}
                 {modalType === "resetPasswordUser" && (
                     <ResetPasswordModal
                         title="Reset Password"
@@ -319,8 +337,6 @@ const Header: FC = () => {
                         submitPassword={resetPasswordApiUser}
                     />
                 )}
-
-                {/* provider sign in modal */}
                 {modalType === "providerSignIn" && (
                     <SignInModal
                         title="Provider"
@@ -333,8 +349,6 @@ const Header: FC = () => {
                         message={signInMessage}
                     />
                 )}
-
-                {/* provider sign up modal */}
                 {modalType === "providerSignUp" && (
                     <SignUpModal
                         role="provider"
@@ -344,8 +358,6 @@ const Header: FC = () => {
                         getServices={getServices}
                     />
                 )}
-
-                {/* provider otp verification modal */}
                 {modalType === "providerOtpVerify" && (
                     <OtpVerifyModal
                         title="Verify Account"
@@ -354,12 +366,10 @@ const Header: FC = () => {
                         accountType="provider"
                         mailType="providerEmail"
                         openModal={openModal}
-                        message="We’ve sent a one-time password (OTP) to your registered email. Enter the  code here to verify your account."
+                        message="We’ve sent a one-time password (OTP) to your registered email. Enter the code here to verify your account."
                         messageDisplay={setSignInMessage}
                     />
                 )}
-
-                {/* provider forgot password */}
                 {modalType === "providerForgotPassword" && (
                     <ForgotPasswordModal
                         closeModal={closeModal}
@@ -368,8 +378,6 @@ const Header: FC = () => {
                         sendMail={forgotPasswordApiProvider}
                     />
                 )}
-
-                {/* provider forgot password otp verification modal*/}
                 {modalType === "providerPasswordOtp" && (
                     <OtpVerifyModal
                         title="Verify Email"
@@ -381,8 +389,6 @@ const Header: FC = () => {
                         message="Enter the one-time password (OTP) send to your mail associated with your account for verification."
                     />
                 )}
-
-                {/* provider reset password modal*/}
                 {modalType === "resetPasswordProvider" && (
                     <ResetPasswordModal
                         title="Reset Password"
