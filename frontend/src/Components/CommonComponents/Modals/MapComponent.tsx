@@ -113,8 +113,8 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-md sm:max-w-xl max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 ">
+            <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-md sm:max-w-xl max-h-[90vh] overflow-y-auto relative scrollbar-hide">
                 {/* Close Button */}
                 <button
                     onClick={() => onClose(false)}

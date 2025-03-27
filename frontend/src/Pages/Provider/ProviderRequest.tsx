@@ -6,15 +6,9 @@ import ProviderSlotRequests from "../../Components/ProviderComponents/ProviderSl
 const BookingRequestPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <ProviderSidebar />
-
-                <div className="flex-1 ml-72">
-                    <ProviderHeader />
-
-                    <ProviderSlotRequests />
-                </div>
-            </div>
+            <ProviderSidebar />
+            <ProviderHeader />
+            <ProviderSlotRequests />
         </>
     );
 };

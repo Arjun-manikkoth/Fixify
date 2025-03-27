@@ -8,7 +8,7 @@ import { RootState } from "../../Redux/Store";
 import { fetchNotifications as fetchUserNotifications } from "../../Api/UserApis";
 import { fetchNotifications as fetchProviderNotifications } from "../../Api/ProviderApis";
 import { markNotificationAsRead as markNotificationAsReadUser } from "../../Api/UserApis";
-import { markNotificationAsRead as markNotificationAsReadProvider } from "../../Api/UserApis";
+import { markNotificationAsRead as markNotificationAsReadProvider } from "../../Api/ProviderApis";
 import { useContext } from "react";
 import { NotificationContext } from "../../Contexts/NotificationContext";
 

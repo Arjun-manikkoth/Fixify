@@ -235,6 +235,13 @@ providerRoute
         providerController.fetchNotificationsCount(req, res);
     });
 
+//route for fetching notifications
+providerRoute
+    .route("/:id/notifications")
+    .get(verifyToken, verifyRole(["provider"]), checkBlockedStatus, (req, res) =>
+        providerController.fetchNotifications(req, res)
+    );
+
 // Route for marking notification
 providerRoute
     .route("/notifications/:id")

@@ -1,3 +1,4 @@
+// src/components/ProviderComponents/ProviderProfile.tsx
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/Store";
@@ -16,18 +17,16 @@ import { IServices } from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import { IProviderProfile } from "../../Interfaces/ProviderInterfaces/SignInInterface";
 import ChangePasswordModalProvider from "./ProviderChangePassword";
 import ProviderResetPassword from "./ProviderResetPassword";
-import LoadingSpinner from "../CommonComponents/LoadingSpinner"; // Import the LoadingSpinner component
+import LoadingSpinner from "../CommonComponents/LoadingSpinner";
 
 const ProviderProfile: React.FC = () => {
     const ref = useRef<HTMLInputElement | null>(null);
-
     const dispatch = useDispatch();
 
     const [modalType, setModal] = useState<"changePassword" | "newPassword" | "">("");
-    const [loading, setLoading] = useState<boolean>(false); // State for loading spinner
-    const [loadingRegister, setLoadingRegister] = useState<boolean>(false); // State for loading spinner
+    const [loading, setLoading] = useState<boolean>(false);
+    const [loadingRegister, setLoadingRegister] = useState<boolean>(false);
     const [services, setServices] = useState<IServices[]>([]);
-
     const [profileData, setProfileData] = useState<IProviderProfile>({
         provider: {
             _id: "",
@@ -49,54 +48,40 @@ const ProviderProfile: React.FC = () => {
         expertise_id: string;
         workImages: File[];
     }
-    const provider = useSelector((state: RootState) => state.provider);
 
+    const provider = useSelector((state: RootState) => state.provider);
     const [formData, setFormData] = useState<profileData>({
         userName: provider.name,
         mobileNo: provider.phone,
         image: null,
     });
-
     const [registration, setRegistration] = useState<IRegistration>({
         description: "",
         expertise_id: "",
         aadharImage: null,
         workImages: [],
     });
-
     const [preview, setPreview] = useState<string>("");
 
     useEffect(() => {
         if (provider.id) {
-            setLoading(true); // Start loading
+            setLoading(true);
             getProviderData(provider.id)
-                .then((data) => {
-                    setProfileData(data.data);
-                })
-                .catch((error) => {
-                    console.log(error.message);
-                })
-                .finally(() => {
-                    setLoading(false); // Stop loading
-                });
+                .then((data) => setProfileData(data.data))
+                .catch((error) => console.log(error.message))
+                .finally(() => setLoading(false));
         }
-    }, []);
+    }, [provider.id]);
 
     useEffect(() => {
         if (provider.id) {
-            setLoading(true); // Start loading
+            setLoading(true);
             getServices()
-                .then((response) => {
-                    setServices(response.data);
-                })
-                .catch((error) => {
-                    console.log(error.message);
-                })
-                .finally(() => {
-                    setLoading(false); // Stop loading
-                });
+                .then((response) => setServices(response.data))
+                .catch((error) => console.log(error.message))
+                .finally(() => setLoading(false));
         }
-    }, []);
+    }, [provider.id]);
 
     const handleExpertiseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRegistration((prev) => ({ ...prev, expertise_id: e.target.value }));
@@ -146,13 +131,10 @@ const ProviderProfile: React.FC = () => {
             toast.error("Experience description is required.");
             return;
         }
-        if (!profileData.service?.name) {
-            if (!expertise_id) {
-                toast.error("Please select your area of expertise.");
-                return;
-            }
+        if (!profileData.service?.name && !expertise_id) {
+            toast.error("Please select your area of expertise.");
+            return;
         }
-
         if (!aadharImage) {
             toast.error("Aadhaar image is required.");
             return;
@@ -162,17 +144,17 @@ const ProviderProfile: React.FC = () => {
             return;
         }
 
-        setLoadingRegister(true); // Start loading
+        setLoadingRegister(true);
         try {
             if (provider.id) {
                 const response = await registerProvider(
                     provider.id,
                     aadharImage,
                     workImages,
-                    registration.description,
-                    registration.expertise_id
+                    description,
+                    expertise_id
                 );
-                if (response.success === true) {
+                if (response.success) {
                     toast.success("Approval request sent successfully");
                 } else {
                     toast.error(response.message);
@@ -181,75 +163,61 @@ const ProviderProfile: React.FC = () => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoadingRegister(false); // Stop loading
+            setLoadingRegister(false);
         }
     };
 
     const validateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (formData.userName.trim() === "") {
+            toast.error("Name can't be empty.");
+            return;
+        }
+        if (formData.mobileNo.trim() === "" || formData.mobileNo.trim().length !== 10) {
+            toast.error(
+                formData.mobileNo.trim() === ""
+                    ? "Phone number can't be empty"
+                    : "Phone number must be 10 digits."
+            );
+            return;
+        }
+
+        setLoading(true);
         try {
-            e.preventDefault();
-
-            let isValid = true;
-
-            if (formData.userName.trim() === "") {
-                toast.error("Name cant be empty.");
-                isValid = false;
-            }
-
-            if (formData.mobileNo.trim() === "") {
-                toast.error("Phone number cant be empty");
-                isValid = false;
-            } else if (formData.mobileNo.trim().length !== 10) {
-                toast.error("Phone number must be 10 digits.");
-                isValid = false;
-            }
-
-            if (isValid) {
-                setLoading(true); // Start loading
-
-                if (provider.id) {
-                    const updateResponse = await updateProfile({
-                        ...formData,
-                        id: provider.id,
-                    });
-
-                    if (updateResponse.success) {
-                        toast.success("Profile Updated Successfully");
-                        dispatch(
-                            setProvider({
-                                id: updateResponse.data._id,
-                                name: updateResponse.data.name,
-                                email: updateResponse.data.email,
-                                phone: updateResponse.data.mobile_no,
-                                url: updateResponse.data.url,
-                                service_id: updateResponse.data.service_id,
-                            })
-                        );
-                        setPreview("");
-                    }
+            if (provider.id) {
+                const updateResponse = await updateProfile({
+                    ...formData,
+                    id: provider.id,
+                });
+                if (updateResponse.success) {
+                    toast.success("Profile Updated Successfully");
+                    dispatch(
+                        setProvider({
+                            id: updateResponse.data._id,
+                            name: updateResponse.data.name,
+                            email: updateResponse.data.email,
+                            phone: updateResponse.data.mobile_no,
+                            url: updateResponse.data.url,
+                            service_id: updateResponse.data.service_id,
+                        })
+                    );
+                    setPreview("");
                 }
             }
         } catch (error: any) {
             console.log(error.message);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 
-    const handleImageUpload = () => {
-        if (ref.current) {
-            ref.current.click();
-        }
-    };
-
-    const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = () => ref.current?.click();
+    const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) =>
         setFormData({ ...formData, [e.target.id]: e.target.value });
-    };
 
     const imageOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-
             if (file.size > 5 * 1024 * 1024) {
                 toast.error("File size must be less than 5MB.");
                 return;
@@ -266,268 +234,298 @@ const ProviderProfile: React.FC = () => {
     const cancelUpload = () => {
         setPreview("");
         setFormData({ ...formData, image: null });
-        if (ref.current) {
-            ref.current.value = "";
-        }
+        if (ref.current) ref.current.value = "";
     };
 
     return (
-        <>
-            <div className="p-9 px-14 me-12 rounded-2xl shadow-lg">
-                {/* Profile Section */}
-
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">My Profile</h2>
-                <div className="flex flex-col items-center">
-                    <form onSubmit={validateProfile} className="flex flex-col items-center w-full">
-                        {/* Profile Image */}
-                        <div className="relative w-full flex justify-center">
-                            {preview ? (
-                                <>
-                                    <img
-                                        src={preview}
-                                        alt="Profile"
-                                        className="w-52 h-52 rounded-full border-4 border-blue-500 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
-                                        onClick={handleImageUpload}
-                                    />
-                                    <button
-                                        onClick={() => cancelUpload()}
-                                        className="absolute top-2 right-2 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-600"
+        <div className="pt-16 md:pl-72 bg-gray-100 min-h-screen flex-1">
+            <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <LoadingSpinner />
+                    </div>
+                ) : (
+                    <div className="flex flex-col space-y-6">
+                        {/* Profile Section */}
+                        <div className="w-full bg-white shadow-lg rounded-xl p-6 sm:p-8">
+                            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
+                                My Profile
+                            </h2>
+                            <form onSubmit={validateProfile} className="space-y-6">
+                                <div className="flex justify-center relative">
+                                    {preview ? (
+                                        <>
+                                            <img
+                                                src={preview}
+                                                alt="Profile Preview"
+                                                className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
+                                                onClick={handleImageUpload}
+                                            />
+                                            <button
+                                                onClick={cancelUpload}
+                                                className="absolute top-0 right-1/3 sm:right-1/4 bg-brandBlue text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg hover:bg-blue-600 transition"
+                                            >
+                                                ✕
+                                            </button>
+                                        </>
+                                    ) : provider.url ? (
+                                        <img
+                                            src={provider.url}
+                                            alt="Profile"
+                                            referrerPolicy="no-referrer"
+                                            className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
+                                            onClick={handleImageUpload}
+                                        />
+                                    ) : (
+                                        <img
+                                            src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8"
+                                            alt="Default Profile"
+                                            className="w-32 h-32 sm:w-40 sm:h-40 md:w-52 md:h-52 rounded-full mb-4 cursor-pointer object-cover"
+                                            onClick={handleImageUpload}
+                                        />
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    ref={ref}
+                                    id="image"
+                                    onChange={imageOnChange}
+                                    className="hidden"
+                                />{" "}
+                                <div className="sm:col-span-2 text-center">
+                                    <span
+                                        className={`text-sm sm:text-lg ${
+                                            profileData?.service
+                                                ? "font-semibold text-blue-600"
+                                                : "text-red-700"
+                                        }`}
                                     >
-                                        ✕
+                                        {profileData?.service?.name || "Service not chosen"}
+                                    </span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label
+                                            htmlFor="userName"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="userName"
+                                            onChange={onChangeInput}
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent"
+                                            value={formData.userName}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label
+                                            htmlFor="mobileNo"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="mobileNo"
+                                            onChange={onChangeInput}
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent"
+                                            value={formData.mobileNo}
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label
+                                            htmlFor="email"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="email"
+                                            className="w-full mt-1 py-2 border-b-2 border-gray-300 focus:outline-none bg-transparent text-gray-500"
+                                            defaultValue={provider.email}
+                                            readOnly
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-center mt-6">
+                                    <button
+                                        disabled={loading}
+                                        type="submit"
+                                        className={`px-6 py-2 sm:px-9 sm:py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-base sm:text-lg  transition ${
+                                            loading ? "bg-gray-500 cursor-not-allowed" : ""
+                                        }`}
+                                    >
+                                        {loading ? <LoadingSpinner /> : "Save"}
                                     </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Password Section */}
+                        <div className="w-full bg-white shadow-lg rounded-xl p-6 sm:p-8">
+                            {!profileData?.provider.google_id ? (
+                                <>
+                                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
+                                        Passwords And Security
+                                    </h2>
+                                    <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                                        For optimal security, consider updating your password
+                                        periodically.
+                                    </p>
+                                    <div className="flex justify-start">
+                                        <button
+                                            className="px-6 py-2 sm:px-8 sm:py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-base sm:text-lg  transition"
+                                            onClick={() => setModal("changePassword")}
+                                        >
+                                            Change Now
+                                        </button>
+                                    </div>
                                 </>
-                            ) : provider.url ? (
-                                <img
-                                    src={provider.url}
-                                    alt="Preview"
-                                    referrerPolicy="no-referrer"
-                                    className="w-52 h-52 rounded-full border-4 border-blue-500 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
-                                    onClick={handleImageUpload}
-                                />
                             ) : (
-                                <img
-                                    src="https://firebasestorage.googleapis.com/v0/b/user-management-mern-5bc5a.appspot.com/o/profile_images%2F66fd0a2fd73f7295eaca123c?alt=media&token=00d21b9d-4a72-459d-841e-42bca581a6c8" // Placeholder image URL
-                                    alt="Default Profile"
-                                    className="w-52 h-52 rounded-full border-4 border-gray-300 shadow-md mb-8 cursor-pointer hover:scale-105 transition-transform"
-                                    onClick={handleImageUpload}
-                                />
+                                <>
+                                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
+                                        Signed In With Google Account
+                                    </h2>
+                                    <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                                        You can seamlessly sign in every time with your Gmail
+                                        account.
+                                    </p>
+                                </>
                             )}
                         </div>
 
-                        <input
-                            type="file"
-                            ref={ref}
-                            id="image"
-                            onChange={imageOnChange}
-                            className="hidden"
-                        />
-
-                        {/* Profile Name and Phone Number */}
-                        <div className="w-full space-y-6">
-                            <div
-                                className={`text-center text-lg ${
-                                    profileData?.service
-                                        ? "font-semibold text-blue-600"
-                                        : "text-red-700"
-                                }`}
-                            >
-                                {profileData?.service
-                                    ? profileData?.service.name
-                                    : "Service not chosen"}
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:space-x-6">
-                                <div className="w-full sm:w-1/2">
-                                    <input
-                                        type="text"
-                                        id="userName"
-                                        onChange={onChangeInput}
-                                        className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                        value={formData.userName}
-                                        placeholder="Enter your name"
-                                    />
-                                </div>
-                                <div className="w-full sm:w-1/2">
-                                    <input
-                                        type="text"
-                                        id="mobileNo"
-                                        onChange={onChangeInput}
-                                        className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                        value={formData.mobileNo}
-                                        placeholder="Enter your phone number"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <input
-                                    type="text"
-                                    className="w-full mt-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-gray-100 focus:outline-none"
-                                    defaultValue={provider.email}
-                                    readOnly
-                                />
-                            </div>
-                        </div>
-
-                        {/* Save Button */}
-                        <div className="mt-10">
-                            <button
-                                disabled={loading}
-                                className={` px-9 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 text-lg transition ${
-                                    loading
-                                        ? "bg-gray-500 cursor-not-allowed"
-                                        : "bg-brandBlue hover:bg-blue-700"
-                                }`}
-                            >
-                                {loading ? <LoadingSpinner /> : "Save"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                {!profileData?.provider.google_id && (
-                    <div className="bg-white shadow-lg p-11 rounded-2xl">
-                        <h2 className="text-xl font-bold text-gray-800 mb-6">
-                            Passwords and Security
-                        </h2>
-                        <p className="text-gray-600 mb-6">
-                            For optimal security, consider updating your password periodically.
-                        </p>
-                        <button
-                            className="px-6 py-3 bg-brandBlue text-white rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transition"
-                            onClick={() => setModal("changePassword")}
-                        >
-                            Change Now
-                        </button>
-                    </div>
-                )}
-            </div>
-            {!profileData.provider.is_approved && (
-                <div className="flex space-x-6 bg-customBlue p-9 px-14 mt-4 me-12 rounded-xl">
-                    <div className="w-full bg-white shadow p-11 rounded-xl">
-                        <h2 className="text-2xl font-semibold mt-6 text-black mb-6 text-center">
-                            Provider Registration - Complete Your Profile
-                        </h2>
-                        <p className="text-gray-600 text-start mb-8">
-                            Ensure your details are accurate to start receiving job opportunities
-                            and enhance your credibility with clients.
-                        </p>
-                        <form onSubmit={validateRegistrationForm}>
-                            <div className="grid grid-cols-1 gap-8">
-                                {/* Experience Description */}
-                                <div className="mt-6">
-                                    <label
-                                        htmlFor="experience"
-                                        className="block text-gray-700 text-sm font-semibold mb-2"
-                                    >
-                                        Experience Description
-                                    </label>
-                                    <textarea
-                                        id="experience"
-                                        rows={3}
-                                        className="w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Briefly describe your professional experience..."
-                                        value={registration.description}
-                                        onChange={(e) =>
-                                            setRegistration((prev) => ({
-                                                ...prev,
-                                                description: e.target.value,
-                                            }))
-                                        }
-                                    ></textarea>
-                                </div>
-
-                                {/* Expertise Select Box */}
-                                {!profileData.service?.name && (
+                        {/* Registration Section */}
+                        {!profileData.provider.is_approved && (
+                            <div className="w-full bg-white shadow-lg rounded-xl p-6 sm:p-8">
+                                <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6 text-center">
+                                    Provider Registration - Complete Your Profile
+                                </h2>
+                                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 text-center">
+                                    Ensure your details are accurate to start receiving job
+                                    opportunities and enhance your credibility with clients.
+                                </p>
+                                <form onSubmit={validateRegistrationForm} className="space-y-6">
+                                    {/* Experience Description */}
                                     <div>
                                         <label
-                                            htmlFor="expertise"
-                                            className="block text-gray-700 text-sm font-semibold mb-2"
+                                            htmlFor="experience"
+                                            className="block text-sm font-medium text-gray-700"
                                         >
-                                            Area of Expertise
+                                            Experience Description
                                         </label>
-                                        <select
-                                            id="expertise"
-                                            className="w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            value={registration.expertise_id}
-                                            onChange={handleExpertiseChange}
-                                        >
-                                            <option value="">Select your expertise</option>
-                                            {services.length &&
-                                                services.map((each, index) => (
+                                        <textarea
+                                            id="experience"
+                                            rows={3}
+                                            className="w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Briefly describe your professional experience..."
+                                            value={registration.description}
+                                            onChange={(e) =>
+                                                setRegistration((prev) => ({
+                                                    ...prev,
+                                                    description: e.target.value,
+                                                }))
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* Expertise Select */}
+                                    {!profileData.service?.name && (
+                                        <div>
+                                            <label
+                                                htmlFor="expertise"
+                                                className="block text-sm font-medium text-gray-700"
+                                            >
+                                                Area of Expertise
+                                            </label>
+                                            <select
+                                                id="expertise"
+                                                className="w-full mt-1 py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                value={registration.expertise_id}
+                                                onChange={handleExpertiseChange}
+                                            >
+                                                <option value="">Select your expertise</option>
+                                                {services.map((each, index) => (
                                                     <option value={each._id} key={index}>
                                                         {each.name}
                                                     </option>
                                                 ))}
-                                        </select>
-                                    </div>
-                                )}
+                                            </select>
+                                        </div>
+                                    )}
 
-                                {/* Aadhaar Card and Work Images Upload */}
-                                <div className="flex justify-between items-start my-6 space-x-4">
-                                    <div className="w-1/2">
-                                        <label
-                                            htmlFor="aadhaar"
-                                            className="block text-gray-700 text-sm font-semibold mb-2"
-                                        >
-                                            Aadhaar Card (Front Image)
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id="aadhaar"
-                                            accept="image/*"
-                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brandBlue file:text-white hover:file:bg-blue-600 focus:outline-none"
-                                            onChange={handleAadharImageChange}
-                                        />
-                                        <p className="text-xs text-gray-500 mt-2">
-                                            Upload a clear image of the front side of your Aadhaar
-                                            card.
-                                        </p>
+                                    {/* File Uploads */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label
+                                                htmlFor="aadhaar"
+                                                className="block text-sm font-medium text-gray-700"
+                                            >
+                                                Aadhaar Card (Front Image)
+                                            </label>
+                                            <input
+                                                type="file"
+                                                id="aadhaar"
+                                                accept="image/*"
+                                                className="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brandBlue file:text-white hover:file:bg-blue-600 focus:outline-none"
+                                                onChange={handleAadharImageChange}
+                                            />
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Upload a clear image of the front side of your
+                                                Aadhaar card.
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="sampleWork"
+                                                className="block text-sm font-medium text-gray-700"
+                                            >
+                                                Sample Work (Image Upload)
+                                            </label>
+                                            <input
+                                                type="file"
+                                                id="sampleWork"
+                                                accept="image/*"
+                                                className="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brandBlue file:text-white hover:file:bg-blue-600 focus:outline-none"
+                                                onChange={handleWorkImagesChange}
+                                                multiple
+                                            />
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Share up to 2 images of your previous work to
+                                                showcase your skills.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="w-1/2">
-                                        <label
-                                            htmlFor="sampleWork"
-                                            className="block text-gray-700 text-sm font-semibold mb-2"
-                                        >
-                                            Sample Work (Image Upload)
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id="sampleWork"
-                                            accept="image/*"
-                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brandBlue file:text-white hover:file:bg-blue-600 focus:outline-none"
-                                            onChange={handleWorkImagesChange}
-                                            multiple
-                                        />
-                                        <p className="text-xs text-gray-500 mt-2">
-                                            Share up to 2 images of your previous work to showcase
-                                            your skills.
-                                        </p>
-                                    </div>
-                                </div>
 
-                                {/* Submit Button */}
-                                <div className="flex justify-center my-3">
-                                    <button
-                                        disabled={loading}
-                                        type="submit"
-                                        className={`px-9 py-2 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-lg loading
-                                            ? "bg-gray-500 cursor-not-allowed"
-                                            : "bg-brandBlue hover:bg-blue-700"
-                         }`}
-                                    >
-                                        {loadingRegister ? (
-                                            <LoadingSpinner />
-                                        ) : (
-                                            " Complete Registration"
-                                        )}
-                                    </button>
-                                </div>
+                                    {/* Submit Button */}
+                                    <div className="flex justify-center mt-6">
+                                        <button
+                                            disabled={loadingRegister}
+                                            type="submit"
+                                            className={`px-6 py-2 sm:px-9 sm:py-3 bg-brandBlue text-white rounded-full hover:bg-blue-600 text-base sm:text-lg font-semibold transition ${
+                                                loadingRegister
+                                                    ? "bg-gray-500 cursor-not-allowed"
+                                                    : ""
+                                            }`}
+                                        >
+                                            {loadingRegister ? (
+                                                <LoadingSpinner />
+                                            ) : (
+                                                "Complete Registration"
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        )}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
             {modalType === "changePassword" && <ChangePasswordModalProvider setModal={setModal} />}
             {modalType === "newPassword" && <ProviderResetPassword setModal={setModal} />}
-        </>
+        </div>
     );
 };
 

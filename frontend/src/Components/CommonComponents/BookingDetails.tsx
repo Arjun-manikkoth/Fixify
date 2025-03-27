@@ -142,9 +142,9 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
     };
 
     return (
-        <div className="pt-16 md:pl-72 min-h-screen flex-1 bg-gray-100">
+        <div className="pt-16 md:pl-72 min-h-screen flex-1 bg-white">
             <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
-                <div className="w-full max-w-5xl bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
+                <div className="w-full max-w-5xl bg-white rounded-lg  p-4 sm:p-6 lg:p-8">
                     <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
                         Booking Details
                     </h2>

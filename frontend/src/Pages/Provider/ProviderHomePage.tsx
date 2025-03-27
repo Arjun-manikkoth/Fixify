@@ -4,19 +4,13 @@ import ProviderHeader from "../../Components/ProviderComponents/ProviderHeader";
 import ProviderProfile from "../../Components/ProviderComponents/ProviderProfile";
 
 const HomePage: React.FC = () => {
-     return (
-          <>
-               <div className="flex">
-                    <ProviderSidebar />
-
-                    <div className="flex-1 ml-72">
-                         <ProviderHeader />
-
-                         <ProviderProfile />
-                    </div>
-               </div>
-          </>
-     );
+    return (
+        <>
+            <ProviderSidebar />
+            <ProviderHeader />
+            <ProviderProfile />
+        </>
+    );
 };
 
 export default HomePage;

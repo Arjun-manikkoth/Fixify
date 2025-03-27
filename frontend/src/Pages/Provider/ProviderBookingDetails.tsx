@@ -6,14 +6,9 @@ import ProviderBookingDetail from "../../Components/ProviderComponents/ProviderB
 const BookingDetailPage: React.FC = () => {
     return (
         <>
-            <div className="flex">
-                <ProviderSidebar />
-
-                <div className="flex-1 ml-72">
-                    <ProviderHeader />
-                    <ProviderBookingDetail />
-                </div>
-            </div>
+            <ProviderSidebar />
+            <ProviderHeader />
+            <ProviderBookingDetail />
         </>
     );
 };

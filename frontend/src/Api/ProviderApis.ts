@@ -593,7 +593,7 @@ const countNotificationsApiProvider = async (id: string) => {
 //count unread notifications api
 const fetchNotifications = async (id: string, page: number) => {
     try {
-        const response = await axiosProvider.get(`${providerRoutes.notifications}/${id}`);
+        const response = await axiosProvider.get(`/${id}${providerRoutes.notifications}`);
 
         return {
             success: true,

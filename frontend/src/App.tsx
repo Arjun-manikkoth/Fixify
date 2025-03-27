@@ -27,6 +27,7 @@ import AdminSalesListingPage from "./Pages/Admin/AdminSalesListingPage";
 import AdminDashboardPage from "./Pages/Admin/AdminDashboardPage";
 import UserNotificationsPage from "./Pages/User/UserNotificationsPage";
 import AdminReportsPage from "./Pages/Admin/AdminReportsListPage";
+import ProviderNotificationsPage from "./Pages/Provider/ProviderNotifications";
 
 const App: FC = () => {
     return (
@@ -77,6 +78,11 @@ const App: FC = () => {
                         />
                         {/*provider dashboard */}
                         <Route path="/providers/dashboard" Component={ProviderDashboardPage} />
+                        {/*provider notifications page*/}
+                        <Route
+                            path="/providers/notifications"
+                            Component={ProviderNotificationsPage}
+                        />
                     </Route>
 
                     {/*admin sign in page*/}
