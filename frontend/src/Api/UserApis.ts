@@ -284,7 +284,7 @@ const resetPasswordApi = async (email: string, password: string) => {
 //api to validate the current password
 const confirmPasswordApi = async (id: string | null, password: string) => {
     try {
-        const response = await axiosUser.post(`${userRoutes.confirm_password}/${id}`, { password });
+        const response = await axiosUser.post(`/${id}${userRoutes.confirm_password}`, { password });
 
         return {
             success: true,
