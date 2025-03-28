@@ -36,14 +36,16 @@ class AdminController {
                 res.status(OK)
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
-                        secure: false,
+                        secure: true,
+                        sameSite: true,
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
                     })
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
-                        secure: false,
+                        secure: true,
+                        sameSite: true,
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -99,12 +101,14 @@ class AdminController {
         try {
             res.clearCookie("accessToken", {
                 httpOnly: true,
-                secure: false,
+                secure: true,
+                sameSite: true,
             });
 
             res.clearCookie("refreshToken", {
                 httpOnly: true,
-                secure: false,
+                secure: true,
+                sameSite: false,
             });
 
             res.status(OK).json({
@@ -139,7 +143,8 @@ class AdminController {
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                             httpOnly: true,
-                            secure: false,
+                            secure: true,
+                            sameSite: true,
                             maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                                 ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                                 : 15 * 60 * 1000, // 15 minutes
