@@ -220,7 +220,7 @@ class UserService implements IUserService {
                 </div>
                 <div class="footer">
                     <p>© 2025 Fixify. All rights reserved.</p>
-                    <p><a href="https://fixify.com">Visit our website</a></p>
+                    <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                 </div>
             </div>
         </body>
@@ -323,7 +323,7 @@ class UserService implements IUserService {
                   </div>
                   <div class="footer">
                       <p>© 2025 Fixify. All rights reserved.</p>
-                      <p><a href="https://fixify.com">Visit our website</a></p>
+                      <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                   </div>
               </div>
           </body>
@@ -726,7 +726,7 @@ class UserService implements IUserService {
                 </div>
                 <div class="footer">
                     <p>© 2024 Fixify. All rights reserved.</p>
-                    <p><a href="https://fixify.com">Visit our website</a></p>
+                    <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                 </div>
             </div>
         </body>

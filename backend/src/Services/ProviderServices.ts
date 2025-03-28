@@ -257,7 +257,7 @@ class ProviderService implements IProviderService {
                         </div>
                         <div class="footer">
                             <p>© 2025 Fixify. All rights reserved.</p>
-                            <p><a href="https://fixify.com">Visit our website</a></p>
+                            <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                         </div>
                     </div>
                 </body>
@@ -359,7 +359,7 @@ class ProviderService implements IProviderService {
                             </div>
                             <div class="footer">
                                 <p>© 2025 Fixify. All rights reserved.</p>
-                                <p><a href="https://fixify.com">Visit our website</a></p>
+                                <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                             </div>
                         </div>
                     </body>
@@ -836,7 +836,7 @@ class ProviderService implements IProviderService {
                         </div>
                         <div class="footer">
                             <p>© 2024 Fixify. All rights reserved.</p>
-                            <p><a href="https://fixify.com">Visit our website</a></p>
+                            <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                         </div>
                     </div>
                 </body>
@@ -1101,7 +1101,7 @@ class ProviderService implements IProviderService {
                     date: new Date(requestData.data[0].date).toDateString(),
                     time: formattedTime,
                     providerName: requestData.data[0].technician.name,
-                    bookingUrl: `https://fixify.com/users/${userData._id}/bookings/${bookingStatus._id}.`,
+                    bookingUrl: `${process.env.FRONT_END_URL}/users/bookings/${bookingStatus._id}.`,
                 };
                 if (userData._id)
                     await sendNotfication(
@@ -1214,7 +1214,7 @@ class ProviderService implements IProviderService {
                             </div>
                             <div class="footer">
                                 <p>© 2023 Fixify. All rights reserved.</p>
-                                <p><a href="https://fixify.com">Visit our website</a></p>
+                                <p><a href=${process.env.FRONT_END_URL}>Visit our website</a></p>
                             </div>
                         </div>
                     </body>
