@@ -115,7 +115,7 @@ class ProviderController {
                     .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
                         secure: true,
-                        sameSite: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
@@ -123,7 +123,7 @@ class ProviderController {
                     .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
                         secure: true,
-                        sameSite: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -300,13 +300,13 @@ class ProviderController {
             res.clearCookie("accessToken", {
                 httpOnly: true,
                 secure: true,
-                sameSite: true,
+                sameSite: "none",
             });
 
             res.clearCookie("refreshToken", {
                 httpOnly: true,
                 secure: true,
-                sameSite: true,
+                sameSite: "none",
             });
 
             res.status(OK).json({
@@ -342,7 +342,7 @@ class ProviderController {
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                             httpOnly: true,
-                            sameSite: true,
+                            sameSite: "none",
                             secure: true,
                             maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                                 ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)

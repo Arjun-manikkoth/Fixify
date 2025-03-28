@@ -69,16 +69,16 @@ class UserController {
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
-                        secure: false,
-                        sameSite: true,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
                     })
                         .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
-                        secure: false,
-                        sameSite: true,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -234,8 +234,8 @@ class UserController {
     signOut(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                res.clearCookie("accessToken", { httpOnly: true, secure: false });
-                res.clearCookie("refreshToken", { httpOnly: true, secure: false });
+                res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "none" });
+                res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "none" });
                 res.status(OK).json({
                     success: true,
                     message: Messages_1.AuthMessages.SIGN_OUT_SUCCESS,
@@ -269,14 +269,16 @@ class UserController {
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
-                        secure: false,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
                     })
                         .cookie("refreshToken", response.refreshToken, {
                         httpOnly: true,
-                        secure: false,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_REFRESH_COOKIE
                             ? parseInt(process.env.MAX_AGE_REFRESH_COOKIE)
                             : 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -349,8 +351,8 @@ class UserController {
                     res.status(OK)
                         .cookie("accessToken", response.accessToken, {
                         httpOnly: true,
-                        secure: false,
-                        sameSite: true,
+                        secure: true,
+                        sameSite: "none",
                         maxAge: process.env.MAX_AGE_ACCESS_COOKIE
                             ? parseInt(process.env.MAX_AGE_ACCESS_COOKIE)
                             : 15 * 60 * 1000, // 15 minutes
