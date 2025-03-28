@@ -757,3 +757,9 @@
 2025-03-28 03:24:02 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 40ms
 2025-03-28 03:24:10 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 39ms
 2025-03-28 10:10:01 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 241ms
+2025-03-28 12:08:34 [WARN]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 401 | Duration: 6ms
+2025-03-28 12:08:35 [WARN]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications?page=1 | Response: 401 | Duration: 2ms
+2025-03-28 12:08:35 [INFO]: Request: POST /users/refresh-token | Response: 200 | Duration: 16ms
+2025-03-28 12:08:35 [INFO]: Request: POST /users/refresh-token | Response: 200 | Duration: 4ms
+2025-03-28 12:08:35 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications/count | Response: 200 | Duration: 120ms
+2025-03-28 12:08:35 [INFO]: Request: GET /users/67b73ccff9abd4290f863a3d/notifications?page=1 | Response: 200 | Duration: 167ms
