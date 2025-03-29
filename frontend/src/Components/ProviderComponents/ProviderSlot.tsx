@@ -68,7 +68,7 @@ const Slots: React.FC = () => {
                 setSlots(res.data.slots);
                 setLocation({
                     lat: res.data.location.geo.coordinates[0],
-                    lng: res.data.location.geo.coordinates[1], // Fixed typo from 'long' to 'lng'
+                    lngg: res.data.location.geo.coordinates[1],
                     ...res.data.location.address,
                 });
             } else {

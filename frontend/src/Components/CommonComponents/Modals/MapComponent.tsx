@@ -89,7 +89,8 @@ const MapModal: React.FC<MapModalProps> = ({ onClose, onLocationSelect }) => {
                     addressComponents.find((c: any) => c.types.includes("postal_code"))
                         ?.long_name || "";
                 const street =
-                    addressComponents.find((c: any) => c.types.includes("route"))?.long_name || "";
+                    addressComponents.find((c: any) => c.types.includes("political"))?.long_name ||
+                    "";
                 return { city, state, pincode, street };
             } else {
                 toast.error(message || "Error fetching address details.");
