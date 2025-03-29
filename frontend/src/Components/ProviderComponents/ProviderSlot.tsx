@@ -218,12 +218,14 @@ const Slots: React.FC = () => {
                                                     hour: "2-digit",
                                                     minute: "2-digit",
                                                     hour12: true,
+                                                    timeZone: "UTC",
                                                 })} - ${new Date(
                                                     new Date(slot.time).getTime() + 60 * 60 * 1000
                                                 ).toLocaleTimeString([], {
                                                     hour: "2-digit",
                                                     minute: "2-digit",
                                                     hour12: true,
+                                                    timeZone: "UTC",
                                                 })}`}
                                             </span>
                                             <span
