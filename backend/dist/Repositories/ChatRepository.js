@@ -17,7 +17,7 @@ class ChatRepository {
     fetchChats(room_id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const chatList = yield ChatModel_1.default.find({ room_id: room_id }).sort({ timeStamp: 1 });
+                const chatList = yield ChatModel_1.default.find({ room_id: room_id }).sort({ timestamp: 1 });
                 return {
                     success: true,
                     message: "Chat list fetched successfully",
