@@ -5,7 +5,7 @@ import Chat from "../Models/CommonModels/ChatModel";
 class ChatRepository implements IChatRepository {
     async fetchChats(room_id: string): Promise<IResponse> {
         try {
-            const chatList = await Chat.find({ room_id: room_id }).sort({ timeStamp: 1 });
+            const chatList = await Chat.find({ room_id: room_id }).sort({ timestamp: 1 });
 
             return {
                 success: true,
