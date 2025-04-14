@@ -152,7 +152,7 @@ exports.ScheduleMessages = {
     FETCH_ALL_REQUESTS_FAILED: "Failed to fetch requests", // Added for getAllRequests
 };
 exports.tokenMessages = {
-    REFRESH_TOKEN_MISSING: "Refresh token missing",
+    REFRESH_TOKEN_MISSING: "Refresh Token missing",
     ACCESS_TOKEN_SUCCESS: "Access token sent successfully",
     TOKEN_ERROR: "Token error",
 };

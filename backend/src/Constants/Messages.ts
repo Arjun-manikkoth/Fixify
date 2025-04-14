@@ -164,7 +164,7 @@ export const ScheduleMessages = {
 };
 
 export const tokenMessages = {
-    REFRESH_TOKEN_MISSING: "Refresh token missing",
+    REFRESH_TOKEN_MISSING: "Refresh Token missing",
     ACCESS_TOKEN_SUCCESS: "Access token sent successfully",
     TOKEN_ERROR: "Token error",
 };
