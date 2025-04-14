@@ -231,10 +231,10 @@ const BookingDetails: React.FC<IBookingDetailProps> = ({ role, bookingDetailsApi
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-0 relative">
+                            <div className="flex flex-row items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
                                 <button
                                     onClick={() => setShowChat(true)}
-                                    className="right-2 bottom-2 flex items-center justify-center gap-1 bg-blue-500 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg shadow hover:bg-blue-600 transition text-xs sm:text-sm whitespace-nowrap"
+                                    className="flex items-center justify-center gap-1 bg-blue-500 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg shadow hover:bg-blue-600 transition text-xs sm:text-sm whitespace-nowrap"
                                 >
                                     <FaCommentDots /> Chat Now
                                 </button>
