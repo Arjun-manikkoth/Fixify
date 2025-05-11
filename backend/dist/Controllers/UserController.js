@@ -478,7 +478,7 @@ class UserController {
                         data: status.data,
                     });
                 }
-                else if (status.message === "Mail not registered") {
+                else if (status.message === Messages_1.PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED) {
                     res.status(NOT_FOUND).json({
                         success: false,
                         message: Messages_1.PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED,

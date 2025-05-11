@@ -1013,3 +1013,12 @@
 2025-05-11 16:12:08 [WARN]: Request: POST /providers/forgot-password | Response: 400 | Duration: 4431ms
 2025-05-11 16:12:50 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 55ms
 2025-05-11 16:13:07 [INFO]: Request: POST /providers/forgot-password | Response: 200 | Duration: 3951ms
+2025-05-11 16:28:36 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 74ms
+2025-05-11 16:28:48 [INFO]: Request: POST /users/forgot-password | Response: 200 | Duration: 4853ms
+2025-05-11 16:30:45 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 51ms
+2025-05-11 16:31:05 [WARN]: Request: POST /users/forgot-password | Response: 400 | Duration: 49ms
+2025-05-11 16:38:26 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 64ms
+2025-05-11 16:39:40 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 59ms
+2025-05-11 16:39:48 [WARN]: Request: POST /users/forgot-password | Response: 404 | Duration: 56ms
+2025-05-11 16:40:05 [INFO]: Request: POST /users/forgot-password | Response: 200 | Duration: 4107ms
+2025-05-11 16:40:09 [INFO]: Request: GET /providers/services | Response: 304 | Duration: 38ms
