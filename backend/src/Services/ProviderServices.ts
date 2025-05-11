@@ -848,7 +848,7 @@ class ProviderService implements IProviderService {
                 const otpStatus = await this.otpRepository.storeOtp(hashedOtp, userData._id);
                 return {
                     success: true,
-                    message: PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "Mail sent successfully" -> closest match
+                    message: PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "Mail sent successfully"
                     data: userData.email,
                 };
             }
@@ -861,7 +861,7 @@ class ProviderService implements IProviderService {
             console.log(error.message);
             return {
                 success: false,
-                message: PasswordMessages.FORGOT_PASSWORD_FAILED, // "Couldn't verify mail" -> closest match
+                message: PasswordMessages.FORGOT_PASSWORD_FAILED, // "Couldn't verify mail"
                 data: null,
             };
         }

@@ -577,14 +577,14 @@ class ProviderController {
                     return;
                 }
                 const status = yield this.providerService.forgotPasswordVerify(req.body.email);
-                if (status.message === "Mail sent successfully") {
+                if (status.message === "OTP email sent successfully") {
                     res.status(OK).json({
                         success: true,
                         message: Messages_1.PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "OTP email sent successfully"
                         data: status.data,
                     });
                 }
-                else if (status.message === "Mail not registered") {
+                else if (status.message === "Email is not registered") {
                     res.status(NOT_FOUND).json({
                         success: false,
                         message: Messages_1.PasswordMessages.FORGOT_PASSWORD_NOT_REGISTERED, // "Email is not registered"

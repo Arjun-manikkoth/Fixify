@@ -758,7 +758,7 @@ class ProviderService {
                     const otpStatus = yield this.otpRepository.storeOtp(hashedOtp, userData._id);
                     return {
                         success: true,
-                        message: Messages_1.PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "Mail sent successfully" -> closest match
+                        message: Messages_1.PasswordMessages.FORGOT_PASSWORD_SUCCESS, // "Mail sent successfully"
                         data: userData.email,
                     };
                 }
@@ -772,7 +772,7 @@ class ProviderService {
                 console.log(error.message);
                 return {
                     success: false,
-                    message: Messages_1.PasswordMessages.FORGOT_PASSWORD_FAILED, // "Couldn't verify mail" -> closest match
+                    message: Messages_1.PasswordMessages.FORGOT_PASSWORD_FAILED, // "Couldn't verify mail"
                     data: null,
                 };
             }
